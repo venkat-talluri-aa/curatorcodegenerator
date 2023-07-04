@@ -1,0 +1,141 @@
+package com.aa.rac.mod.orm.dao.refundedrepl;
+
+import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
+import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
+
+import com.aa.rac.mod.domain.enums.CuratedEntityClassMapper;
+import com.aa.rac.mod.domain.util.RacUtil;
+import com.aa.rac.mod.orm.dao.AbstractCuratedBaseEntity;
+import com.aa.rac.mod.orm.dao.CuratedDependency;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import java.math.BigDecimal;
+import java.sql.Date;
+import java.sql.Timestamp;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
+@Entity
+@Table(name = "refunded", schema = "curated_test")
+@JsonAutoDetect(fieldVisibility = ANY, getterVisibility = NONE, setterVisibility = NONE)
+@NoArgsConstructor
+@ToString(callSuper = true)
+@Setter
+@Getter
+public class RefundedRepl extends AbstractCuratedBaseEntity { 
+
+  @Id
+  @Column( name = "uuid")
+  private String uuid;
+
+  @Column( name = "REF_REFUND_AMOUNT")
+  private String refRefundAmount;
+
+  @Column( name = "REF_FILE_NUMBER")
+  private String refFileNumber;
+
+  @Column( name = "REF_BATCH_DATE")
+  private String refBatchDate;
+
+  @Column( name = "REF_PAYMENT_SERVICES")
+  private String refPaymentServices;
+
+  @Column( name = "REF_RFND_AMT_CURCD")
+  private String refRfndAmtCurcd;
+
+  @Column( name = "REF_RECALL_AMTFORN")
+  private String refRecallAmtforn;
+
+  @Column( name = "REF_ID_REFUNDED")
+  private String refIdRefunded;
+
+  @Column( name = "REF_FOP_TYPE")
+  private String refFopType;
+
+  @Column( name = "REF_FOP_REFERENCE")
+  private String refFopReference;
+
+  @Column( name = "REF_TC_EXP_DATE")
+  private String refTcExpDate;
+
+  @Column( name = "REF_RFND_AMT_FORN")
+  private String refRfndAmtForn;
+
+  @Column( name = "REF_STA_COPY_RECD")
+  private String refStaCopyRecd;
+
+  @Column( name = "REF_CHECK_RETURNED")
+  private String refCheckReturned;
+
+  @Column( name = "REF_INCENT_RFND_AMT")
+  private String refIncentRfndAmt;
+
+  @Column( name = "REF_TICKET_NUMBER")
+  private String refTicketNumber;
+
+  @Column( name = "REF_ENTERED_DATE")
+  private String refEnteredDate;
+
+  @Column( name = "REF_RECALL_AMOUNT")
+  private String refRecallAmount;
+
+  @Column( name = "REF_LAST_NAME")
+  private String refLastName;
+
+  @Column( name = "REF_ORIG_RFND_AMT")
+  private String refOrigRfndAmt;
+
+  @Column( name = "REF_ENTERED_BY")
+  private String refEnteredBy;
+
+  @Column( name = "REF_RAW_TOT_CUR")
+  private String refRawTotCur;
+
+  @Column( name = "REF_FIRST_NAME")
+  private String refFirstName;
+
+  @Column( name = "REF_MODIFIED_DATE")
+  private String refModifiedDate;
+
+  @Column( name = "REF_SEQUENCE_NUM")
+  private String refSequenceNum;
+
+  @Column( name = "REF_EXCHANGE_RATE")
+  private String refExchangeRate;
+
+  @Column( name = "REF_VCHR_TRANSACTION_ID")
+  private String refVchrTransactionId;
+
+  @Column( name = "REF_AGENCY_NUMBER")
+  private String refAgencyNumber;
+
+  @Column( name = "REF_MODIFIED_BY")
+  private String refModifiedBy;
+
+  @Column( name = "REF_CHECK_PROCPER")
+  private String refCheckProcper;
+
+  @Column( name = "TICKET_CREATE_TS")
+  private String ticketCreateTs;
+
+  @Column( name = "REF_PAYMENT_TICKET_NO")
+  private String refPaymentTicketNo;
+
+  @Column( name = "REF_BATCH_NUMBER")
+  private String refBatchNumber;
+
+  @Column( name = "REF_CHECK_CLEARED")
+  private String refCheckCleared;
+
+  @Column( name = "REF_RECALL_PERCENT")
+  private String refRecallPercent;
+
+  @Column( name = "REF_CHECK_DATE")
+  private String refCheckDate;
+
+}

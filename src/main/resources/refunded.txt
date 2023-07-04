@@ -1,0 +1,73 @@
+{"B_REF_FILE_NUMBER":"KAKM50"
+ ,"B_REF_TICKET_NUMBER":"0012425446412"
+ ,"B_REF_AGENCY_NUMBER":{"string":"X31XTMTL"}
+ ,"B_REF_BATCH_NUMBER":{"string":"    "}
+ ,"B_REF_BATCH_DATE":{"string":"0001-01-01"}
+ ,"B_REF_FOP_TYPE":{"string":"MC"}
+ ,"B_REF_FOP_REFERENCE":{"string":"51XXXXXXXXXX8335"}
+ ,"B_REF_REFUND_AMOUNT":{"string":"117.56"}
+ ,"B_REF_RECALL_PERCENT":{"string":"0.0"}
+ ,"B_REF_RECALL_AMOUNT":{"string":"0.00"}
+ ,"B_REF_LAST_NAME":{"string":"PHILLIPS                      "}
+ ,"B_REF_FIRST_NAME":{"string":"SUZANNE                       "}
+ ,"B_REF_CHECK_DATE":{"string":"0001-01-01"}
+ ,"B_REF_CHECK_RETURNED":{"string":" "}
+ ,"B_REF_CHECK_CLEARED":"0001-01-01"
+ ,"B_REF_CHECK_PROCPER":{"string":"      "}
+ ,"B_REF_ID_REFUNDED":{"string":"      "}
+ ,"B_REF_ENTERED_BY":{"string":"RFA601"}
+ ,"B_REF_ENTERED_DATE":{"string":"2023-05-10"}
+ ,"B_REF_MODIFIED_BY":{"string":"      "}
+ ,"B_REF_MODIFIED_DATE":{"string":"0001-01-01"}
+ ,"B_REF_STA_COPY_RECD":" "
+ ,"B_REF_RFND_AMT_FORN":"0.00"
+ ,"B_REF_RFND_AMT_CURCD":"USD "
+ ,"B_REF_RECALL_AMTFORN":"0.00"
+ ,"B_REF_RAW_TOT_CUR":"USD "
+ ,"B_REF_EXCHANGE_RATE":"1.000000"
+ ,"B_REF_PAYMENT_TICKET_NO":"0010625969348"
+ ,"B_REF_PAYMENT_SERVICES":"?"
+ ,"B_REF_ORIG_RFND_AMT":"117.56"
+ ,"B_REF_INCENT_RFND_AMT":"117.56"
+ ,"B_REF_VCHR_TRANSACTION_ID":"                                                               "
+ ,"B_REF_SEQUENCE_NUM":"639052"
+ ,"B_REF_TC_EXP_DATE":"0001-01-01"
+ ,"REF_FILE_NUMBER":"KAKM50"
+,"REF_TICKET_NUMBER":"0012425446412"
+,"REF_AGENCY_NUMBER":{"string":"P32XYZV"}
+,"REF_BATCH_NUMBER":{"string":"    "}
+,"REF_BATCH_DATE":{"string":"0001-01-01"}
+,"REF_FOP_TYPE":{"string":"FO"}
+,"REF_FOP_REFERENCE":{"string":"51XXXXXXXXXX8335"}
+,"REF_REFUND_AMOUNT":{"string":"117.56"}
+,"REF_RECALL_PERCENT":{"string":"0.0"}
+,"REF_RECALL_AMOUNT":{"string":"0.00"}
+,"REF_LAST_NAME":{"string":"PHILLIPS                      "}
+,"REF_FIRST_NAME":{"string":"SUZANNE                       "}
+,"REF_CHECK_DATE":{"string":"0001-01-01"}
+,"REF_CHECK_RETURNED":{"string":" "}
+,"REF_CHECK_CLEARED":"0001-01-01"
+,"REF_CHECK_PROCPER":{"string":"      "}
+,"REF_ID_REFUNDED":{"string":"      "}
+,"REF_ENTERED_BY":{"string":"RFA601"}
+,"REF_ENTERED_DATE":{"string":"2023-05-10"}
+,"REF_MODIFIED_BY":{"string":"      "}
+,"REF_MODIFIED_DATE":{"string":"0001-01-01"}
+,"REF_STA_COPY_RECD":" "
+,"REF_RFND_AMT_FORN":"0.00"
+,"REF_RFND_AMT_CURCD":"USD "
+,"REF_RECALL_AMTFORN":"0.00"
+,"REF_RAW_TOT_CUR":"USD "
+,"REF_EXCHANGE_RATE":"1.000000"
+,"REF_PAYMENT_TICKET_NO":"0010625969348"
+,"REF_PAYMENT_SERVICES":"?"
+,"REF_ORIG_RFND_AMT":"117.56"
+,"REF_INCENT_RFND_AMT":"117.56"
+,"REF_VCHR_TRANSACTION_ID":"                                                                "
+,"REF_SEQUENCE_NUM":"639052"
+,"REF_TC_EXP_DATE":"0001-01-01"
+,"TICKET_CREATE_TS":"2022-12-03T01:04:53.769702000000"
+,"A_ENTTYP":{"string":"UP"}
+,"A_TIMSTAMP":{"string":"2023-05-04 13:11:26.808602000000"}
+,"A_USER":{"string":"AD436"}
+,"A_JOBUSER":{"string":"AD436"}}
