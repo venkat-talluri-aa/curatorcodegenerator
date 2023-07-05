@@ -10,7 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Arrays;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.util.StringUtils;
@@ -36,6 +36,10 @@ public class FileUtil {
     return getFileName(filePath) + ".java.txt";
   }
 
+  public static String getClassName(String filePath) {
+    return getFileName(filePath);
+  }
+
   public static List<String> readLinesFromFile(String filePath) throws IOException {
     Path path = Paths.get(filePath);
     byte[] bytes = Files.readAllBytes(path);
@@ -45,7 +49,7 @@ public class FileUtil {
 
   public static Map<String, Object> mapContentsToHashMap(String fileContents)
       throws JsonProcessingException {
-    return objectMapper.readValue(fileContents, HashMap.class);
+    return objectMapper.readValue(fileContents, LinkedHashMap.class);
   }
 
   public static void createDirectory(String folderPath) {

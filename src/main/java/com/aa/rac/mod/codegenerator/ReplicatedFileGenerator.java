@@ -1,20 +1,17 @@
-package com.aa.rac.mod.codegenerator.replicated;
+package com.aa.rac.mod.codegenerator;
 
-import com.aa.rac.mod.codegenerator.FileUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
 public class ReplicatedFileGenerator {
-  private static final ObjectMapper objectMapper = new ObjectMapper();
 
   private static final String pwd = System.getProperty("user.dir").replace('\\', '/');
 
@@ -29,7 +26,7 @@ public class ReplicatedFileGenerator {
 
   private List<String> lines = new ArrayList<>();
 
-  private Map<String, Object> json = new HashMap<>();
+  private Map<String, Object> json = new LinkedHashMap<>();
 
   private String unpackedTrim = "UnpackingNestedStringTrimDeserializer";
   private String unpacked = "";
@@ -38,8 +35,15 @@ public class ReplicatedFileGenerator {
 
   private Set<String> ehBaseColumnsSet = new HashSet<>(Arrays.asList("A_ENTTYP", "A_TIMSTAMP", "A_USER", "A_JOBUSER"));
 
-  public ReplicatedFileGenerator(String tableName) {
-    this.tableName = tableName;
+  private String replicatedClassName;
+
+  private String filePath;
+
+  public ReplicatedFileGenerator(String filePath) {
+    this.filePath = filePath;
+    String eventHubClassName = FileUtil.getClassName(filePath);
+    replicatedClassName = eventHubClassName + "Repl";
+    this.tableName = eventHubClassName.toLowerCase();
   }
 
   public Map<String, Object> getJson(String jsonString) throws JsonProcessingException {
@@ -51,6 +55,10 @@ public class ReplicatedFileGenerator {
 
   public String getReplicatedDirectory() {
     return pwd + replSourcePath.substring(1);
+  }
+
+  public String getReplicatedImportPath() {
+    return packageName + replicatedClassName.toLowerCase() + "." + replicatedClassName;
   }
 
   public String getFullReplicatedFilePath(String fileName) {
@@ -118,10 +126,10 @@ public class ReplicatedFileGenerator {
     return "@Id\n";
   }
 
-  public void addFields() {
+  public void addFields(String uuidColumnName) {
     lines.add("  " + getIdAnnotation());
-    lines.add("  " + getColumnAnnotation("uuid"));
-    lines.add("  private String uuid;\n\n");
+    lines.add("  " + getColumnAnnotation(uuidColumnName));
+    lines.add("  private String " + FileUtil.getFieldName(uuidColumnName) + ";\n\n");
     for (Map.Entry<String, Object> entry: json.entrySet()) {
       String field = entry.getKey();
       String value = entry.getValue().toString();
@@ -137,17 +145,17 @@ public class ReplicatedFileGenerator {
     lines.add("}");
   }
 
-  public void generateReplicatedFile(String filePath) throws IOException {
-    String replicatedClassName = FileUtil.getClassFileName(filePath).replace(".java.txt", "Repl.java.txt");
+  public void generateReplicatedFile(String uuidColumnName) throws IOException {
+    String replicatedClassFileName = replicatedClassName + ".java.txt";
     Set<String> fieldNames = getFieldNames(String.join("", FileUtil.readLinesFromFile(filePath)));
-    String fullPath = getFullReplicatedFilePath(replicatedClassName);
+    String fullPath = getFullReplicatedFilePath(replicatedClassFileName);
     FileUtil.createFile(getReplicatedDirectory() + tableName +"repl", fullPath);
     FileWriter writer = getFileWriter(fullPath);
     addPackageContents(packageName);
     addImportStatements();
     addClassAnnotations();
-    addInitialClassTemplate(replicatedClassName.replace(".java.txt", ""));
-    addFields();
+    addInitialClassTemplate(replicatedClassName);
+    addFields(uuidColumnName);
     addEndingLine();
     try {
       writer.write(String.join("", lines));

@@ -1,26 +1,19 @@
-package com.aa.rac.mod.codegenerator.eventhub;
+package com.aa.rac.mod.codegenerator;
 
-import com.aa.rac.mod.codegenerator.FileUtil;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.springframework.util.StringUtils;
+import lombok.Getter;
 
+@Getter
 public class EventHubPojoGenerator {
-  private static final ObjectMapper objectMapper = new ObjectMapper();
 
   private static final String pwd = System.getProperty("user.dir").replace('\\', '/');
 
@@ -33,7 +26,7 @@ public class EventHubPojoGenerator {
 
   private List<String> lines = new ArrayList<>();
 
-  private Map<String, Object> json = new HashMap<>();
+  private Map<String, Object> json = new LinkedHashMap<>();
 
   private String unpackedTrim = "UnpackingNestedStringTrimDeserializer";
   private String unpacked = "";
@@ -42,8 +35,13 @@ public class EventHubPojoGenerator {
 
   private Set<String> ehBaseColumnsSet = new HashSet<>(Arrays.asList("A_ENTTYP", "A_TIMSTAMP", "A_USER", "A_JOBUSER"));
 
-  public EventHubPojoGenerator() {
+  private String eventHubClassName;
 
+  private String filePath;
+
+  public EventHubPojoGenerator(String filePath) {
+    this.filePath = filePath;
+    eventHubClassName = FileUtil.getClassName(filePath);
   }
 
   public Map<String, Object> getJson(String jsonString) throws JsonProcessingException {
@@ -98,6 +96,10 @@ public class EventHubPojoGenerator {
     lines.add("public class " + className + " extends AbstractEventHubBaseEntity { \n\n");
   }
 
+  public String getEventHubImportPath() {
+    return packageName + "." + eventHubClassName;
+  }
+
   public Set<String> getFieldNames(String jsonString) throws JsonProcessingException {
     return getJson(jsonString).keySet();
   }
@@ -131,16 +133,16 @@ public class EventHubPojoGenerator {
     lines.add("}");
   }
 
-  public void eventHubPojoFileGenerator(String filePath) throws IOException {
-    String eventHubClassName = FileUtil.getClassFileName(filePath);
+  public void eventHubPojoFileGenerator() throws IOException {
+    String eventHubClassFileName = FileUtil.getClassFileName(filePath);
     Set<String> fieldNames = getFieldNames(String.join("", FileUtil.readLinesFromFile(filePath)));
-    String fullPath = getFullEventHubFilePath(eventHubClassName);
+    String fullPath = getFullEventHubFilePath(eventHubClassFileName);
     FileUtil.createFile(getEventHubDirectory(), fullPath);
     FileWriter writer = getFileWriter(fullPath);
     addPackageContents(packageName);
     addImportStatements();
     addClassAnnotations();
-    addInitialClassTemplate(eventHubClassName.replace(".java.txt", ""));
+    addInitialClassTemplate(eventHubClassName);
     addFields();
     addEndingLine();
     try {
