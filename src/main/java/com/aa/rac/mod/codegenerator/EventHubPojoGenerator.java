@@ -38,10 +38,16 @@ public class EventHubPojoGenerator {
   private String eventHubClassName;
 
   private String filePath;
+  private String generatedOutput;
+
 
   public EventHubPojoGenerator(String filePath) {
     this.filePath = filePath;
     eventHubClassName = FileUtil.getClassName(filePath);
+  }
+
+  public String getGeneratedOutput() {
+    return generatedOutput;
   }
 
   public Map<String, Object> getJson(String jsonString) throws JsonProcessingException {
@@ -145,8 +151,9 @@ public class EventHubPojoGenerator {
     addInitialClassTemplate(eventHubClassName);
     addFields();
     addEndingLine();
+    this.generatedOutput = String.join("", lines);
     try {
-      writer.write(String.join("", lines));
+      writer.write(this.generatedOutput);
     } finally {
       writer.close();
     }

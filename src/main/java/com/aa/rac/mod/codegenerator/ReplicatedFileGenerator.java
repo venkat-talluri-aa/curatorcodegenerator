@@ -1,10 +1,12 @@
 package com.aa.rac.mod.codegenerator;
 
+import com.aa.rac.mod.CuratorcodegeneratorApplication;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -35,12 +37,29 @@ public class ReplicatedFileGenerator {
 
   private Set<String> ehBaseColumnsSet = new HashSet<>(Arrays.asList("A_ENTTYP", "A_TIMSTAMP", "A_USER", "A_JOBUSER"));
 
+  private Map<String, String> db2DataTypeMap =
+      Map.ofEntries(
+          Map.entry("CHAR", "String"),
+          Map.entry("DATE", "Date"),
+          Map.entry("TIMESTAMP", "Timestamp"),
+          Map.entry("VARCHAR", "String"),
+          Map.entry("DECIMAL", "BigDecimal"),
+          Map.entry("SMALLINT", "Integer"),
+          Map.entry("BIGINT", "BigInteger"),
+          Map.entry("INTEGER", "Integer"),
+          Map.entry("INT", "Integer")
+      );
+
   private String replicatedClassName;
 
-  private String filePath;
+  private DDLSQLFileGenerator ddlsqlFileGenerator;
 
-  public ReplicatedFileGenerator(String filePath) {
+  private String filePath;
+  private String generatedOutput;
+
+  public ReplicatedFileGenerator(String filePath, DDLSQLFileGenerator ddlsqlFileGenerator) {
     this.filePath = filePath;
+    this.ddlsqlFileGenerator = ddlsqlFileGenerator;
     String eventHubClassName = FileUtil.getClassName(filePath);
     replicatedClassName = eventHubClassName + "Repl";
     this.tableName = eventHubClassName.toLowerCase();
@@ -51,6 +70,14 @@ public class ReplicatedFileGenerator {
       this.json = FileUtil.mapContentsToHashMap(jsonString);
     }
     return this.json;
+  }
+
+  public Map<String, String> getDb2DataTypeMap() {
+    return db2DataTypeMap;
+  }
+
+  public String getGeneratedOutput() {
+    return generatedOutput;
   }
 
   public String getReplicatedDirectory() {
@@ -90,6 +117,7 @@ public class ReplicatedFileGenerator {
         "import jakarta.persistence.Id;\n" +
         "import jakarta.persistence.Table;\n" +
         "import java.math.BigDecimal;\n" +
+        "import java.math.BigInteger;\n" +
         "import java.sql.Date;\n" +
         "import java.sql.Timestamp;\n" +
         "import lombok.Getter;\n" +
@@ -101,7 +129,8 @@ public class ReplicatedFileGenerator {
 
   public void addClassAnnotations() throws IOException {
     String annotations = "@Entity\n" +
-        "@Table(name = \"" + tableName + "\", schema = \"" + "curated_test" + "\")\n" +
+        "@Table(name = \"" + tableName + "\", schema = \""
+        + CuratorcodegeneratorApplication.SCHEMA_NAME + "\")\n" +
         "@JsonAutoDetect(fieldVisibility = ANY, getterVisibility = NONE, setterVisibility = NONE)\n" +
         "@NoArgsConstructor\n" +
         "@ToString(callSuper = true)\n" +
@@ -137,7 +166,19 @@ public class ReplicatedFileGenerator {
         continue;
       }
       lines.add("  " + getColumnAnnotation(field));
-      lines.add("  private String " + FileUtil.getFieldName(field) +";\n\n");
+      if (field.equalsIgnoreCase("TICKET_CREATE_TS")) {
+        lines.add("  private Timestamp " + FileUtil.getFieldName(field) +";\n\n");
+        continue;
+      }
+
+      if (ddlsqlFileGenerator.getDataTypeMap().get(field) == null) {
+        throw new IllegalArgumentException("Field not found in DDL script provided.");
+      }
+      if (db2DataTypeMap.get(ddlsqlFileGenerator.getDataTypeMap().get(field)) == null) {
+        throw new IllegalArgumentException("Data type not mapped b/w DDL type and Java type in ReplicatedFileGenerator.");
+      }
+      lines.add("  private " + db2DataTypeMap.get(ddlsqlFileGenerator.getDataTypeMap().get(field))
+          + " " + FileUtil.getFieldName(field) +";\n\n");
     }
   }
 
@@ -157,8 +198,9 @@ public class ReplicatedFileGenerator {
     addInitialClassTemplate(replicatedClassName);
     addFields(uuidColumnName);
     addEndingLine();
+    this.generatedOutput = String.join("", lines);
     try {
-      writer.write(String.join("", lines));
+      writer.write(this.generatedOutput);
     } finally {
       writer.close();
     }

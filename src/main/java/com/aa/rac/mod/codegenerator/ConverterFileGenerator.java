@@ -32,23 +32,31 @@ public class ConverterFileGenerator {
 
   private EventHubPojoGenerator eventHubPojoGenerator;
 
-  private String replicatedClassFilepath;
+  private DDLSQLFileGenerator ddlsqlFileGenerator;
 
-  private List<String> replClassAllLines;
+  private String generatedOutput;
 
-  public ConverterFileGenerator(ReplicatedFileGenerator replicatedFileGenerator, EventHubPojoGenerator eventHubPojoGenerator, String replicatedClassFilepath)
+  public ConverterFileGenerator(ReplicatedFileGenerator replicatedFileGenerator,
+                                EventHubPojoGenerator eventHubPojoGenerator,
+                                DDLSQLFileGenerator ddlsqlFileGenerator
+                                )
       throws IOException {
     this.replicatedFileGenerator = replicatedFileGenerator;
     this.eventHubPojoGenerator = eventHubPojoGenerator;
-    this.replicatedClassFilepath = replicatedClassFilepath;
+    this.ddlsqlFileGenerator = ddlsqlFileGenerator;
     this.eventHubClassName = eventHubPojoGenerator.getEventHubImportPath().substring(eventHubPojoGenerator.getEventHubImportPath().lastIndexOf('.')+1);
     this.replicatedClassName = replicatedFileGenerator.getReplicatedImportPath().substring(replicatedFileGenerator.getReplicatedImportPath().lastIndexOf('.')+1);
     this.converterClassName = this.eventHubClassName + "To" + this.replicatedClassName + "Converter";
-    this.replClassAllLines = Files.readAllLines(Paths.get(replicatedClassFilepath));
   }
+
+
 
   public void getReplicatedFieldNames() {
 
+  }
+
+  public String getGeneratedOutput() {
+    return generatedOutput;
   }
 
   public String getConverterDirectory() {
@@ -125,13 +133,14 @@ public class ConverterFileGenerator {
     addInitialClassTemplate(converterClassName);
     addMethod();
     addEndingLine();
-    System.out.println(String.join("", lines));
+    this.generatedOutput = String.join("", lines);
+    System.out.println(this.generatedOutput);
 //    try {
-//      writer.write(String.join("", lines));
+//      writer.write(this.generatedOutput);
 //    } finally {
 //      writer.close();
 //    }
-    System.out.println("Repository file successfully generated. Please review at location: " + fullPath);
+    System.out.println("Converter file successfully generated. Please review at location: " + fullPath);
     System.out.println("\tNOTE: Please review the generated code.");
   }
 }

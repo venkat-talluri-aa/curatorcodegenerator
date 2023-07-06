@@ -9,6 +9,7 @@ import com.aa.rac.mod.codegenerator.RepositoryFileGenerator;
 import java.io.IOException;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.core.convert.converter.Converter;
 
 @SpringBootApplication
 public class CuratorcodegeneratorApplication {
@@ -22,26 +23,32 @@ public class CuratorcodegeneratorApplication {
 		String uuid = "refunded_uuid";
 		EventHubPojoGenerator eventHubPojoGenerator = new EventHubPojoGenerator(filePath);
 		eventHubPojoGenerator.eventHubPojoFileGenerator();
-		System.out.println("\n\n");
+		System.out.println("\n");
+
+		String ddlFilePath = resourcesPath + "refunded_ddl.txt";
+		DDLSQLFileGenerator ddlsqlFileGenerator = new DDLSQLFileGenerator(ddlFilePath, FileUtil.getClassName(filePath).toLowerCase());
+		ddlsqlFileGenerator.generateDDLFile(uuid);
 
 
-		ReplicatedFileGenerator replicatedFileGenerator = new ReplicatedFileGenerator(filePath);
+		ReplicatedFileGenerator replicatedFileGenerator = new ReplicatedFileGenerator(filePath, ddlsqlFileGenerator);
 		replicatedFileGenerator.generateReplicatedFile(uuid);
-		System.out.println("\n\n");
+		System.out.println("\n");
 
 		String replImportPath = replicatedFileGenerator.getReplicatedImportPath();
 		String replClassName = replImportPath.substring(replImportPath.lastIndexOf(".")+1);
 
 		RepositoryFileGenerator repositoryFileGenerator = new RepositoryFileGenerator(replClassName);
 		repositoryFileGenerator.generateRepositoryFile(replImportPath, uuid);
+		System.out.println("\n");
 
+
+
+		System.out.println("\n");
 		String replFilePath = "C:/Users/vtalluri/OneDrive - Insight/Documents/1 - AA/RAC MOD Project/Java/1-AAInternal/racmodcurator-pb/src/main/java/com/aa/rac/mod/orm/dao/refundedfa/RefundedFa.java";
-		ConverterFileGenerator converterFileGenerator = new ConverterFileGenerator(replicatedFileGenerator, eventHubPojoGenerator, replFilePath);
+		ConverterFileGenerator converterFileGenerator = new ConverterFileGenerator(replicatedFileGenerator, eventHubPojoGenerator, ddlsqlFileGenerator);
 		converterFileGenerator.generateConverterFile();
 
-		String ddlFilePath = resourcesPath + "refunded_ddl.txt";
-		DDLSQLFileGenerator ddlsqlFileGenerator = new DDLSQLFileGenerator(ddlFilePath, FileUtil.getClassName(filePath).toLowerCase());
-		ddlsqlFileGenerator.generateDDLFile(uuid);
+
 	}
 
 }

@@ -22,10 +22,16 @@ public class RepositoryFileGenerator {
   private FileWriter fileWriter = null;
 
   private List<String> lines = new ArrayList<>();
+  private String generatedOutput;
+
 
   public RepositoryFileGenerator(String replicatedClassName) {
     this.replicatedClassName = replicatedClassName;
     this.repositoryClassName = this.replicatedClassName + "Repository";
+  }
+
+  public String getGeneratedOutput() {
+    return generatedOutput;
   }
 
   public String getRepositoryDirectory() {
@@ -105,8 +111,9 @@ public class RepositoryFileGenerator {
     addInitialClassTemplate(repositoryClassName);
     addMethod(uuidColumnName);
     addEndingLine();
+    this.generatedOutput = String.join("", lines);
     try {
-      writer.write(String.join("", lines));
+      writer.write(this.generatedOutput);
     } finally {
       writer.close();
     }

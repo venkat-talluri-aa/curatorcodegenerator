@@ -6,6 +6,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -30,18 +31,51 @@ public class DDLSQLFileGenerator {
 
   private Map<String, Object> json = new LinkedHashMap<>();
 
+  private Map<String, String> dataTypeMap = new HashMap<>();
+
+  private Map<String, String> nullMap = new HashMap<>();
+
   private Set<String> db2DataTypeSet = new HashSet<>(Arrays.asList("CHAR", "DATE", "TIMESTAMP", "VARCHAR", "DECIMAL", "SMALLINT", "BIGINT", "INTEGER"));
 
   private String filePath;
+
+  private String generatedOutput;
 
   public DDLSQLFileGenerator(String filePath, String tableName) {
     this.filePath = filePath;
     this.tableName = tableName;
   }
 
+  public String getGeneratedOutput() {
+    return generatedOutput;
+  }
+
+  public Map<String, String> getDataTypeMap() {
+    return dataTypeMap;
+  }
+
+  public Map<String, String> getNullMap() {
+    return nullMap;
+  }
+
+  public void loadDataTypeAndNullMaps() {
+    if (dataTypeMap.isEmpty()) {
+      for (Map.Entry<String, Object> entry: json.entrySet()) {
+        String field = entry.getKey();
+        String[] properties = entry.getValue().toString().split("[|]");
+        String nullable = properties.length>1?properties[1]:"";
+        String value = properties[0];
+        String dataType = value.lastIndexOf("(") == -1 ? value : value.substring(0, value.lastIndexOf("("));
+        dataTypeMap.put(field, dataType);
+        nullMap.put(field, nullable);
+      }
+    }
+  }
+
   public Map<String, Object> getJson(String jsonString) throws JsonProcessingException {
     if (this.json.isEmpty()) {
       this.json = FileUtil.mapContentsToHashMap(jsonString);
+      loadDataTypeAndNullMaps();
     }
     return this.json;
   }
@@ -69,6 +103,23 @@ public class DDLSQLFileGenerator {
     return getJson(jsonString).keySet();
   }
 
+  public String getAuditColumns() {
+    Map<String, String> auditColumnsMap = new LinkedHashMap<>();
+    auditColumnsMap.put("src_deleted_indicator", "boolean");
+    auditColumnsMap.put("deleted_indicator", "boolean");
+    auditColumnsMap.put("dml_flg", "character varying(3)");
+    auditColumnsMap.put("eventhub_timestamp", "timestamp without time zone");
+    auditColumnsMap.put("system_modified_timestamp", "timestamp without time zone");
+    auditColumnsMap.put("created_by", "character varying(100)");
+    auditColumnsMap.put("modified_by", "character varying(100)");
+    String auditColumns = "";
+    for (String name: auditColumnsMap.keySet()) {
+      auditColumns += "    "+name + " ".repeat(fieldDataTypeGapLength-name.length())
+          + auditColumnsMap.get(name) + " NOT NULL" +", \n";
+    }
+    return auditColumns;
+  }
+
   public void addFields(String uuidColumnName) {
     lines.add("    " + uuidColumnName + " ".repeat(fieldDataTypeGapLength-uuidColumnName.length()) + "CHAR(64) NOT NULL, \n");
     for (Map.Entry<String, Object> entry: json.entrySet()) {
@@ -78,12 +129,14 @@ public class DDLSQLFileGenerator {
       String value = properties[0];
       String dataType = value.lastIndexOf("(") == -1 ? value : value.substring(0, value.lastIndexOf("("));
       if (!db2DataTypeSet.contains(dataType)) {
-        throw new IllegalArgumentException("Data type not matched. Please check the data types.");
+        throw new IllegalArgumentException("Data type not matched. Please check the data types for " + field + ": " + entry.getValue().toString());
       }
       String space = nullable.isBlank()?"":" ";
       lines.add("    "+field + " ".repeat(fieldDataTypeGapLength-field.length())
           + value.replace(",", "") + space + nullable +", \n");
     }
+    lines.add(getAuditColumns());
+
   }
 
   public void addPKConstraint(String uuidColumnName) {
@@ -105,8 +158,9 @@ public class DDLSQLFileGenerator {
     addFields(uuidColumnName);
     addPKConstraint(uuidColumnName);
     addEndingLine();
+    this.generatedOutput = String.join("", lines);
     try {
-      writer.write(String.join("", lines));
+      writer.write(this.generatedOutput);
     } finally {
       writer.close();
     }
