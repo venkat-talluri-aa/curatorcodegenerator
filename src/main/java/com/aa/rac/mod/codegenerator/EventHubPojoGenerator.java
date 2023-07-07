@@ -122,7 +122,6 @@ public class EventHubPojoGenerator {
   }
 
   public void addFields() {
-    System.out.println(ddlsqlFileGenerator.getTrimMap());
     for (Map.Entry<String, Object> entry: json.entrySet()) {
       String field = entry.getKey();
       String value = entry.getValue().toString();
