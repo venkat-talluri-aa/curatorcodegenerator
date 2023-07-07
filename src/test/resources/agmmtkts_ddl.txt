@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS curated_test.agmmtkts
 (
-    ticket_uuid                   CHAR(64) NOT NULL, 
+    TICKET_UUID                   CHAR(64) NOT NULL, 
     TKM_TICKET_NO                 CHAR(14) NOT NULL, 
     TKM_CHAIN_HEAD                CHAR(14) NOT NULL, 
     TKM_SALES_REF_NO              CHAR(12), 
@@ -128,5 +128,5 @@ CREATE TABLE IF NOT EXISTS curated_test.agmmtkts
     system_modified_timestamp     timestamp without time zone NOT NULL, 
     created_by                    character varying(100) NOT NULL, 
     modified_by                   character varying(100) NOT NULL, 
-    CONSTRAINT curated_test_ticket_uuid_pkey PRIMARY KEY (ticket_uuid)
+    CONSTRAINT curated_test_TICKET_UUID_pkey PRIMARY KEY (TICKET_UUID)
 )
