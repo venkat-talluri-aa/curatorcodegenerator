@@ -37,7 +37,20 @@ public class DDLSQLFileGenerator {
 
   private Map<String, Boolean> trimMap = new HashMap<>();
 
-  private Set<String> db2DataTypeSet = new HashSet<>(Arrays.asList("CHAR", "DATE", "TIMESTAMP", "VARCHAR", "DECIMAL", "SMALLINT", "BIGINT", "INTEGER", "TIMESTMP"));
+  private Map<String, String> db2ToPgdataTypeMap = Map.ofEntries(
+      Map.entry("CHAR", "VARCHAR"),
+      Map.entry("DATE", "DATE"),
+      Map.entry("TIMESTMP", "TIMESTAMP WITHOUT TIME ZONE"),
+      Map.entry("TIMESTAMP", "TIMESTAMP WITHOUT TIME ZONE"),
+      Map.entry("VARCHAR", "VARCHAR"),
+      Map.entry("DECIMAL", "DECIMAL"),
+      Map.entry("SMALLINT", "SMALLINT"),
+      Map.entry("BIGINT", "BIGINT"),
+      Map.entry("INTEGER", "INTEGER"),
+      Map.entry("INT", "INTEGER")
+  );
+
+  private Set<String> db2DataTypeSet = db2ToPgdataTypeMap.keySet();
 
   private String filePath;
 
@@ -112,13 +125,13 @@ public class DDLSQLFileGenerator {
 
   public String getAuditColumns() {
     Map<String, String> auditColumnsMap = new LinkedHashMap<>();
-    auditColumnsMap.put("src_deleted_indicator", "boolean");
-    auditColumnsMap.put("deleted_indicator", "boolean");
-    auditColumnsMap.put("dml_flg", "character varying(3)");
-    auditColumnsMap.put("eventhub_timestamp", "timestamp without time zone");
-    auditColumnsMap.put("system_modified_timestamp", "timestamp without time zone");
-    auditColumnsMap.put("created_by", "character varying(100)");
-    auditColumnsMap.put("modified_by", "character varying(100)");
+    auditColumnsMap.put("src_deleted_indicator", "BOOLEAN");
+    auditColumnsMap.put("deleted_indicator", "BOOLEAN");
+    auditColumnsMap.put("dml_flg", "VARCHAR(3)");
+    auditColumnsMap.put("eventhub_timestamp", "TIMESTAMP WITHOUT TIME ZONE");
+    auditColumnsMap.put("system_modified_timestamp", "TIMESTAMP WITHOUT TIME ZONE");
+    auditColumnsMap.put("created_by", "VARCHAR(100)");
+    auditColumnsMap.put("modified_by", "VARCHAR(100)");
     String auditColumns = "";
     for (String name: auditColumnsMap.keySet()) {
       auditColumns += "    "+name + " ".repeat(fieldDataTypeGapLength-name.length())
@@ -140,7 +153,7 @@ public class DDLSQLFileGenerator {
       }
       String space = nullable.isBlank()?"":" ";
       lines.add("    "+field + " ".repeat(fieldDataTypeGapLength-field.length())
-          + value + space + nullable +", \n");
+          + db2ToPgdataTypeMap.get(dataType) + (value.lastIndexOf("(")==-1 || value.toLowerCase().startsWith("timest")?"":value.substring(value.lastIndexOf("("))) + space + nullable +", \n");
     }
     lines.add(getAuditColumns());
 
