@@ -35,7 +35,7 @@ public class ReplicatedFileGenerator {
 
   private String trimmed = "TrimmingDeserializer";
 
-  private Set<String> ehBaseColumnsSet = new HashSet<>(Arrays.asList("A_ENTTYP", "A_TIMSTAMP", "A_USER", "A_JOBUSER"));
+  public Set<String> ehBaseColumnsSet = new HashSet<>(Arrays.asList("A_ENTTYP", "A_TIMSTAMP", "A_USER", "A_JOBUSER"));
 
   private Map<String, String> db2DataTypeMap =
       Map.ofEntries(
@@ -57,17 +57,43 @@ public class ReplicatedFileGenerator {
   private String filePath;
   private String generatedOutput;
 
-  public ReplicatedFileGenerator(String filePath, DDLSQLFileGenerator ddlsqlFileGenerator) {
+  public Map<String, String> columnTypes = new LinkedHashMap<>();
+
+  public List<String> skipColumns = Arrays.asList("TICKET_CREATE_TS", "A_ENTTYP", "A_TIMSTAMP", "A_USER", "A_JOBUSER");
+  public String uuidColumnName;
+
+  public ReplicatedFileGenerator(String filePath, DDLSQLFileGenerator ddlsqlFileGenerator, String uuidColumnName) {
     this.filePath = filePath;
     this.ddlsqlFileGenerator = ddlsqlFileGenerator;
     String eventHubClassName = FileUtil.getClassName(filePath);
     replicatedClassName = eventHubClassName + "Repl";
     this.tableName = eventHubClassName.toLowerCase();
+    this.uuidColumnName = uuidColumnName;
+  }
+
+  public Map<String, Object> getJson() {
+    return this.json;
+  }
+
+  public void validateJson() {
+    for (String field: json.keySet()) {
+      field = field.startsWith("B_") ? field.substring(2) : field;
+      if (skipColumns.contains(field)) {
+        continue;
+      }
+      if (ddlsqlFileGenerator.getDataTypeMap().get(field) == null) {
+        throw new IllegalArgumentException("Field not found in DDL script provided.");
+      }
+      if (db2DataTypeMap.get(FileUtil.truncatedDataType(ddlsqlFileGenerator.getDataTypeMap().get(field)).toUpperCase()) == null) {
+        throw new IllegalArgumentException("Data type not mapped b/w DDL type and Java type in ReplicatedFileGenerator.");
+      }
+    }
   }
 
   public Map<String, Object> getJson(String jsonString) throws JsonProcessingException {
     if (this.json.isEmpty()) {
       this.json = FileUtil.mapContentsToHashMap(jsonString);
+      validateJson();
     }
     return this.json;
   }
@@ -158,6 +184,7 @@ public class ReplicatedFileGenerator {
   public void addFields(String uuidColumnName) {
     lines.add("  " + getIdAnnotation());
     lines.add("  " + getColumnAnnotation(uuidColumnName));
+    columnTypes.put(uuidColumnName, "String");
     lines.add("  private String " + FileUtil.getFieldName(uuidColumnName) + ";\n\n");
     for (Map.Entry<String, Object> entry: json.entrySet()) {
       String field = entry.getKey();
@@ -167,17 +194,12 @@ public class ReplicatedFileGenerator {
       }
       lines.add("  " + getColumnAnnotation(field));
       if (field.equalsIgnoreCase("TICKET_CREATE_TS")) {
+        columnTypes.put(field, "Timestamp");
         lines.add("  private Timestamp " + FileUtil.getFieldName(field) +";\n\n");
         continue;
       }
-
-      if (ddlsqlFileGenerator.getDataTypeMap().get(field) == null) {
-        throw new IllegalArgumentException("Field not found in DDL script provided.");
-      }
-      if (db2DataTypeMap.get(ddlsqlFileGenerator.getDataTypeMap().get(field)) == null) {
-        throw new IllegalArgumentException("Data type not mapped b/w DDL type and Java type in ReplicatedFileGenerator.");
-      }
-      lines.add("  private " + db2DataTypeMap.get(ddlsqlFileGenerator.getDataTypeMap().get(field))
+      columnTypes.put(field, db2DataTypeMap.get(FileUtil.truncatedDataType(ddlsqlFileGenerator.getDataTypeMap().get(field))));
+      lines.add("  private " + db2DataTypeMap.get(FileUtil.truncatedDataType(ddlsqlFileGenerator.getDataTypeMap().get(field)))
           + " " + FileUtil.getFieldName(field) +";\n\n");
     }
   }
@@ -186,7 +208,7 @@ public class ReplicatedFileGenerator {
     lines.add("}");
   }
 
-  public void generateReplicatedFile(String uuidColumnName) throws IOException {
+  public void generateReplicatedFile() throws IOException {
     String replicatedClassFileName = replicatedClassName + ".java.txt";
     Set<String> fieldNames = getFieldNames(String.join("", FileUtil.readLinesFromFile(filePath)));
     String fullPath = getFullReplicatedFilePath(replicatedClassFileName);

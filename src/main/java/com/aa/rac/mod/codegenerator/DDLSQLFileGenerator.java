@@ -65,8 +65,7 @@ public class DDLSQLFileGenerator {
         String[] properties = entry.getValue().toString().split("[|]");
         String nullable = properties.length>1?properties[1]:"";
         String value = properties[0];
-        String dataType = value.lastIndexOf("(") == -1 ? value : value.substring(0, value.lastIndexOf("("));
-        dataTypeMap.put(field, dataType);
+        dataTypeMap.put(field, value);
         nullMap.put(field, nullable);
       }
     }
@@ -133,7 +132,7 @@ public class DDLSQLFileGenerator {
       }
       String space = nullable.isBlank()?"":" ";
       lines.add("    "+field + " ".repeat(fieldDataTypeGapLength-field.length())
-          + value.replace(",", "") + space + nullable +", \n");
+          + value + space + nullable +", \n");
     }
     lines.add(getAuditColumns());
 

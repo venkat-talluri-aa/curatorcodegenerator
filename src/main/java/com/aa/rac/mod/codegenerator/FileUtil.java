@@ -91,4 +91,23 @@ public class FileUtil {
     }
     return finalField + suffix;
   }
+
+  public static String truncatedDataType(String value) {
+    if (value == null) {
+      return null;
+    }
+    return value.lastIndexOf("(") == -1 ? value : value.substring(0, value.lastIndexOf("("));
+  }
+
+  public static String getDecimalPrecision(String decimalType) {
+    if (decimalType == null) {
+      return null;
+    }
+    if (decimalType.toLowerCase().startsWith("decimal") && decimalType.indexOf("(") != -1) {
+      String[] values = decimalType.replace(" ", "").substring(decimalType.indexOf("(")+1, decimalType.indexOf(")")).split(",");
+      return values[1];
+    } else {
+      throw new IllegalArgumentException("Data type provided is not a decimal type");
+    }
+  }
 }

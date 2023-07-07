@@ -30,8 +30,8 @@ public class CuratorcodegeneratorApplication {
 		ddlsqlFileGenerator.generateDDLFile(uuid);
 
 
-		ReplicatedFileGenerator replicatedFileGenerator = new ReplicatedFileGenerator(filePath, ddlsqlFileGenerator);
-		replicatedFileGenerator.generateReplicatedFile(uuid);
+		ReplicatedFileGenerator replicatedFileGenerator = new ReplicatedFileGenerator(filePath, ddlsqlFileGenerator, uuid);
+		replicatedFileGenerator.generateReplicatedFile();
 		System.out.println("\n");
 
 		String replImportPath = replicatedFileGenerator.getReplicatedImportPath();

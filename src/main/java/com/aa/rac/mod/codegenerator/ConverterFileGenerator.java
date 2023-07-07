@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import org.springframework.util.StringUtils;
 
 public class ConverterFileGenerator {
@@ -35,6 +36,15 @@ public class ConverterFileGenerator {
   private DDLSQLFileGenerator ddlsqlFileGenerator;
 
   private String generatedOutput;
+
+  private Map<String, String> transformationMapper = Map.ofEntries(
+      Map.entry("String", "|"),
+      Map.entry("Date", "Date.valueOf(RacUtil.getDate(|))"),
+      Map.entry("Timestamp", "Timestamp.valueOf(RacUtil.getDb2DateTime(|))"),
+      Map.entry("BigDecimal", "RacUtil.convertStringtoBigDecimal(|, $, RoundingMode.UP)"),
+      Map.entry("Integer", "Integer.parseInt(|)"),
+      Map.entry("BigInteger", "RacUtil.convertStringtoBigInteger(|)")
+  );
 
   public ConverterFileGenerator(ReplicatedFileGenerator replicatedFileGenerator,
                                 EventHubPojoGenerator eventHubPojoGenerator,
@@ -103,12 +113,51 @@ public class ConverterFileGenerator {
     return "@Override";
   }
 
+  public void addFields(boolean isBefore) {
+    String before = isBefore?"Before":"";
+    lines.add("\n          target.set"
+        +StringUtils.capitalize(
+            FileUtil.getFieldName(
+                replicatedFileGenerator.uuidColumnName)) + "(#TODO: GENERATE HASH);");
+    for (String field : replicatedFileGenerator.getJson().keySet()) {
+      if (field.startsWith("B_") || replicatedFileGenerator.ehBaseColumnsSet.contains(field)) {
+        continue;
+      }
+      String fieldUp = StringUtils.capitalize(FileUtil.getFieldName(field))+before;
+      String sourceField = "source.get" + fieldUp + "()";
+      String transformation = transformationMapper.get(
+          replicatedFileGenerator.getDb2DataTypeMap().get(
+          FileUtil.truncatedDataType(
+              ddlsqlFileGenerator.getDataTypeMap().get(field))));
+      if (transformation == null) {
+        throw new IllegalArgumentException("Cannot get transformation for field type: " + field);
+      }
+      transformation = transformation.replace("|", sourceField);
+      if (FileUtil.truncatedDataType(
+          ddlsqlFileGenerator.getDataTypeMap().get(field)).equalsIgnoreCase("decimal")) {
+        transformation = transformation.replace("$",
+            FileUtil.getDecimalPrecision(
+                ddlsqlFileGenerator.getDataTypeMap().get(field)));
+      }
+      lines.add("\n          target.set" + fieldUp + "("
+          + transformation + ");");
+    }
+  }
+
   public void addMethod() {
     lines.add("  " + getMethodAnnotation());
     lines.add("\n  public " + replicatedClassName + " convert(@NotNull " + eventHubClassName + " source) {\n    "
-    + replicatedClassName + " target = new " + replicatedClassName + "();\n    try { \n      switch (source.getEntityType()) {\n        case \"PT\", \"UP\", \"DL\" -> {");
-    //#TODO
-    lines.add("}\n" +
+    + replicatedClassName + " target = new " + replicatedClassName
+        + "();\n    try { " );
+    lines.add("\n      if (source.getEntityType() == null) {\n" +
+        "        throw new IllegalArgumentException(\"EntityType in eventhub pojo cannot be null\");\n" +
+        "      }");
+    lines.add("\n      switch (source.getEntityType()) {\n        case \"PT\", \"UP\", \"RR\" -> {");
+    addFields(false);
+    lines.add("\n        }");
+    lines.add("\n        case \"DL\" -> {");
+    addFields(true);
+    lines.add("\n        }\n" +
         "        default -> throw new IllegalStateException(\n" +
         "            \"Unexpected value: \" + source.getEntityType());\n" +
         "      }\n" +
@@ -134,12 +183,11 @@ public class ConverterFileGenerator {
     addMethod();
     addEndingLine();
     this.generatedOutput = String.join("", lines);
-    System.out.println(this.generatedOutput);
-//    try {
-//      writer.write(this.generatedOutput);
-//    } finally {
-//      writer.close();
-//    }
+    try {
+      writer.write(this.generatedOutput);
+    } finally {
+      writer.close();
+    }
     System.out.println("Converter file successfully generated. Please review at location: " + fullPath);
     System.out.println("\tNOTE: Please review the generated code.");
   }
