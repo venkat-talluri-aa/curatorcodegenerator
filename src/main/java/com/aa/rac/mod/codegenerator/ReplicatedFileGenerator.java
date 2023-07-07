@@ -41,6 +41,7 @@ public class ReplicatedFileGenerator {
       Map.ofEntries(
           Map.entry("CHAR", "String"),
           Map.entry("DATE", "Date"),
+          Map.entry("TIMESTMP", "Timestamp"),
           Map.entry("TIMESTAMP", "Timestamp"),
           Map.entry("VARCHAR", "String"),
           Map.entry("DECIMAL", "BigDecimal"),

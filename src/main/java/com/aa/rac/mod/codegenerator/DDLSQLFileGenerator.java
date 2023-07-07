@@ -35,7 +35,7 @@ public class DDLSQLFileGenerator {
 
   private Map<String, String> nullMap = new HashMap<>();
 
-  private Set<String> db2DataTypeSet = new HashSet<>(Arrays.asList("CHAR", "DATE", "TIMESTAMP", "VARCHAR", "DECIMAL", "SMALLINT", "BIGINT", "INTEGER"));
+  private Set<String> db2DataTypeSet = new HashSet<>(Arrays.asList("CHAR", "DATE", "TIMESTAMP", "VARCHAR", "DECIMAL", "SMALLINT", "BIGINT", "INTEGER", "TIMESTMP"));
 
   private String filePath;
 

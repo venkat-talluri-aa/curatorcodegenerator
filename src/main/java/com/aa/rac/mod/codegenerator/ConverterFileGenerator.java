@@ -59,12 +59,6 @@ public class ConverterFileGenerator {
     this.converterClassName = this.eventHubClassName + "To" + this.replicatedClassName + "Converter";
   }
 
-
-
-  public void getReplicatedFieldNames() {
-
-  }
-
   public String getGeneratedOutput() {
     return generatedOutput;
   }

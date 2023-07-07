@@ -104,7 +104,8 @@ public class FileUtil {
       return null;
     }
     if (decimalType.toLowerCase().startsWith("decimal") && decimalType.indexOf("(") != -1) {
-      String[] values = decimalType.replace(" ", "").substring(decimalType.indexOf("(")+1, decimalType.indexOf(")")).split(",");
+      decimalType = decimalType.replace(" ", "");
+      String[] values = decimalType.substring(decimalType.indexOf("(")+1, decimalType.indexOf(")")).split(",");
       return values[1];
     } else {
       throw new IllegalArgumentException("Data type provided is not a decimal type");

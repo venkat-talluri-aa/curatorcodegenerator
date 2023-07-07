@@ -6,6 +6,7 @@ import com.aa.rac.mod.codegenerator.FileUtil;
 import com.aa.rac.mod.codegenerator.EventHubPojoGenerator;
 import com.aa.rac.mod.codegenerator.ReplicatedFileGenerator;
 import com.aa.rac.mod.codegenerator.RepositoryFileGenerator;
+import com.aa.rac.mod.codegenerator.ServiceFileGenerator;
 import java.io.IOException;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -19,13 +20,13 @@ public class CuratorcodegeneratorApplication {
 		SpringApplication.run(CuratorcodegeneratorApplication.class, args);
 		String resourcesPath = System.getProperty("user.dir").replace('\\', '/')
 				+ "/src/main/resources/";
-		String filePath = resourcesPath + "refunded.txt";
-		String uuid = "refunded_uuid";
+		String filePath = resourcesPath + "agmmtkts.txt";
+		String uuid = "ticket_uuid";
 		EventHubPojoGenerator eventHubPojoGenerator = new EventHubPojoGenerator(filePath);
 		eventHubPojoGenerator.eventHubPojoFileGenerator();
 		System.out.println("\n");
 
-		String ddlFilePath = resourcesPath + "refunded_ddl.txt";
+		String ddlFilePath = resourcesPath + "agmmtkts_ddl.txt";
 		DDLSQLFileGenerator ddlsqlFileGenerator = new DDLSQLFileGenerator(ddlFilePath, FileUtil.getClassName(filePath).toLowerCase());
 		ddlsqlFileGenerator.generateDDLFile(uuid);
 
@@ -39,16 +40,15 @@ public class CuratorcodegeneratorApplication {
 
 		RepositoryFileGenerator repositoryFileGenerator = new RepositoryFileGenerator(replClassName);
 		repositoryFileGenerator.generateRepositoryFile(replImportPath, uuid);
-		System.out.println("\n");
-
 
 
 		System.out.println("\n");
-		String replFilePath = "C:/Users/vtalluri/OneDrive - Insight/Documents/1 - AA/RAC MOD Project/Java/1-AAInternal/racmodcurator-pb/src/main/java/com/aa/rac/mod/orm/dao/refundedfa/RefundedFa.java";
 		ConverterFileGenerator converterFileGenerator = new ConverterFileGenerator(replicatedFileGenerator, eventHubPojoGenerator, ddlsqlFileGenerator);
 		converterFileGenerator.generateConverterFile();
 
-
+		System.out.println("\n");
+		ServiceFileGenerator serviceFileGenerator = new ServiceFileGenerator(replicatedFileGenerator, eventHubPojoGenerator, repositoryFileGenerator);
+		serviceFileGenerator.generateConverterFile();
 	}
 
 }
