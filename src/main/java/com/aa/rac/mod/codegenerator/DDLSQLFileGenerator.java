@@ -35,6 +35,8 @@ public class DDLSQLFileGenerator {
 
   private Map<String, String> nullMap = new HashMap<>();
 
+  private Map<String, Boolean> trimMap = new HashMap<>();
+
   private Set<String> db2DataTypeSet = new HashSet<>(Arrays.asList("CHAR", "DATE", "TIMESTAMP", "VARCHAR", "DECIMAL", "SMALLINT", "BIGINT", "INTEGER", "TIMESTMP"));
 
   private String filePath;
@@ -58,7 +60,11 @@ public class DDLSQLFileGenerator {
     return nullMap;
   }
 
-  public void loadDataTypeAndNullMaps() {
+  public Map<String, Boolean> getTrimMap() {
+    return trimMap;
+  }
+
+  public void loadDataTypeAndNullAndTrimMaps() {
     if (dataTypeMap.isEmpty()) {
       for (Map.Entry<String, Object> entry: json.entrySet()) {
         String field = entry.getKey();
@@ -67,6 +73,8 @@ public class DDLSQLFileGenerator {
         String value = properties[0];
         dataTypeMap.put(field, value);
         nullMap.put(field, nullable);
+        Boolean trimmable = properties.length>2?properties[2].equalsIgnoreCase("y"):false;
+        trimMap.put(field, trimmable);
       }
     }
   }
@@ -74,7 +82,7 @@ public class DDLSQLFileGenerator {
   public Map<String, Object> getJson(String jsonString) throws JsonProcessingException {
     if (this.json.isEmpty()) {
       this.json = FileUtil.mapContentsToHashMap(jsonString);
-      loadDataTypeAndNullMaps();
+      loadDataTypeAndNullAndTrimMaps();
     }
     return this.json;
   }

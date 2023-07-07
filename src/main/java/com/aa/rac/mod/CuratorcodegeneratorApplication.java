@@ -20,17 +20,18 @@ public class CuratorcodegeneratorApplication {
 		SpringApplication.run(CuratorcodegeneratorApplication.class, args);
 		String resourcesPath = System.getProperty("user.dir").replace('\\', '/')
 				+ "/src/main/resources/";
-		String filePath = resourcesPath + "agmmtkts.txt";
-		String uuid = "ticket_uuid";
-		EventHubPojoGenerator eventHubPojoGenerator = new EventHubPojoGenerator(filePath);
-		eventHubPojoGenerator.eventHubPojoFileGenerator();
-		System.out.println("\n");
 
-		String ddlFilePath = resourcesPath + "agmmtkts_ddl.txt";
+		String filePath = resourcesPath + "refunded.txt";
+		String uuid = "refunded_uuid";
+
+		String ddlFilePath = resourcesPath + "refunded_ddl.txt";
 		DDLSQLFileGenerator ddlsqlFileGenerator = new DDLSQLFileGenerator(ddlFilePath, FileUtil.getClassName(filePath).toLowerCase());
 		ddlsqlFileGenerator.generateDDLFile(uuid);
 		System.out.println("\n");
 
+		EventHubPojoGenerator eventHubPojoGenerator = new EventHubPojoGenerator(filePath, ddlsqlFileGenerator);
+		eventHubPojoGenerator.eventHubPojoFileGenerator();
+		System.out.println("\n");
 
 		ReplicatedFileGenerator replicatedFileGenerator = new ReplicatedFileGenerator(filePath, ddlsqlFileGenerator, uuid);
 		replicatedFileGenerator.generateReplicatedFile();

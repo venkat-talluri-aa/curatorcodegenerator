@@ -37,13 +37,16 @@ public class EventHubPojoGenerator {
 
   private String eventHubClassName;
 
+  private DDLSQLFileGenerator ddlsqlFileGenerator;
+
   private String filePath;
   private String generatedOutput;
 
 
-  public EventHubPojoGenerator(String filePath) {
+  public EventHubPojoGenerator(String filePath, DDLSQLFileGenerator ddlsqlFileGenerator) {
     this.filePath = filePath;
     eventHubClassName = FileUtil.getClassName(filePath);
+    this.ddlsqlFileGenerator = ddlsqlFileGenerator;
   }
 
   public String getGeneratedOutput() {
@@ -119,6 +122,7 @@ public class EventHubPojoGenerator {
   }
 
   public void addFields() {
+    System.out.println(ddlsqlFileGenerator.getTrimMap());
     for (Map.Entry<String, Object> entry: json.entrySet()) {
       String field = entry.getKey();
       String value = entry.getValue().toString();
@@ -126,11 +130,16 @@ public class EventHubPojoGenerator {
         continue;
       }
       lines.add("  " + getJsonPropertyAnnotation(field));
-      if (value.contains("{")) {
-        lines.add("  " + getJsonDeserializeAnnotation(unpackedTrim));
-      } else {
-        lines.add("  " + getJsonDeserializeAnnotation(trimmed));
+      String fieldUp = field.startsWith("B_")?field.replace("B_", ""):field;
+      if (ddlsqlFileGenerator.getTrimMap().get(fieldUp)) {
+
+        if (value.contains("{")) {
+          lines.add("  " + getJsonDeserializeAnnotation(unpackedTrim));
+        } else {
+          lines.add("  " + getJsonDeserializeAnnotation(trimmed));
+        }
       }
+
       lines.add("  private String " + FileUtil.getFieldName(field) +";\n\n");
     }
   }

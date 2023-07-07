@@ -1,8 +1,8 @@
 CREATE TABLE IF NOT EXISTS curated_test.refunded
 (
     refunded_uuid                 CHAR(64) NOT NULL, 
-    REF_FILE_NUMBER               CHAR(6), 
-    REF_TICKET_NUMBER             CHAR(13), 
+    REF_FILE_NUMBER               CHAR(6) NOT NULL, 
+    REF_TICKET_NUMBER             CHAR(13) NOT NULL, 
     REF_AGENCY_NUMBER             CHAR(8), 
     REF_BATCH_NUMBER              CHAR(4), 
     REF_BATCH_DATE                DATE, 
