@@ -29,6 +29,7 @@ public class CuratorcodegeneratorApplication {
 		String ddlFilePath = resourcesPath + "agmmtkts_ddl.txt";
 		DDLSQLFileGenerator ddlsqlFileGenerator = new DDLSQLFileGenerator(ddlFilePath, FileUtil.getClassName(filePath).toLowerCase());
 		ddlsqlFileGenerator.generateDDLFile(uuid);
+		System.out.println("\n");
 
 
 		ReplicatedFileGenerator replicatedFileGenerator = new ReplicatedFileGenerator(filePath, ddlsqlFileGenerator, uuid);
