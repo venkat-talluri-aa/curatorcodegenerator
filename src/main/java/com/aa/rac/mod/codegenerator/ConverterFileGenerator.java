@@ -133,7 +133,7 @@ public class ConverterFileGenerator {
             FileUtil.getDecimalPrecision(
                 ddlsqlFileGenerator.getDataTypeMap().get(field)));
       }
-      lines.add("\n          target.set" + fieldUp + "("
+      lines.add("\n          target.set" + StringUtils.capitalize(FileUtil.getFieldName(field)) + "("
           + transformation + ");");
     }
   }
