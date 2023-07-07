@@ -175,7 +175,17 @@ public class ReplicatedFileGenerator {
   }
 
   public String getColumnAnnotation(String field) {
-    return "@Column( name = \"" + field + "\")\n";
+    if (uuidColumnName != field && !ddlsqlFileGenerator.getNullMap().containsKey(field)) {
+      throw new IllegalArgumentException("Field not found: " + field);
+    }
+    String nullable;
+    if (uuidColumnName == field) {
+      nullable = ", nullable = false";
+    } else {
+      nullable = ddlsqlFileGenerator.getNullMap().get(field).isBlank()?"":", nullable = false";
+    }
+
+    return "@Column( name = \"" + field + "\"" + nullable + ")\n";
   }
 
   public String getIdAnnotation() {
