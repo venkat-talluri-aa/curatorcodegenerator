@@ -109,10 +109,11 @@ public class ConverterFileGenerator {
 
   public void addFields(boolean isBefore) {
     String before = isBefore?"Before":"";
-    lines.add("\n          target.set"
-        +StringUtils.capitalize(
-            FileUtil.getFieldName(
-                replicatedFileGenerator.uuidColumnName)) + "(#TODO: GENERATE HASH);");
+    for (String uuidColumnName: ddlsqlFileGenerator.uuidColumnNames) {
+      lines.add("\n          target.set"
+          +StringUtils.capitalize(
+          FileUtil.getFieldName(uuidColumnName)) + "(#TODO: GENERATE HASH);");
+    }
     for (String field : replicatedFileGenerator.getJson().keySet()) {
       if (field.startsWith("B_") || replicatedFileGenerator.ehBaseColumnsSet.contains(field)) {
         continue;

@@ -24,10 +24,13 @@ public class RepositoryFileGenerator {
   private List<String> lines = new ArrayList<>();
   private String generatedOutput;
 
+  private String uuidColumnName;
 
-  public RepositoryFileGenerator(String replicatedClassName) {
+
+  public RepositoryFileGenerator(DDLSQLFileGenerator ddlsqlFileGenerator, String replicatedClassName) {
     this.replicatedClassName = replicatedClassName;
     this.repositoryClassName = this.replicatedClassName + "Repository";
+    this.uuidColumnName = ddlsqlFileGenerator.uuidColumnNames.get(0);
   }
 
   public String getGeneratedOutput() {
@@ -81,15 +84,15 @@ public class RepositoryFileGenerator {
 //      nativeQuery = true)
 //  Optional<ProcessedRefund> findByRefundedAmountUuid(String refundedAmountUuid);
 
-  public String getQueryAnnotation(String uuidColumnName) {
+  public String getQueryAnnotation() {
     return "@Query( value = \"SELECT * FROM curated_test."
         + replicatedClassName.replace("Repl", "").toLowerCase()
         + "\"\n                + \" WHERE " + uuidColumnName + "=?1\", " +
         "\n                  nativeQuery = true)\n";
   }
 
-  public void addMethod(String uuidColumnName) {
-    lines.add("  " + getQueryAnnotation(uuidColumnName));
+  public void addMethod() {
+    lines.add("  " + getQueryAnnotation());
     String fieldName = FileUtil.getFieldName(uuidColumnName);
     lines.add("  " + "Optional<"+replicatedClassName+"> findBy"
         + StringUtils.capitalize(fieldName)
@@ -100,7 +103,7 @@ public class RepositoryFileGenerator {
     lines.add("}");
   }
 
-  public void generateRepositoryFile(String replicatedImportPath, String uuidColumnName) throws IOException {
+  public void generateRepositoryFile(String replicatedImportPath) throws IOException {
     String repositoryClassFileName = repositoryClassName + ".java.txt";
     String fullPath = getFullRepositoryFilePath(repositoryClassFileName);
     FileUtil.createFile(getRepositoryDirectory() + replicatedClassName.toLowerCase(), fullPath);
@@ -109,7 +112,7 @@ public class RepositoryFileGenerator {
     addImportStatements(replicatedImportPath);
     addClassAnnotations();
     addInitialClassTemplate(repositoryClassName);
-    addMethod(uuidColumnName);
+    addMethod();
     addEndingLine();
     this.generatedOutput = String.join("", lines);
     try {

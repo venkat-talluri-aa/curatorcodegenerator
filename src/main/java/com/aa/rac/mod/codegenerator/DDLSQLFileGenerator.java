@@ -7,13 +7,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class DDLSQLFileGenerator {
 
@@ -56,9 +53,12 @@ public class DDLSQLFileGenerator {
 
   private String generatedOutput;
 
-  public DDLSQLFileGenerator(String filePath, String tableName) {
+  public List<String> uuidColumnNames;
+
+  public DDLSQLFileGenerator(String filePath, String tableName, String[] uuidColumnNames) {
     this.filePath = filePath;
     this.tableName = tableName;
+    this.uuidColumnNames = Arrays.asList(uuidColumnNames);
   }
 
   public String getGeneratedOutput() {
@@ -140,8 +140,10 @@ public class DDLSQLFileGenerator {
     return auditColumns;
   }
 
-  public void addFields(String uuidColumnName) {
-    lines.add("    " + uuidColumnName + " ".repeat(fieldDataTypeGapLength-uuidColumnName.length()) + "CHAR(64) NOT NULL, \n");
+  public void addFields() {
+    for (String uuidColumnName: uuidColumnNames) {
+      lines.add("    " + uuidColumnName + " ".repeat(fieldDataTypeGapLength-uuidColumnName.length()) + "CHAR(64) NOT NULL, \n");
+    }
     for (Map.Entry<String, Object> entry: json.entrySet()) {
       String field = entry.getKey();
       String[] properties = entry.getValue().toString().split("[|]");
@@ -159,24 +161,24 @@ public class DDLSQLFileGenerator {
 
   }
 
-  public void addPKConstraint(String uuidColumnName) {
+  public void addPKConstraint() {
     lines.add("    CONSTRAINT " + CuratorcodegeneratorApplication.SCHEMA_NAME + "_" +
-        uuidColumnName + "_pkey PRIMARY KEY ("+ uuidColumnName + ")\n");
+        uuidColumnNames.get(0) + "_pkey PRIMARY KEY ("+ uuidColumnNames.get(0) + ")\n");
   }
 
   public void addEndingLine() {
     lines.add(")");
   }
 
-  public void generateDDLFile(String uuidColumnName) throws IOException {
+  public void generateDDLFile() throws IOException {
     String ddlFileName = tableName + "_ddl.txt";
     Set<String> fieldNames = getFieldNames(String.join("", FileUtil.readLinesFromFile(filePath)));
     String fullPath = getFullDDLdFilePath(ddlFileName);
     FileUtil.createFile(getDDLDirectory(), fullPath);
     FileWriter writer = getFileWriter(fullPath);
     addCreateStatement();
-    addFields(uuidColumnName);
-    addPKConstraint(uuidColumnName);
+    addFields();
+    addPKConstraint();
     addEndingLine();
     this.generatedOutput = String.join("", lines);
     try {

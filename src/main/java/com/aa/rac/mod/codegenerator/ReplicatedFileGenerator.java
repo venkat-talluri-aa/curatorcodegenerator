@@ -61,15 +61,15 @@ public class ReplicatedFileGenerator {
   public Map<String, String> columnTypes = new LinkedHashMap<>();
 
   public List<String> skipColumns = Arrays.asList("TICKET_CREATE_TS", "A_ENTTYP", "A_TIMSTAMP", "A_USER", "A_JOBUSER");
-  public String uuidColumnName;
 
-  public ReplicatedFileGenerator(String filePath, DDLSQLFileGenerator ddlsqlFileGenerator, String uuidColumnName) {
+
+
+  public ReplicatedFileGenerator(String filePath, DDLSQLFileGenerator ddlsqlFileGenerator) {
     this.filePath = filePath;
     this.ddlsqlFileGenerator = ddlsqlFileGenerator;
     String eventHubClassName = FileUtil.getClassName(filePath);
     replicatedClassName = eventHubClassName + "Repl";
     this.tableName = eventHubClassName.toLowerCase();
-    this.uuidColumnName = uuidColumnName;
   }
 
   public Map<String, Object> getJson() {
@@ -175,11 +175,11 @@ public class ReplicatedFileGenerator {
   }
 
   public String getColumnAnnotation(String field) {
-    if (uuidColumnName != field && !ddlsqlFileGenerator.getNullMap().containsKey(field)) {
+    if (!ddlsqlFileGenerator.uuidColumnNames.contains(field) && !ddlsqlFileGenerator.getNullMap().containsKey(field)) {
       throw new IllegalArgumentException("Field not found: " + field);
     }
     String nullable;
-    if (uuidColumnName == field) {
+    if (ddlsqlFileGenerator.uuidColumnNames.contains(field)) {
       nullable = ", nullable = false";
     } else {
       nullable = ddlsqlFileGenerator.getNullMap().get(field).isBlank()?"":", nullable = false";
@@ -192,11 +192,13 @@ public class ReplicatedFileGenerator {
     return "@Id\n";
   }
 
-  public void addFields(String uuidColumnName) {
-    lines.add("  " + getIdAnnotation());
-    lines.add("  " + getColumnAnnotation(uuidColumnName));
-    columnTypes.put(uuidColumnName, "String");
-    lines.add("  private String " + FileUtil.getFieldName(uuidColumnName) + ";\n\n");
+  public void addFields() {
+    for (String uuidColumnName: ddlsqlFileGenerator.uuidColumnNames) {
+      lines.add("  " + getIdAnnotation());
+      lines.add("  " + getColumnAnnotation(uuidColumnName));
+      columnTypes.put(uuidColumnName, "String");
+      lines.add("  private String " + FileUtil.getFieldName(uuidColumnName) + ";\n\n");
+    }
     for (Map.Entry<String, Object> entry: json.entrySet()) {
       String field = entry.getKey();
       String value = entry.getValue().toString();
@@ -229,7 +231,7 @@ public class ReplicatedFileGenerator {
     addImportStatements();
     addClassAnnotations();
     addInitialClassTemplate(replicatedClassName);
-    addFields(uuidColumnName);
+    addFields();
     addEndingLine();
     this.generatedOutput = String.join("", lines);
     try {

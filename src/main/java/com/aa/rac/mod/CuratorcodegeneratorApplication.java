@@ -21,29 +21,29 @@ public class CuratorcodegeneratorApplication {
 		String resourcesPath = System.getProperty("user.dir").replace('\\', '/')
 				+ "/src/main/resources/";
 
-		String fileName = "agmmtkts";
+		String fileName = "agdename";
 
 		String filePath = resourcesPath + fileName + ".txt";
-		String uuid = "TICKET_UUID";
+		String[] uuids = {"NAME_UUID", "AGMMTKTS_UUID"};
 
 		String ddlFilePath = resourcesPath + fileName + "_ddl.txt";
-		DDLSQLFileGenerator ddlsqlFileGenerator = new DDLSQLFileGenerator(ddlFilePath, FileUtil.getClassName(filePath).toLowerCase());
-		ddlsqlFileGenerator.generateDDLFile(uuid);
+		DDLSQLFileGenerator ddlsqlFileGenerator = new DDLSQLFileGenerator(ddlFilePath, FileUtil.getClassName(filePath).toLowerCase(), uuids);
+		ddlsqlFileGenerator.generateDDLFile();
 		System.out.println("\n");
 
 		EventHubPojoGenerator eventHubPojoGenerator = new EventHubPojoGenerator(filePath, ddlsqlFileGenerator);
 		eventHubPojoGenerator.eventHubPojoFileGenerator();
 		System.out.println("\n");
 
-		ReplicatedFileGenerator replicatedFileGenerator = new ReplicatedFileGenerator(filePath, ddlsqlFileGenerator, uuid);
+		ReplicatedFileGenerator replicatedFileGenerator = new ReplicatedFileGenerator(filePath, ddlsqlFileGenerator);
 		replicatedFileGenerator.generateReplicatedFile();
 		System.out.println("\n");
 
 		String replImportPath = replicatedFileGenerator.getReplicatedImportPath();
 		String replClassName = replImportPath.substring(replImportPath.lastIndexOf(".")+1);
 
-		RepositoryFileGenerator repositoryFileGenerator = new RepositoryFileGenerator(replClassName);
-		repositoryFileGenerator.generateRepositoryFile(replImportPath, uuid);
+		RepositoryFileGenerator repositoryFileGenerator = new RepositoryFileGenerator(ddlsqlFileGenerator, replClassName);
+		repositoryFileGenerator.generateRepositoryFile(replImportPath);
 
 
 		System.out.println("\n");
