@@ -174,8 +174,8 @@ public class DDLSQLFileGenerator {
     lines.add("\nCOMMENT ON TABLE " + CuratorcodegeneratorApplication.SCHEMA_NAME + "." +tableName +
         " IS 'UUID values are derived using SHA256 Hash';");
     for (String uuidColumnName: uuidColumnNames) {
-      lines.add("\nCOMMENT ON TABLE " + CuratorcodegeneratorApplication.SCHEMA_NAME + "." +tableName +
-          "." + uuidColumnName + " IS '" + uuidColumnName + " is derived using SHA256 Hash'");
+      lines.add("\nCOMMENT ON COLUMN " + CuratorcodegeneratorApplication.SCHEMA_NAME + "." +tableName +
+          "." + uuidColumnName + " IS '" + uuidColumnName + " is derived using SHA256 Hash';");
     }
   }
 

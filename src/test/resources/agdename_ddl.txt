@@ -1,7 +1,6 @@
 CREATE TABLE IF NOT EXISTS curated_test.agdename
 (
     NAME_UUID                     CHAR(64) NOT NULL, 
-    AGMMTKTS_UUID                 CHAR(64) NOT NULL, 
     NAM_TICKET_NO                 VARCHAR(14) NOT NULL, 
     NAM_PASSENGER_NAME            VARCHAR(33), 
     NAM_PNR_NUMBER                VARCHAR(13), 
@@ -34,4 +33,3 @@ CREATE TABLE IF NOT EXISTS curated_test.agdename
 
 COMMENT ON TABLE curated_test.agdename IS 'UUID values are derived using SHA256 Hash';
 COMMENT ON TABLE curated_test.agdename.NAME_UUID IS 'NAME_UUID is derived using SHA256 Hash'
-COMMENT ON TABLE curated_test.agdename.AGMMTKTS_UUID IS 'AGMMTKTS_UUID is derived using SHA256 Hash'

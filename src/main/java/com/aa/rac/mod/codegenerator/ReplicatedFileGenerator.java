@@ -137,7 +137,6 @@ public class ReplicatedFileGenerator {
         "import com.aa.rac.mod.domain.enums.CuratedEntityClassMapper;\n" +
         "import com.aa.rac.mod.domain.util.RacUtil;\n" +
         "import com.aa.rac.mod.orm.dao.AbstractCuratedBaseEntity;\n" +
-        "import com.aa.rac.mod.orm.dao.CuratedDependency;\n" +
         "import com.fasterxml.jackson.annotation.JsonAutoDetect;\n" +
         "import jakarta.persistence.Column;\n" +
         "import jakarta.persistence.Entity;\n" +

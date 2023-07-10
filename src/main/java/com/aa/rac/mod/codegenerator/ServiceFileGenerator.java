@@ -115,7 +115,7 @@ public class ServiceFileGenerator {
   }
 
   public String getMethodAnnotation() {
-    return "@Override\n" + "  @Async";
+    return "\n@Override\n" + "  @Async";
   }
 
   public void addMethod(boolean isException) {
@@ -127,7 +127,7 @@ public class ServiceFileGenerator {
     String replicatedClassMapper;
     if (isException) {
       parameter = "ProcessingException processingException";
-      retry = "processingException.getRetryCount()+1";
+      retry = "processingException.getRetryCount() + 1";
       payload = "processingException.getPayload()";
       serviceClassMapper = "processingException.getCurator()";
       eventHubClassMapper = "processingException.getEventHubSource()";

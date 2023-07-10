@@ -129,4 +129,7 @@ CREATE TABLE IF NOT EXISTS curated_test.agmmtkts
     created_by                    VARCHAR(100) NOT NULL, 
     modified_by                   VARCHAR(100) NOT NULL, 
     CONSTRAINT curated_test_TICKET_UUID_pkey PRIMARY KEY (TICKET_UUID)
-)
+);
+
+COMMENT ON TABLE curated_test.agmmtkts IS 'UUID values are derived using SHA256 Hash';
+COMMENT ON COLUMN curated_test.agmmtkts.TICKET_UUID IS 'TICKET_UUID is derived using SHA256 Hash';

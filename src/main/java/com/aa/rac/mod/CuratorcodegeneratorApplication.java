@@ -21,10 +21,10 @@ public class CuratorcodegeneratorApplication {
 		String resourcesPath = System.getProperty("user.dir").replace('\\', '/')
 				+ "/src/main/resources/";
 
-		String fileName = "agdename";
+		String fileName = "agmmtkts";
 
 		String filePath = resourcesPath + fileName + ".txt";
-		String[] uuids = {"NAME_UUID", "AGMMTKTS_UUID"};
+		String[] uuids = {"TICKET_UUID"};
 
 		String ddlFilePath = resourcesPath + fileName + "_ddl.txt";
 		DDLSQLFileGenerator ddlsqlFileGenerator = new DDLSQLFileGenerator(ddlFilePath, FileUtil.getClassName(filePath).toLowerCase(), uuids);
