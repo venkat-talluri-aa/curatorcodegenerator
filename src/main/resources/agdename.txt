@@ -1,40 +1,43 @@
-{"B_NAM_TICKET_NO":"0010656472110 ",
-"B_NAM_PASSENGER_NAME":"REINHOLD/CLARA                   ",
-"B_NAM_PNR_NUMBER":"RBIFUR/AA    ",
-"B_NAM_RESTRICTIONS":"                                                            ",
-"B_NAM_RESTRICT_CONT":"                                                                                       ",
-"B_NAM_PASSENGER_TYPE":"   ",
-"B_NAM_CREATED_BY":"RV7100",
-"B_NAM_CREATED_TIME":"2022-06-21T01:28:50.302057000000",
-"B_NAM_MODIFIED_BY":"      ",
-"B_NAM_MODIFIED_TIME":"0001-01-01T00:00:00.000000000000",
-"B_NAM_NO_REFUND_IND":"N","B_NAM_PARTITION_NBR":26,
-"B_NAM_FULL_PASSENGER_NAME":"REINHOLD/CLARA                                   ",
-"B_NAM_DATE_OF_BIRTH":"9999-01-01",
-"B_NAM_SABRE_PNR":"RBIFUR/AA    ",
-"B_NAM_INTL_TAX_ID":"                                                  ",
-"B_NAM_PASSENGER_FIRST":"CLARA                         ",
-"B_NAM_PASSENGER_LAST":"REINHOLD                      ",
-"B_NAM_CHAIN_UUID":0,
-"NAM_TICKET_NO":"0010656472110 ",
-"NAM_PASSENGER_NAME":"REINHOLD/CLARA                   ",
-"NAM_PNR_NUMBER":"RBIFUR/AA    ",
-"NAM_RESTRICTIONS":"                                                            ",
-"NAM_RESTRICT_CONT":"                                                                                       ",
-"NAM_PASSENGER_TYPE":"   ",
-"NAM_CREATED_BY":"RV7100",
-"NAM_CREATED_TIME":"2022-06-21T01:28:50.302057000000",
-"NAM_MODIFIED_BY":"      ",
-"NAM_MODIFIED_TIME":"0001-01-01T00:00:00.000000000000",
-"NAM_NO_REFUND_IND":"N","B_NAM_PARTITION_NBR":26,
-"NAM_FULL_PASSENGER_NAME":"REINHOLD/CLARA                                   ",
-"NAM_DATE_OF_BIRTH":"9999-01-01",
-"NAM_SABRE_PNR":"RBIFUR/AA    ",
-"NAM_INTL_TAX_ID":"                                                  ",
-"NAM_PASSENGER_FIRST":"CLARA                         ",
-"NAM_PASSENGER_LAST":"REINHOLD                      ",
-"NAM_CHAIN_UUID":0,
-"A_ENTTYP":{"string":"DL"},
-"A_TIMSTAMP":{"string":"2023-06-24 12:29:48.388426000000"},
-"A_USER":{"string":"STCUSR"},
-"A_JOBUSER":{"string":"STCUSR"}}
+{"B_NAM_TICKET_NO":"0012382312727 "
+,"B_NAM_PASSENGER_NAME":"XXXXXXXXXXXXXXXXXX/XXXXXXXXXXXXXX"
+,"B_NAM_PNR_NUMBER":"VOLWCE/AA    "
+,"B_NAM_RESTRICTIONS":"NONREF/FAREDIF/CXL BY FLT TIME OR NOVALUE                   "
+,"B_NAM_RESTRICT_CONT":"                                                                                       "
+,"B_NAM_PASSENGER_TYPE":"ADT"
+,"B_NAM_CREATED_BY":"RV7100"
+,"B_NAM_CREATED_TIME":"2023-03-30T12:33:47.580740000000"
+,"B_NAM_MODIFIED_BY":"      "
+,"B_NAM_MODIFIED_TIME":"0001-01-01T00:00:00.000000000000"
+,"B_NAM_NO_REFUND_IND":"Y"
+,"B_NAM_PARTITION_NBR":65
+,"B_NAM_FULL_PASSENGER_NAME":"XXXXXXXXXXXXXXXXXX/XXXXXXXXXXXXXXX               "
+,"B_NAM_DATE_OF_BIRTH":"9999-01-01"
+,"B_NAM_SABRE_PNR":"VOLWCE/AA    "
+,"B_NAM_INTL_TAX_ID":"                                                  "
+,"B_NAM_PASSENGER_FIRST":"XXXXXXXXXXXXXXX               "
+,"B_NAM_PASSENGER_LAST":"XXXXXXXXXXXXXXXXXX            "
+,"B_NAM_CHAIN_UUID":0
+,"B_TICKET_CREATE_TS":"2023-03-30T12:33:47.580607000000"
+,"NAM_TICKET_NO":"0012382312727 "
+,"NAM_PASSENGER_NAME":"XXXXXXXXXXXXXXXXXX/XXXXXXXXXXXXXX"
+,"NAM_PNR_NUMBER":"VOLWCE/AA    "
+,"NAM_RESTRICTIONS":"NONREF/FAREDIF/CXL BY FLT TIME OR NOVALUE                   "
+,"NAM_RESTRICT_CONT":"                                                                                       "
+,"NAM_PASSENGER_TYPE":"ADT"
+,"NAM_CREATED_BY":"RV7100"
+,"NAM_CREATED_TIME":"2023-03-30T12:33:47.580740000000"
+,"NAM_MODIFIED_BY":"AD490 "
+,"NAM_MODIFIED_TIME":"0001-01-01T00:00:00.000000000000"
+,"NAM_NO_REFUND_IND":"Y"
+,"NAM_PARTITION_NBR":65
+,"NAM_FULL_PASSENGER_NAME":"XXXXXXXXXXXXXXXXXX/XXXXXXXXXXXXXXX               "
+,"NAM_DATE_OF_BIRTH":"9999-01-01"
+,"NAM_SABRE_PNR":"VOLWCE/AA    "
+,"NAM_INTL_TAX_ID":"                                                  "
+,"NAM_PASSENGER_FIRST":"XXXXXXXXXXXXXXX               "
+,"NAM_PASSENGER_LAST":"XXXXXXXXXXXXXXXXXX            "
+,"NAM_CHAIN_UUID":0
+,"TICKET_CREATE_TS":"2023-03-30T12:33:47.580607000000"
+,"A_ENTTYP":{"string":"UP"}
+,"A_TIMSTAMP":{"string":"2023-07-10 17:38:57.383023000000"}
+,"A_USER":{"string":"AD490"},"A_JOBUSER":{"string":"AD490"}}

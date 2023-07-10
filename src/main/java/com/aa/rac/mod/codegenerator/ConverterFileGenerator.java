@@ -40,7 +40,8 @@ public class ConverterFileGenerator {
   private Map<String, String> transformationMapper = Map.ofEntries(
       Map.entry("String", "|"),
       Map.entry("Date", "Date.valueOf(RacUtil.getDate(|))"),
-      Map.entry("Timestamp", "Timestamp.valueOf(RacUtil.getDb2DateTime(|))"),
+      Map.entry("Timestamp", "RacUtil.getSqlTimeFromDb2DateTime(|)"),
+      Map.entry("TimestampTicketCreateTs", "RacUtil.getSqlTimeFromDb2DateTime(|, ChronoUnit.SECONDS)"),
       Map.entry("BigDecimal", "RacUtil.convertStringtoBigDecimal(|, $, RoundingMode.UP)"),
       Map.entry("Integer", "Integer.parseInt(|)"),
       Map.entry("BigInteger", "RacUtil.convertStringtoBigInteger(|)")
@@ -83,7 +84,7 @@ public class ConverterFileGenerator {
   }
 
   public void addPackageContents(String packageName) {
-    lines.add("package " + packageName + end + "\n\n");
+    lines.add("package " + packageName.substring(0, packageName.length()-1) + end + "\n\n");
   }
 
   public void addImportStatements(String eventHubImportPath, String replicatedImportPath) throws IOException {
@@ -93,6 +94,7 @@ public class ConverterFileGenerator {
         "import java.math.RoundingMode;\n" +
         "import java.sql.Date;\n" +
         "import java.sql.Timestamp;\n" +
+        "import java.time.temporal.ChronoUnit;\n" +
         "import org.jetbrains.annotations.NotNull;\n" +
         "import org.springframework.core.convert.converter.Converter;";
     lines.add(imports +"\n\n");
@@ -121,10 +123,15 @@ public class ConverterFileGenerator {
       }
       String fieldUp = StringUtils.capitalize(FileUtil.getFieldName(field))+before;
       String sourceField = "source.get" + fieldUp + "()";
-      String transformation = transformationMapper.get(
-          replicatedFileGenerator.getDb2DataTypeMap().get(
-          FileUtil.truncatedDataType(
-              ddlsqlFileGenerator.getDataTypeMap().get(field))));
+      String transformation = null;
+      if (field.equalsIgnoreCase("TICKET_CREATE_TS")) {
+        transformation = transformationMapper.get("TimestampTicketCreateTs");
+      } else {
+        transformation = transformationMapper.get(
+            replicatedFileGenerator.getDb2DataTypeMap().get(
+                FileUtil.truncatedDataType(
+                    ddlsqlFileGenerator.getDataTypeMap().get(field))));
+      }
       if (transformation == null) {
         throw new IllegalArgumentException("Cannot get transformation for field type: " + field);
       }
