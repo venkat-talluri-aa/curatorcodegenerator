@@ -79,7 +79,6 @@ public class ServiceFileGenerator {
                                   String replicatedImportPath,
                                   String repositoryImportPath) throws IOException {
     String imports = "import com.aa.rac.mod.domain.AbstractServiceEventHub;\n" +
-        "import com.aa.rac.mod.domain.annotations.EmitToEventHub;\n" +
         "import com.aa.rac.mod.domain.annotations.SetAuditColumns;\n" +
         "import com.aa.rac.mod.domain.annotations.SetServiceClasses;\n" +
         "import com.aa.rac.mod.domain.enums.CuratedEntityClassMapper;\n" +
@@ -100,9 +99,6 @@ public class ServiceFileGenerator {
   public String getClassAnnotations() {
     return "@Service\n" +
         "@EnableAsync\n" +
-        "@EmitToEventHub(enabled = false,\n" +
-        "    topicPropertyName = #TODO,\n" +
-        "    emptyOriginalPayload = false)\n" +
         "@SetAuditColumns(setEntityTypeInConverter = true,\n" +
         "    targetCuratedCdcTimestampField = \"eventHubTimestamp\")\n" +
         "@SetServiceClasses(eventHubClassMapper = EventHubPojoClassMapper." + eventHubClassName.toUpperCase() + ",\n" +
@@ -123,22 +119,35 @@ public class ServiceFileGenerator {
   }
 
   public void addMethod(boolean isException) {
-    String parameter = "String topicPayload";
-    String retry = "1";
-    String payload = "topicPayload";
+    String parameter;
+    String retry;
+    String payload;
+    String serviceClassMapper;
+    String eventHubClassMapper;
+    String replicatedClassMapper;
     if (isException) {
       parameter = "ProcessingException processingException";
       retry = "processingException.getRetryCount()+1";
       payload = "processingException.getPayload()";
+      serviceClassMapper = "processingException.getCurator()";
+      eventHubClassMapper = "processingException.getEventHubSource()";
+      replicatedClassMapper = "processingException.getCuratedTarget()";
+    } else {
+      parameter = "String topicPayload";
+      retry = "1";
+      payload = "topicPayload";
+      serviceClassMapper = "ServiceClassMapper."+ replicatedClassName.toUpperCase() +"_SERVICE_IMPL";
+      eventHubClassMapper = "EventHubPojoClassMapper." + eventHubClassName.toUpperCase();
+      replicatedClassMapper = "CuratedEntityClassMapper." + replicatedClassName.toUpperCase();
     }
     lines.add("  " + getMethodAnnotation());
     lines.add("\n  public void processAsync("+ parameter + ") throws ProcessingException { \n");
     lines.add("    try {\n" +
         "      processToCuratedAndEmit("+ payload + ");\n" +
         "    } catch (ProcessingException e) {\n" +
-        "      e.setCurator(ServiceClassMapper."+ replicatedClassName.toUpperCase() +"_SERVICE_IMPL"+");\n" +
-        "      e.setEventHubSource(EventHubPojoClassMapper." + eventHubClassName.toUpperCase() + ");\n" +
-        "      e.setCuratedTarget(CuratedEntityClassMapper." + replicatedClassName.toUpperCase() + ");\n" +
+        "      e.setCurator("+ serviceClassMapper +");\n" +
+        "      e.setEventHubSource(" + eventHubClassMapper + ");\n" +
+        "      e.setCuratedTarget(" + replicatedClassMapper + ");\n" +
         "      e.setPayload("+payload +");\n" +
         "      e.setRetryCount("+ retry +");\n" +
         "      throw e;\n" +
