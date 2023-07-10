@@ -30,4 +30,8 @@ CREATE TABLE IF NOT EXISTS curated_test.agdename
     created_by                    VARCHAR(100) NOT NULL, 
     modified_by                   VARCHAR(100) NOT NULL, 
     CONSTRAINT curated_test_NAME_UUID_pkey PRIMARY KEY (NAME_UUID)
-)
+);
+
+COMMENT ON TABLE curated_test.agdename IS 'UUID values are derived using SHA256 Hash';
+COMMENT ON TABLE curated_test.agdename.NAME_UUID IS 'NAME_UUID is derived using SHA256 Hash'
+COMMENT ON TABLE curated_test.agdename.AGMMTKTS_UUID IS 'AGMMTKTS_UUID is derived using SHA256 Hash'

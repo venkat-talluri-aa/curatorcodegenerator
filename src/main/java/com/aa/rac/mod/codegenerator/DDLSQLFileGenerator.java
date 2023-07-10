@@ -116,7 +116,7 @@ public class DDLSQLFileGenerator {
   }
 
   public void addCreateStatement() {
-    lines.add("CREATE TABLE IF NOT EXISTS curated_test." + tableName +"\n(\n");
+    lines.add("CREATE TABLE IF NOT EXISTS " + CuratorcodegeneratorApplication.SCHEMA_NAME  +"." + tableName +"\n(\n");
   }
 
   public Set<String> getFieldNames(String jsonString) throws JsonProcessingException {
@@ -167,7 +167,16 @@ public class DDLSQLFileGenerator {
   }
 
   public void addEndingLine() {
-    lines.add(")");
+    lines.add(");\n");
+  }
+
+  public void addComments() {
+    lines.add("\nCOMMENT ON TABLE " + CuratorcodegeneratorApplication.SCHEMA_NAME + "." +tableName +
+        " IS 'UUID values are derived using SHA256 Hash';");
+    for (String uuidColumnName: uuidColumnNames) {
+      lines.add("\nCOMMENT ON TABLE " + CuratorcodegeneratorApplication.SCHEMA_NAME + "." +tableName +
+          "." + uuidColumnName + " IS '" + uuidColumnName + " is derived using SHA256 Hash'");
+    }
   }
 
   public void generateDDLFile() throws IOException {
@@ -180,6 +189,7 @@ public class DDLSQLFileGenerator {
     addFields();
     addPKConstraint();
     addEndingLine();
+    addComments();
     this.generatedOutput = String.join("", lines);
     try {
       writer.write(this.generatedOutput);
