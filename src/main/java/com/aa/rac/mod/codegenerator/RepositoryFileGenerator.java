@@ -75,7 +75,7 @@ public class RepositoryFileGenerator {
   }
 
   public void addInitialClassTemplate(String className) throws IOException {
-    lines.add("public class " + className
+    lines.add("public interface " + className
         + " extends JpaRepository<"
         + replicatedClassName + ", String>" + " { \n\n");
   }

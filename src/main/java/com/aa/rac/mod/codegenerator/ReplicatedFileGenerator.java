@@ -217,6 +217,12 @@ public class ReplicatedFileGenerator {
     }
   }
 
+  public void addGetUniqueIdentifier() {
+    lines.add("  @Override\n");
+    lines.add("  public String getUniqueIdentifier() { \n    return " +
+        FileUtil.getFieldName(ddlsqlFileGenerator.uuidColumnNames.get(0)) +"; \n  }\n");
+  }
+
   public void addEndingLine() {
     lines.add("}");
   }
@@ -232,6 +238,7 @@ public class ReplicatedFileGenerator {
     addClassAnnotations();
     addInitialClassTemplate(replicatedClassName);
     addFields();
+    addGetUniqueIdentifier();
     addEndingLine();
     this.generatedOutput = String.join("", lines);
     try {
