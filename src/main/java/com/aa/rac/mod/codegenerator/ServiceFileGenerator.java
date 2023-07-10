@@ -107,7 +107,7 @@ public class ServiceFileGenerator {
         "    targetCuratedCdcTimestampField = \"eventHubTimestamp\")\n" +
         "@SetServiceClasses(eventHubClassMapper = EventHubPojoClassMapper." + eventHubClassName.toUpperCase() + ",\n" +
         "    curatedTargetClassMapper = CuratedEntityClassMapper." + replicatedClassName.toUpperCase() + ",\n" +
-        "    repoClass =" + repositoryClassName + ".class\n" +
+        "    repoClass = " + repositoryClassName + ".class\n" +
         ")\n";
   }
 
@@ -122,19 +122,29 @@ public class ServiceFileGenerator {
     return "@Override\n" + "  @Async";
   }
 
-  public void addMethod() {
+  public void addMethod(boolean isException) {
+    String parameter = "String topicPayload";
+    String retry = "1";
+    String payload = "topicPayload";
+    if (isException) {
+      parameter = "ProcessingException processingException";
+      retry = "processingException.getRetryCount()+1";
+      payload = "processingException.getPayload()";
+    }
     lines.add("  " + getMethodAnnotation());
-    lines.add("\n  public void processAsync(String topicPayload) throws ProcessingException { \n");
+    lines.add("\n  public void processAsync("+ parameter + ") throws ProcessingException { \n");
     lines.add("    try {\n" +
-        "      processToCuratedAndEmit(topicPayload);\n" +
+        "      processToCuratedAndEmit("+ payload + ");\n" +
         "    } catch (ProcessingException e) {\n" +
         "      e.setCurator(ServiceClassMapper."+ replicatedClassName.toUpperCase() +"_SERVICE_IMPL"+");\n" +
         "      e.setEventHubSource(EventHubPojoClassMapper." + eventHubClassName.toUpperCase() + ");\n" +
         "      e.setCuratedTarget(CuratedEntityClassMapper." + replicatedClassName.toUpperCase() + ");\n" +
-        "      e.setPayload(topicPayload);\n" +
-        "      e.setRetryCount(1);\n" +
+        "      e.setPayload("+payload +");\n" +
+        "      e.setRetryCount("+ retry +");\n" +
         "      throw e;\n" +
-        "    }\n");
+        "    }\n  }\n");
+
+
   }
 
   public void addEndingLine() {
@@ -151,7 +161,8 @@ public class ServiceFileGenerator {
         replicatedFileGenerator.getReplicatedImportPath(),
         repositoryFileGenerator.getRepositoryImportPath());
     addInitialClassTemplate(serviceClassName);
-    addMethod();
+    addMethod(false);
+    addMethod(true);
     addEndingLine();
     this.generatedOutput = String.join("", lines);
 //    System.out.println(this.generatedOutput);

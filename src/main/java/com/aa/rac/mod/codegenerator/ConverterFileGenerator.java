@@ -91,6 +91,7 @@ public class ConverterFileGenerator {
         "import " + replicatedImportPath + ";\n" +
         "import " + eventHubImportPath + ";\n" +
         "import java.math.RoundingMode;\n" +
+        "import java.sql.Date;\n" +
         "import java.sql.Timestamp;\n" +
         "import org.jetbrains.annotations.NotNull;\n" +
         "import org.springframework.core.convert.converter.Converter;";
