@@ -32,4 +32,4 @@ CREATE TABLE IF NOT EXISTS curated_test.agdename
 );
 
 COMMENT ON TABLE curated_test.agdename IS 'UUID values are derived using SHA256 Hash';
-COMMENT ON TABLE curated_test.agdename.NAME_UUID IS 'NAME_UUID is derived using SHA256 Hash'
+COMMENT ON COLUMN curated_test.agdename.NAME_UUID IS 'NAME_UUID is derived using SHA256 Hash';

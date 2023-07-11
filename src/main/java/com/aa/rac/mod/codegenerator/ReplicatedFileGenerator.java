@@ -153,6 +153,10 @@ public class ReplicatedFileGenerator {
     lines.add(imports +"\n\n");
   }
 
+  public void addClassJavaDoc() {
+    lines.add("/** " + replicatedClassName + " replicated orm. */\n");
+  }
+
   public void addClassAnnotations() throws IOException {
     String annotations = "@Entity\n" +
         "@Table(name = \"" + tableName + "\", schema = \""
@@ -184,7 +188,7 @@ public class ReplicatedFileGenerator {
       nullable = ddlsqlFileGenerator.getNullMap().get(field).isBlank()?"":", nullable = false";
     }
 
-    return "@Column( name = \"" + field + "\"" + nullable + ")\n";
+    return "@Column(name = \"" + field + "\"" + nullable + ")\n";
   }
 
   public String getIdAnnotation() {
@@ -234,6 +238,7 @@ public class ReplicatedFileGenerator {
     FileWriter writer = getFileWriter(fullPath);
     addPackageContents(packageName);
     addImportStatements();
+    addClassJavaDoc();
     addClassAnnotations();
     addInitialClassTemplate(replicatedClassName);
     addFields();

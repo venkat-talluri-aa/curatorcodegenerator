@@ -96,6 +96,10 @@ public class ServiceFileGenerator {
     lines.add(imports +"\n\n");
   }
 
+  public void addClassJavaDoc() {
+    lines.add("/** " + replicatedClassName + " service implemenation. */\n");
+  }
+
   public String getClassAnnotations() {
     return "@Service\n" +
         "@EnableAsync\n" +
@@ -110,12 +114,12 @@ public class ServiceFileGenerator {
   public void addInitialClassTemplate(String className) {
     lines.add(getClassAnnotations());
     lines.add("public class " + serviceClassName
-        + " extends AbstractServiceEventHub<" + eventHubClassName + ", "
-        + replicatedClassName + ", " + repositoryClassName + "> {\n\n");
+        + " \n    extends AbstractServiceEventHub<" + eventHubClassName + ", "
+        + replicatedClassName + ", " + repositoryClassName + "> {\n");
   }
 
   public String getMethodAnnotation() {
-    return "\n@Override\n" + "  @Async";
+    return "\n  @Override\n" + "  @Async";
   }
 
   public void addMethod(boolean isException) {
@@ -169,6 +173,7 @@ public class ServiceFileGenerator {
     addImportStatements(eventHubPojoGenerator.getEventHubImportPath(),
         replicatedFileGenerator.getReplicatedImportPath(),
         repositoryFileGenerator.getRepositoryImportPath());
+    addClassJavaDoc();
     addInitialClassTemplate(serviceClassName);
     addMethod(false);
     addMethod(true);

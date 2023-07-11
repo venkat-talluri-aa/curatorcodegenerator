@@ -100,9 +100,17 @@ public class ConverterFileGenerator {
     lines.add(imports +"\n\n");
   }
 
+  public void addClassJavaDoc() {
+    lines.add("/** " + eventHubClassName + " to " + replicatedClassName + " converter. */\n");
+  }
+
+  public void addClassAnnotation() {
+    lines.add("@SuppressWarnings(\"checkstyle:LineLength\")\n");
+  }
+
   public void addInitialClassTemplate(String className) {
     lines.add("public class " + converterClassName
-        + " implements Converter<" + eventHubClassName + ", "
+        + "\n    implements Converter<" + eventHubClassName + ", "
         + replicatedClassName + "> {\n\n");
   }
 
@@ -182,6 +190,8 @@ public class ConverterFileGenerator {
     FileWriter writer = getFileWriter(fullPath);
     addPackageContents(packageName);
     addImportStatements(eventHubPojoGenerator.getEventHubImportPath(), replicatedFileGenerator.getReplicatedImportPath());
+    addClassJavaDoc();
+    addClassAnnotation();
     addInitialClassTemplate(converterClassName);
     addMethod();
     addEndingLine();

@@ -69,6 +69,10 @@ public class RepositoryFileGenerator {
     lines.add(imports +"\n\n");
   }
 
+  public void addClassJavaDoc() {
+    lines.add("/** " + replicatedClassName + " repository. */\n");
+  }
+
   public void addClassAnnotations() throws IOException {
     String annotations = "@Repository\n";
     lines.add(annotations);
@@ -85,7 +89,7 @@ public class RepositoryFileGenerator {
 //  Optional<ProcessedRefund> findByRefundedAmountUuid(String refundedAmountUuid);
 
   public String getQueryAnnotation() {
-    return "@Query( value = \"SELECT * FROM curated_test."
+    return "@Query(value = \"SELECT * FROM curated_test."
         + replicatedClassName.replace("Repl", "").toLowerCase()
         + "\"\n                + \" WHERE " + uuidColumnName + "=?1\", " +
         "\n                  nativeQuery = true)\n";
@@ -110,6 +114,7 @@ public class RepositoryFileGenerator {
     FileWriter writer = getFileWriter(fullPath);
     addPackageContents(packageName);
     addImportStatements(replicatedImportPath);
+    addClassJavaDoc();
     addClassAnnotations();
     addInitialClassTemplate(repositoryClassName);
     addMethod();

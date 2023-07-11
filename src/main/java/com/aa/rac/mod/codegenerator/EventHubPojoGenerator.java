@@ -92,8 +92,12 @@ public class EventHubPojoGenerator {
     lines.add(imports +"\n\n");
   }
 
+  public void addClassJavaDoc() {
+    lines.add("/** " + eventHubClassName + " eventhub pojo. */");
+  }
+
   public void addClassAnnotations() throws IOException {
-    String annotations = "@JsonIgnoreProperties(ignoreUnknown = true)\n" +
+    String annotations = "\n@JsonIgnoreProperties(ignoreUnknown = true)\n" +
         "@NoArgsConstructor\n" +
         "@ToString(callSuper = true)\n" +
         "@Setter\n" +
@@ -118,7 +122,7 @@ public class EventHubPojoGenerator {
   }
 
   public String getJsonDeserializeAnnotation(String className) {
-    return "@JsonDeserialize( using = " + className + ".class)\n";
+    return "@JsonDeserialize(using = " + className + ".class)\n";
   }
 
   public void addFields() {
@@ -155,6 +159,7 @@ public class EventHubPojoGenerator {
     FileWriter writer = getFileWriter(fullPath);
     addPackageContents(packageName);
     addImportStatements();
+    addClassJavaDoc();
     addClassAnnotations();
     addInitialClassTemplate(eventHubClassName);
     addFields();
