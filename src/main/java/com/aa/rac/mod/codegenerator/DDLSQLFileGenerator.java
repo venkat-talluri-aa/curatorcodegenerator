@@ -162,7 +162,7 @@ public class DDLSQLFileGenerator {
   }
 
   public void addPKConstraint() {
-    lines.add("    CONSTRAINT " + CuratorcodegeneratorApplication.SCHEMA_NAME + "_" +
+    lines.add("    CONSTRAINT " + CuratorcodegeneratorApplication.SCHEMA_NAME + "_" + tableName + "_" +
         uuidColumnNames.get(0) + "_pkey PRIMARY KEY ("+ uuidColumnNames.get(0) + ")\n");
   }
 

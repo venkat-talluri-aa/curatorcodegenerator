@@ -7,7 +7,7 @@ CREATE TABLE IF NOT EXISTS curated_test.agdename
     NAM_RESTRICTIONS              VARCHAR(60), 
     NAM_RESTRICT_CONT             VARCHAR(87), 
     NAM_PASSENGER_TYPE            VARCHAR(3), 
-    NAM_CREATED_BY                VARCHAR(6) NOT NULL, 
+    NAM_CREATED_BY                VARCHAR(6), 
     NAM_CREATED_TIME              TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
     NAM_MODIFIED_BY               VARCHAR(6), 
     NAM_MODIFIED_TIME             TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS curated_test.agdename
     system_modified_timestamp     TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
     created_by                    VARCHAR(100) NOT NULL, 
     modified_by                   VARCHAR(100) NOT NULL, 
-    CONSTRAINT curated_test_NAME_UUID_pkey PRIMARY KEY (NAME_UUID)
+    CONSTRAINT curated_test_agdename_NAME_UUID_pkey PRIMARY KEY (NAME_UUID)
 );
 
 COMMENT ON TABLE curated_test.agdename IS 'UUID values are derived using SHA256 Hash';
