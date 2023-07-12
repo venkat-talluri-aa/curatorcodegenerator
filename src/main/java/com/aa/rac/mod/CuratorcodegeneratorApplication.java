@@ -7,6 +7,7 @@ import com.aa.rac.mod.codegenerator.EventHubPojoGenerator;
 import com.aa.rac.mod.codegenerator.ReplicatedFileGenerator;
 import com.aa.rac.mod.codegenerator.RepositoryFileGenerator;
 import com.aa.rac.mod.codegenerator.ServiceFileGenerator;
+import com.aa.rac.mod.codegenerator.TopicProcessorFileGenerator;
 import java.io.IOException;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -53,6 +54,10 @@ public class CuratorcodegeneratorApplication {
 		System.out.println("\n");
 		ServiceFileGenerator serviceFileGenerator = new ServiceFileGenerator(replicatedFileGenerator, eventHubPojoGenerator, repositoryFileGenerator);
 		serviceFileGenerator.generateConverterFile();
+
+		System.out.println("\n");
+		TopicProcessorFileGenerator topicProcessorFileGenerator = new TopicProcessorFileGenerator(replicatedFileGenerator);
+		topicProcessorFileGenerator.generateConverterFile();
 	}
 
 }
