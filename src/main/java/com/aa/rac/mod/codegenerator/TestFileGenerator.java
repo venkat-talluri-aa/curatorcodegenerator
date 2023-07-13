@@ -450,8 +450,8 @@ public class TestFileGenerator {
         lines.add("    TestUtil.assertTimestamps(, target.get"+fieldUp+"(), formatter);\n");
       } else if (value.equalsIgnoreCase("date")) {
         lines.add("    TestUtil.assertTrueTest(, target.get"+fieldUp+"(), \""+ fieldUp+" are not equal.\");\n");
-      } else {
-        lines.add("    assertEquals(, target.get"+fieldUp+"(), \""+ fieldUp+" are not equal.\");\n");
+      } else if(!value.equalsIgnoreCase("string")) {
+        lines.add("    assertEquals(, target.get"+fieldUp+"().toString(), \""+ fieldUp+" are not equal.\");\n");
       }
     }
   }
