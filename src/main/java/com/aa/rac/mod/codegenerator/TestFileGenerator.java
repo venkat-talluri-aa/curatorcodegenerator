@@ -280,7 +280,7 @@ public class TestFileGenerator {
         "      assertEquals(true, "+replCamel+".get().getSrcDeletedIndicator());\n" +
         "      assertEquals(false, "+replCamel+".get().getDeletedIndicator());\n" +
         "\n" +
-        "      testUpdateData("+replCamel+".get());\n" +
+        "      testDeleteData("+replCamel+".get());\n" +
         "    } catch (Exception e) {\n" +
         "      fail(e.getMessage(), e);\n" +
         "    }\n" +
