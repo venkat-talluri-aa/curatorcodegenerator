@@ -458,8 +458,8 @@ public class TestFileGenerator {
 
   public void addMethods() {
     addFields();
-    lines.add("\n\n /** Set Base services by generating with ServiceFactory. */\n" +
-        " @BeforeEach\n" +
+    lines.add("\n\n  /** Set Base services by generating with ServiceFactory. */\n" +
+        "  @BeforeEach\n" +
         "  public void setBaseService() {\n" +
         "    "+ serviceVariable +" = ServiceFactory.getBaseService(\n" +
         "        ServiceClassMapper."+replicatedClassName.toUpperCase()+"_SERVICE_IMPL);\n" +
