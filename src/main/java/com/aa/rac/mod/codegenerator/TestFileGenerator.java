@@ -69,7 +69,7 @@ public class TestFileGenerator {
     this.updateVariable = "update"+this.eventHubClassName;
     this.deleteVariable = "delete"+this.eventHubClassName;
     this.replCamel = this.replicatedClassName.substring(0, 1).toLowerCase() + this.replicatedClassName.substring(1);
-    this.uuidColumn = FileUtil.getFieldName(repositoryFileGenerator.uuidColumnName);
+    this.uuidColumn = StringUtils.capitalize(FileUtil.getFieldName(repositoryFileGenerator.uuidColumnName));
     this.insertException = this.insertVariable +"Exception";
   }
 
@@ -114,6 +114,7 @@ public class TestFileGenerator {
         "import " + replicatedImportPath + ";\n" +
         "import " + eventHubImportPath + ";\n" +
         "import " + repositoryImportPath + ";\n" +
+        "import com.aa.rac.mod.service.ServiceFactory;\n"+
         "import com.fasterxml.jackson.databind.ObjectMapper;\n" +
         "import java.math.BigInteger;\n" +
         "import java.time.format.DateTimeFormatter;\n" +
@@ -159,8 +160,8 @@ public class TestFileGenerator {
         "  ProcessingExceptionHandler processingExceptionHandler;\n");
     lines.add("\n  @Autowired \n" +
         "  private " + repositoryClassName + " "
-        + repoVariable);
-    lines.add("\n\n  private BaseService " + serviceVariable);
+        + repoVariable + ";");
+    lines.add("\n\n  private BaseService " + serviceVariable+";");
     lines.add("\n\n\n  private final String " + insertVariable + " = #TODO");
     lines.add("\n\n  private final String " + updateVariable + " = #TODO");
     lines.add("\n\n  private final String " + deleteVariable + " = #TODO");
@@ -428,8 +429,7 @@ public class TestFileGenerator {
         "  }\n");
   }
 
-  public void addTestDataFields(boolean isBefore) {
-    String before = isBefore?"Before":"";
+  public void addTestDataFields() {
     String pk = replicatedFileGenerator.ddlsqlFileGenerator.uuidColumnNames.get(0);
     for (Map.Entry<String, String> entry: replicatedFileGenerator.columnTypes.entrySet()) {
       String field = entry.getKey();
@@ -439,18 +439,19 @@ public class TestFileGenerator {
         continue;
       }
       if (field.equalsIgnoreCase("TICKET_CREATE_TS")) {
-        lines.add("    assertEquals(, target.getTicketCreateTs"+before+"().toString());\n");
+        lines.add("    assertEquals(, target.getTicketCreateTs"+"().toString());\n");
         continue;
       }
       if (replicatedFileGenerator.ddlsqlFileGenerator.uuidColumnNames.contains(field)) {
         lines.add("    assertEquals(, target.get"+ fieldUp+"());\n");
         continue;
       }
-      if (value.equalsIgnoreCase("timestamp")
-          || value.equalsIgnoreCase("date")) {
-        lines.add("    TestUtil.assertTrueTest(, target.get"+fieldUp+before+"(), \""+ fieldUp+" are not equal.\");\n");
+      if (value.equalsIgnoreCase("timestamp")) {
+        lines.add("    TestUtil.assertTimestamps(, target.get"+fieldUp+"(), formatter);\n");
+      } else if (value.equalsIgnoreCase("date")) {
+        lines.add("    TestUtil.assertTrueTest(, target.get"+fieldUp+"(), \""+ fieldUp+" are not equal.\");\n");
       } else {
-        lines.add("    assertEquals(, target.get"+fieldUp+before+"(), \""+ fieldUp+" are not equal.\");\n");
+        lines.add("    assertEquals(, target.get"+fieldUp+"(), \""+ fieldUp+" are not equal.\");\n");
       }
     }
   }
@@ -475,7 +476,7 @@ public class TestFileGenerator {
         "   * @param target "+replicatedClassName+" object\n" +
         "   */\n" +
         "  public void testInsertData("+replicatedClassName+" target) { \n");
-    addTestDataFields(false);
+    addTestDataFields();
     lines.add("  }\n\n");
     lines.add("  /**\n" +
         "   * Tests all the columns from Update event.\n" +
@@ -483,7 +484,7 @@ public class TestFileGenerator {
         "   * @param target "+replicatedClassName+" object\n" +
         "   */\n" +
         "  public void testUpdateData("+replicatedClassName+" target) { \n");
-    addTestDataFields(false);
+    addTestDataFields();
     lines.add("  }\n\n");
     lines.add("  /**\n" +
         "   * Tests all the columns from Delete event.\n" +
@@ -491,7 +492,7 @@ public class TestFileGenerator {
         "   * @param target "+replicatedClassName+" object\n" +
         "   */\n" +
         "  public void testDeleteData("+replicatedClassName+" target) {\n");
-    addTestDataFields(true);
+    addTestDataFields();
     lines.add("  }\n\n");
     addInsertTest();
     addUpdateTest();
