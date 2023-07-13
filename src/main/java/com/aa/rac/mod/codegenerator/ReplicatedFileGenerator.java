@@ -28,7 +28,7 @@ public class ReplicatedFileGenerator {
 
   private List<String> lines = new ArrayList<>();
 
-  private Map<String, Object> json = new LinkedHashMap<>();
+  public Map<String, Object> json = new LinkedHashMap<>();
 
   private String unpackedTrim = "UnpackingNestedStringTrimDeserializer";
   private String unpacked = "";
@@ -53,7 +53,7 @@ public class ReplicatedFileGenerator {
 
   private String replicatedClassName;
 
-  private DDLSQLFileGenerator ddlsqlFileGenerator;
+  public DDLSQLFileGenerator ddlsqlFileGenerator;
 
   private String filePath;
   private String generatedOutput;
@@ -196,8 +196,11 @@ public class ReplicatedFileGenerator {
   }
 
   public void addFields() {
+    String pk = ddlsqlFileGenerator.uuidColumnNames.get(0);
     for (String uuidColumnName: ddlsqlFileGenerator.uuidColumnNames) {
-      lines.add("  " + getIdAnnotation());
+      if (uuidColumnName.equals(pk)) {
+        lines.add("  " + getIdAnnotation());
+      }
       lines.add("  " + getColumnAnnotation(uuidColumnName));
       columnTypes.put(uuidColumnName, "String");
       lines.add("  private String " + FileUtil.getFieldName(uuidColumnName) + ";\n\n");

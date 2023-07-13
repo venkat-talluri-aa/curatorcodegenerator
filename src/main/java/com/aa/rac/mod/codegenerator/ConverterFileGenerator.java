@@ -72,7 +72,7 @@ public class ConverterFileGenerator {
     return packageName + converterClassName;
   }
 
-  public String getFullConverterFilePath(String fileName) {
+  public String getFullConverterFilePath() {
     return getConverterDirectory() + "/" + converterClassName + ".java.txt";
   }
 
@@ -184,8 +184,7 @@ public class ConverterFileGenerator {
   }
 
   public void generateConverterFile() throws IOException {
-    String converterClassFileName = converterClassName + ".java.txt";
-    String fullPath = getFullConverterFilePath(converterClassFileName);
+    String fullPath = getFullConverterFilePath();
     FileUtil.createFile(getConverterDirectory(), fullPath);
     FileWriter writer = getFileWriter(fullPath);
     addPackageContents(packageName);

@@ -22,7 +22,7 @@ CREATE TABLE IF NOT EXISTS curated_test.agmmtkts
     TKM_CAC1_TYPE                 VARCHAR(6), 
     TKM_CAC1_CODE                 DECIMAL(5,4) NOT NULL, 
     TKM_CAC1_AMOUNT               DECIMAL(11,2) NOT NULL, 
-    TKM_CAC2_TYPE                 VARCHAR(6) NOT NULL, 
+    TKM_CAC2_TYPE                 VARCHAR(6), 
     TKM_CAC2_CODE                 DECIMAL(5,4) NOT NULL, 
     TKM_CAC2_AMOUNT               DECIMAL(11,2) NOT NULL, 
     TKM_CA_EFFCOMM                DECIMAL(5,4) NOT NULL, 
@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS curated_test.agmmtkts
     TKM_LOC_OUTLET_TYP            VARCHAR(1), 
     TKM_CUST_AMT                  DECIMAL(11,2) NOT NULL, 
     TKM_ATPCO_CODESHAR            VARCHAR(1), 
-    TKM_ASSOC_TKT_NO              VARCHAR(14) NOT NULL, 
+    TKM_ASSOC_TKT_NO              VARCHAR(14), 
     TKM_BOOK_AGENT_NO             VARCHAR(8), 
     TKM_CPUI                      VARCHAR(4) NOT NULL, 
     TKM_FARE_CURRENCY             VARCHAR(4), 
@@ -128,7 +128,7 @@ CREATE TABLE IF NOT EXISTS curated_test.agmmtkts
     system_modified_timestamp     TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
     created_by                    VARCHAR(100) NOT NULL, 
     modified_by                   VARCHAR(100) NOT NULL, 
-    CONSTRAINT curated_test_TICKET_UUID_pkey PRIMARY KEY (TICKET_UUID)
+    CONSTRAINT curated_test_agmmtkts_ticket_uuid_pkey PRIMARY KEY (TICKET_UUID)
 );
 
 COMMENT ON TABLE curated_test.agmmtkts IS 'UUID values are derived using SHA256 Hash';

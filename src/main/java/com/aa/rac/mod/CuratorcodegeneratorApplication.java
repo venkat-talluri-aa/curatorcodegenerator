@@ -7,6 +7,7 @@ import com.aa.rac.mod.codegenerator.EventHubPojoGenerator;
 import com.aa.rac.mod.codegenerator.ReplicatedFileGenerator;
 import com.aa.rac.mod.codegenerator.RepositoryFileGenerator;
 import com.aa.rac.mod.codegenerator.ServiceFileGenerator;
+import com.aa.rac.mod.codegenerator.TestFileGenerator;
 import com.aa.rac.mod.codegenerator.TopicProcessorFileGenerator;
 import java.io.IOException;
 import org.springframework.boot.SpringApplication;
@@ -15,17 +16,17 @@ import org.springframework.core.convert.converter.Converter;
 
 @SpringBootApplication
 public class CuratorcodegeneratorApplication {
-	public static final String SCHEMA_NAME = "curated_test";
+	public static final String SCHEMA_NAME = "replicated";
 
 	public static void main(String[] args) throws IOException {
 		SpringApplication.run(CuratorcodegeneratorApplication.class, args);
 		String resourcesPath = System.getProperty("user.dir").replace('\\', '/')
 				+ "/src/main/resources/";
 
-		String fileName = "agdename";
+		String fileName = "refunded";
 
 		String filePath = resourcesPath + fileName + ".txt";
-		String[] uuids = {"NAME_UUID"};
+		String[] uuids = {"REFUNDED_UUID", "TICKET_UUID"};
 
 		String ddlFilePath = resourcesPath + fileName + "_ddl.txt";
 		DDLSQLFileGenerator ddlsqlFileGenerator = new DDLSQLFileGenerator(ddlFilePath, FileUtil.getClassName(filePath).toLowerCase(), uuids);
@@ -58,6 +59,10 @@ public class CuratorcodegeneratorApplication {
 		System.out.println("\n");
 		TopicProcessorFileGenerator topicProcessorFileGenerator = new TopicProcessorFileGenerator(replicatedFileGenerator);
 		topicProcessorFileGenerator.generateConverterFile();
+
+		System.out.println("\n");
+		TestFileGenerator testFileGenerator = new TestFileGenerator(replicatedFileGenerator, eventHubPojoGenerator, repositoryFileGenerator);
+		testFileGenerator.generateConverterFile();
 	}
 
 }

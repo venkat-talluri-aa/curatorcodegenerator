@@ -1,5 +1,6 @@
 package com.aa.rac.mod.codegenerator;
 
+import com.aa.rac.mod.CuratorcodegeneratorApplication;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -24,7 +25,7 @@ public class RepositoryFileGenerator {
   private List<String> lines = new ArrayList<>();
   private String generatedOutput;
 
-  private String uuidColumnName;
+  public String uuidColumnName;
 
 
   public RepositoryFileGenerator(DDLSQLFileGenerator ddlsqlFileGenerator, String replicatedClassName) {
@@ -45,7 +46,7 @@ public class RepositoryFileGenerator {
     return packageName + replicatedClassName.toLowerCase() + "." + repositoryClassName;
   }
 
-  public String getFullRepositoryFilePath(String fileName) {
+  public String getFullRepositoryFilePath() {
     return getRepositoryDirectory() + replicatedClassName.toLowerCase() + "/" + repositoryClassName + ".java.txt";
   }
 
@@ -89,9 +90,9 @@ public class RepositoryFileGenerator {
 //  Optional<ProcessedRefund> findByRefundedAmountUuid(String refundedAmountUuid);
 
   public String getQueryAnnotation() {
-    return "@Query(value = \"SELECT * FROM curated_test."
+    return "@Query(value = \"SELECT * FROM "+ CuratorcodegeneratorApplication.SCHEMA_NAME + "."
         + replicatedClassName.replace("Repl", "").toLowerCase()
-        + "\"\n                + \" WHERE " + uuidColumnName + "=?1\", " +
+        + "\"\n                + \" WHERE " + uuidColumnName.toLowerCase() + "=?1\", " +
         "\n                  nativeQuery = true)\n";
   }
 
@@ -108,8 +109,7 @@ public class RepositoryFileGenerator {
   }
 
   public void generateRepositoryFile(String replicatedImportPath) throws IOException {
-    String repositoryClassFileName = repositoryClassName + ".java.txt";
-    String fullPath = getFullRepositoryFilePath(repositoryClassFileName);
+    String fullPath = getFullRepositoryFilePath();
     FileUtil.createFile(getRepositoryDirectory() + replicatedClassName.toLowerCase(), fullPath);
     FileWriter writer = getFileWriter(fullPath);
     addPackageContents(packageName);

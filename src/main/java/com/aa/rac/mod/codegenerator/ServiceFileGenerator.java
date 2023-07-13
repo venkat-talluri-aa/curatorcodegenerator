@@ -60,7 +60,7 @@ public class ServiceFileGenerator {
     return packageName + replicatedClassName.toLowerCase() + "." + serviceClassName;
   }
 
-  public String getFullServiceFilePath(String fileName) {
+  public String getFullServiceFilePath() {
     return getServiceDirectory() + "/" + serviceClassName + ".java.txt";
   }
 
@@ -165,8 +165,7 @@ public class ServiceFileGenerator {
   }
 
   public void generateConverterFile() throws IOException {
-    String serviceClassFileName = serviceClassName + ".java.txt";
-    String fullPath = getFullServiceFilePath(serviceClassFileName);
+    String fullPath = getFullServiceFilePath();
     FileUtil.createFile(getServiceDirectory(), fullPath);
     FileWriter writer = getFileWriter(fullPath);
     addPackageContents(packageName);

@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS curated_test.agdename
+CREATE TABLE IF NOT EXISTS replicated.agdename
 (
     NAME_UUID                     CHAR(64) NOT NULL, 
     NAM_TICKET_NO                 VARCHAR(14) NOT NULL, 
@@ -28,8 +28,8 @@ CREATE TABLE IF NOT EXISTS curated_test.agdename
     system_modified_timestamp     TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
     created_by                    VARCHAR(100) NOT NULL, 
     modified_by                   VARCHAR(100) NOT NULL, 
-    CONSTRAINT curated_test_agdename_NAME_UUID_pkey PRIMARY KEY (NAME_UUID)
+    CONSTRAINT replicated_agdename_name_uuid_pkey PRIMARY KEY (NAME_UUID)
 );
 
-COMMENT ON TABLE curated_test.agdename IS 'UUID values are derived using SHA256 Hash';
-COMMENT ON COLUMN curated_test.agdename.NAME_UUID IS 'NAME_UUID is derived using SHA256 Hash';
+COMMENT ON TABLE replicated.agdename IS 'UUID values are derived using SHA256 Hash';
+COMMENT ON COLUMN replicated.agdename.NAME_UUID IS 'NAME_UUID is derived using SHA256 Hash';
