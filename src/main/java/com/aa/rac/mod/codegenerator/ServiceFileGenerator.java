@@ -28,13 +28,17 @@ public class ServiceFileGenerator {
 
   private List<String> lines = new ArrayList<>();
 
-  private ReplicatedFileGenerator replicatedFileGenerator;
+  public ReplicatedFileGenerator replicatedFileGenerator;
 
-  private EventHubPojoGenerator eventHubPojoGenerator;
+  public EventHubPojoGenerator eventHubPojoGenerator;
 
-  private RepositoryFileGenerator repositoryFileGenerator;
+  public RepositoryFileGenerator repositoryFileGenerator;
 
   private String generatedOutput;
+
+  public String serviceClassMapper;
+  public String eventHubClassMapper;
+  public String replicatedClassMapper;
 
   public ServiceFileGenerator(ReplicatedFileGenerator replicatedFileGenerator,
                               EventHubPojoGenerator eventHubPojoGenerator,
@@ -143,6 +147,9 @@ public class ServiceFileGenerator {
       serviceClassMapper = "ServiceClassMapper."+ replicatedClassName.toUpperCase() +"_SERVICE_IMPL";
       eventHubClassMapper = "EventHubPojoClassMapper." + eventHubClassName.toUpperCase();
       replicatedClassMapper = "CuratedEntityClassMapper." + replicatedClassName.toUpperCase();
+      this.serviceClassMapper = serviceClassMapper;
+      this.eventHubClassMapper = eventHubClassMapper;
+      this.replicatedClassMapper = replicatedClassMapper;
     }
     lines.add("  " + getMethodAnnotation());
     lines.add("\n  public void processAsync("+ parameter + ") throws ProcessingException { \n");

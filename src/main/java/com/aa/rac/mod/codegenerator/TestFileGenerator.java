@@ -31,6 +31,8 @@ public class TestFileGenerator {
 
   private List<String> lines = new ArrayList<>();
 
+  private ServiceFileGenerator serviceFileGenerator;
+
   private ReplicatedFileGenerator replicatedFileGenerator;
 
   private EventHubPojoGenerator eventHubPojoGenerator;
@@ -51,12 +53,11 @@ public class TestFileGenerator {
 
   private String insertException;
 
-  public TestFileGenerator(ReplicatedFileGenerator replicatedFileGenerator,
-                           EventHubPojoGenerator eventHubPojoGenerator,
-                           RepositoryFileGenerator repositoryFileGenerator) {
-    this.replicatedFileGenerator = replicatedFileGenerator;
-    this.eventHubPojoGenerator = eventHubPojoGenerator;
-    this.repositoryFileGenerator = repositoryFileGenerator;
+  public TestFileGenerator(ServiceFileGenerator serviceFileGenerator) {
+    this.serviceFileGenerator = serviceFileGenerator;
+    this.replicatedFileGenerator = serviceFileGenerator.replicatedFileGenerator;
+    this.eventHubPojoGenerator = serviceFileGenerator.eventHubPojoGenerator;
+    this.repositoryFileGenerator = serviceFileGenerator.repositoryFileGenerator;
     this.eventHubClassName = eventHubPojoGenerator.getEventHubImportPath().substring(eventHubPojoGenerator.getEventHubImportPath().lastIndexOf('.')+1);
     this.replicatedClassName = replicatedFileGenerator.getReplicatedImportPath().substring(replicatedFileGenerator.getReplicatedImportPath().lastIndexOf('.')+1);
     this.repositoryClassName = repositoryFileGenerator.getRepositoryImportPath().substring(repositoryFileGenerator.getRepositoryImportPath().lastIndexOf('.')+1);
@@ -107,7 +108,10 @@ public class TestFileGenerator {
         "import static org.mockito.Mockito.verify;\n" +
         "\n" +
         "import com.aa.rac.mod.domain.BaseService;\n" +
+        "import com.aa.rac.mod.domain.enums.CuratedEntityClassMapper;\n" +
+        "import com.aa.rac.mod.domain.enums.EventHubPojoClassMapper;\n" +
         "import com.aa.rac.mod.domain.enums.ServiceClassMapper;\n" +
+        "import com.aa.rac.mod.domain.exceptions.ProcessingException;\n" +
         "import com.aa.rac.mod.domain.exceptions.ProcessingExceptionHandler;\n" +
         "import com.aa.rac.mod.domain.util.RacUtil;\n" +
         "import com.aa.rac.mod.domain.util.TestUtil;\n" +
@@ -429,6 +433,63 @@ public class TestFileGenerator {
         "  }\n");
   }
 
+  public void addGenerateException() {
+    lines.add("\n  /**\n" +
+        "   * Generates ProcessingException with given payload and additional details.\n" +
+        "   *\n" +
+        "   * @param payload event as string\n" +
+        "   * @return ProcessingException with details\n" +
+        "   */\n" +
+        "  public ProcessingException generateProcessingException(String payload) {\n" +
+        "    ProcessingException processingException = new ProcessingException();\n" +
+        "    processingException.setPayload(payload);\n" +
+        "    processingException.setCurator("+serviceFileGenerator.serviceClassMapper+");\n" +
+        "    processingException.setEventHubSource("+serviceFileGenerator.eventHubClassMapper+");\n" +
+        "    processingException.setCuratedTarget("+serviceFileGenerator.replicatedClassMapper+");\n" +
+        "    processingException.setRetryCount(1);\n" +
+        "    return processingException;\n" +
+        "  }\n");
+  }
+
+  public void addConsumeProcessingExceptionTest() {
+    lines.add("\n  /** Test Consume ProcessingException. */\n" +
+        "  @Test\n" +
+        "  @DisplayName(\"Consume ProcessingException\")\n" +
+        "  public void testConsumeProcessingException() {\n" +
+        "    try {\n" +
+        "      ProcessingException processingException = generateProcessingException("+insertVariable+");\n" +
+        "\n" +
+        "      "+serviceVariable+".processAsync(processingException);\n" +
+        "      lock.await(2000, TimeUnit.MILLISECONDS);\n" +
+        "\n" +
+        "      "+eventHubClassName+" "+eventHubClassName.toLowerCase()+" = mapper.readValue(processingException.getPayload(), "+eventHubClassName+".class);\n" +
+        "\n" +
+        "      String uuid = #TODO\n" +
+        "\n" +
+        "      Optional<"+replicatedClassName+"> "+replCamel+" =\n" +
+        "          "+repoVariable+".findBy"+uuidColumn+"(uuid);\n" +
+        "      assertNotNull("+replCamel+", \""+replCamel+" is null\");\n" +
+        "      assertTrue("+replCamel+".isPresent(), \"No "+replCamel+" present\");\n" +
+        "      assertEquals(uuid, "+replCamel+".get().get"+ uuidColumn +"(),\n" +
+        "          \"UUID: Expected=\" + uuid\n" +
+        "              + \"; Actual=\" + "+replCamel+".get().get"+uuidColumn+"());\n" +
+        "      TestUtil.assertTrueTest(\n" +
+        "          ,\n" +
+        "          "+replCamel+".get().getEventHubTimestamp(),\n" +
+        "          DateTimeFormatter.ofPattern(\"yyyy-MM-dd HH:mm:ss.SSSSSS\"),\n" +
+        "          \"EventHubTimestamp are not equal\");\n" +
+        "\n" +
+        "      assertEquals(\"PT\", "+replCamel+".get().getDmlFlg());\n" +
+        "      assertEquals(false, "+replCamel+".get().getSrcDeletedIndicator());\n" +
+        "      assertEquals(false, "+replCamel+".get().getDeletedIndicator());\n" +
+        "\n" +
+        "      testInsertData("+replCamel+".get());\n" +
+        "    } catch (Exception e) {\n" +
+        "      fail(e.getMessage(), e);\n" +
+        "    }\n" +
+        "  }\n");
+  }
+
   public void addTestDataFields() {
     String pk = replicatedFileGenerator.ddlsqlFileGenerator.uuidColumnNames.get(0);
     for (Map.Entry<String, String> entry: replicatedFileGenerator.columnTypes.entrySet()) {
@@ -501,6 +562,8 @@ public class TestFileGenerator {
     addOutOfOrderDeleteTest();
     addIgnoreTest();
     addExceptionHandlingTest();
+    addGenerateException();
+    addConsumeProcessingExceptionTest();
   }
 
   public void addEndingLine() {
