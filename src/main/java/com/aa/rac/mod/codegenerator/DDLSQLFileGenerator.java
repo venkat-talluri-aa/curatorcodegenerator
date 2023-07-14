@@ -30,9 +30,9 @@ public class DDLSQLFileGenerator {
 
   private Map<String, String> dataTypeMap = new HashMap<>();
 
-  private Map<String, String> nullMap = new HashMap<>();
+  public Map<String, String> nullMap = new HashMap<>();
 
-  private Map<String, Boolean> trimMap = new HashMap<>();
+  public Map<String, Boolean> trimMap = new HashMap<>();
 
   private Map<String, String> db2ToPgdataTypeMap = Map.ofEntries(
       Map.entry("CHAR", "VARCHAR"),

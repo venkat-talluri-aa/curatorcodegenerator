@@ -25,19 +25,21 @@ public class CuratorcodegeneratorApplication {
 
 		String fileName = "agdename";
 
-		String filePath = resourcesPath + fileName + ".txt";
+		String insertFilePath = resourcesPath + fileName + "_insert.txt";
+		String updateFilePath = resourcesPath + fileName + ".txt";
+		String deleteFilePath = resourcesPath + fileName + "_delete.txt";
 		String[] uuids = {"NAME_UUID"};
 
 		String ddlFilePath = resourcesPath + fileName + "_ddl.txt";
-		DDLSQLFileGenerator ddlsqlFileGenerator = new DDLSQLFileGenerator(ddlFilePath, FileUtil.getClassName(filePath).toLowerCase(), uuids);
+		DDLSQLFileGenerator ddlsqlFileGenerator = new DDLSQLFileGenerator(ddlFilePath, FileUtil.getClassName(updateFilePath).toLowerCase(), uuids);
 		ddlsqlFileGenerator.generateDDLFile();
 		System.out.println("\n");
 
-		EventHubPojoGenerator eventHubPojoGenerator = new EventHubPojoGenerator(filePath, ddlsqlFileGenerator);
+		EventHubPojoGenerator eventHubPojoGenerator = new EventHubPojoGenerator(updateFilePath, ddlsqlFileGenerator);
 		eventHubPojoGenerator.eventHubPojoFileGenerator();
 		System.out.println("\n");
 
-		ReplicatedFileGenerator replicatedFileGenerator = new ReplicatedFileGenerator(filePath, ddlsqlFileGenerator);
+		ReplicatedFileGenerator replicatedFileGenerator = new ReplicatedFileGenerator(updateFilePath, ddlsqlFileGenerator);
 		replicatedFileGenerator.generateReplicatedFile();
 		System.out.println("\n");
 
@@ -61,7 +63,7 @@ public class CuratorcodegeneratorApplication {
 		topicProcessorFileGenerator.generateConverterFile();
 
 		System.out.println("\n");
-		TestFileGenerator testFileGenerator = new TestFileGenerator(serviceFileGenerator);
+		TestFileGenerator testFileGenerator = new TestFileGenerator(serviceFileGenerator, ddlsqlFileGenerator, insertFilePath, updateFilePath, deleteFilePath);
 		testFileGenerator.generateConverterFile();
 	}
 

@@ -1,9 +1,11 @@
 package com.aa.rac.mod.codegenerator;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.util.StringUtils;
@@ -39,6 +41,8 @@ public class TestFileGenerator {
 
   private RepositoryFileGenerator repositoryFileGenerator;
 
+  private DDLSQLFileGenerator ddlsqlFileGenerator;
+
   private String generatedOutput;
 
   private String serviceVariable;
@@ -53,11 +57,24 @@ public class TestFileGenerator {
 
   private String insertException;
 
-  public TestFileGenerator(ServiceFileGenerator serviceFileGenerator) {
+  String insFilepath;
+  String updFilepath;
+  String delFilepath;
+
+  public Map<String, String> insertContents = new HashMap<>();
+  public Map<String, String> updateContents = new HashMap<>();
+  public Map<String, String> deleteContents = new HashMap<>();
+
+  public TestFileGenerator(ServiceFileGenerator serviceFileGenerator, DDLSQLFileGenerator ddlsqlFileGenerator, String insFilepath, String updFilepath, String delFilepath)
+      throws IOException {
+    this.insFilepath = insFilepath;
+    this.updFilepath = updFilepath;
+    this.delFilepath = delFilepath;
     this.serviceFileGenerator = serviceFileGenerator;
     this.replicatedFileGenerator = serviceFileGenerator.replicatedFileGenerator;
     this.eventHubPojoGenerator = serviceFileGenerator.eventHubPojoGenerator;
     this.repositoryFileGenerator = serviceFileGenerator.repositoryFileGenerator;
+    this.ddlsqlFileGenerator = ddlsqlFileGenerator;
     this.eventHubClassName = eventHubPojoGenerator.getEventHubImportPath().substring(eventHubPojoGenerator.getEventHubImportPath().lastIndexOf('.')+1);
     this.replicatedClassName = replicatedFileGenerator.getReplicatedImportPath().substring(replicatedFileGenerator.getReplicatedImportPath().lastIndexOf('.')+1);
     this.repositoryClassName = repositoryFileGenerator.getRepositoryImportPath().substring(repositoryFileGenerator.getRepositoryImportPath().lastIndexOf('.')+1);
@@ -72,6 +89,35 @@ public class TestFileGenerator {
     this.replCamel = this.replicatedClassName.substring(0, 1).toLowerCase() + this.replicatedClassName.substring(1);
     this.uuidColumn = StringUtils.capitalize(FileUtil.getFieldName(repositoryFileGenerator.uuidColumnName));
     this.insertException = this.insertVariable +"Exception";
+    readFiles();
+  }
+
+  public Map<String, String> getJson(String jsonString) throws JsonProcessingException {
+    Map<String, String> contents = new HashMap<>();
+    for (Map.Entry<String, Object> entry: FileUtil.mapContentsToHashMap(jsonString).entrySet()) {
+      String value = entry.getValue().toString();
+      if (value.contains("string")) {
+        value = value.substring(8, value.length()-1);
+      }
+      String trimKey = entry.getKey().startsWith("B_")?entry.getKey().substring(2):entry.getKey();
+      if (ddlsqlFileGenerator.trimMap.getOrDefault(trimKey, false)) {
+        value = value.trim();
+      }
+      if (entry.getKey().equalsIgnoreCase("A_TIMSTAMP")){
+        value = value.substring(0, 26);
+      }
+      if (entry.getKey().equalsIgnoreCase("TICKET_CREATE_TS") || entry.getKey().equalsIgnoreCase("B_TICKET_CREATE_TS")){
+        value = value.substring(0, 20).replace('T', ' ')+"0";
+      }
+      contents.put(entry.getKey(), value.isBlank()?null:value);
+    }
+    return contents;
+  }
+
+  public void readFiles() throws IOException {
+    insertContents = getJson(String.join("", FileUtil.readLinesFromFile(insFilepath)));
+    updateContents = getJson(String.join("", FileUtil.readLinesFromFile(updFilepath)));
+    deleteContents = getJson(String.join("", FileUtil.readLinesFromFile(delFilepath)));
   }
 
   public String getGeneratedOutput() {
@@ -154,7 +200,7 @@ public class TestFileGenerator {
     lines.add("public class " + testClassName +" {\n");
   }
 
-  public void addFields() {
+  public void addFields() throws IOException {
     lines.add("\n  private final CountDownLatch lock = new CountDownLatch(1);\n" +
         "  private final ObjectMapper mapper = new ObjectMapper();\n" +
         "\n" +
@@ -166,9 +212,12 @@ public class TestFileGenerator {
         "  private " + repositoryClassName + " "
         + repoVariable + ";");
     lines.add("\n\n  private BaseService " + serviceVariable+";");
-    lines.add("\n\n\n  private final String " + insertVariable + " = #TODO");
-    lines.add("\n\n  private final String " + updateVariable + " = #TODO");
-    lines.add("\n\n  private final String " + deleteVariable + " = #TODO");
+    lines.add("\n\n\n  private final String " + insertVariable + " = \""
+        + String.join("", FileUtil.readLinesFromFile(insFilepath)).replace("\"", "\\\"")+"\"");
+    lines.add("\n\n  private final String " + updateVariable + " = \""
+        + String.join("", FileUtil.readLinesFromFile(updFilepath)).replace("\"", "\\\"")+"\"");
+    lines.add("\n\n  private final String " + deleteVariable +  " = \""
+        + String.join("", FileUtil.readLinesFromFile(delFilepath)).replace("\"", "\\\"")+"\"");
     lines.add("\n\n  private final String " + insertException + " = #TODO");
   }
   public void addInsertTest() {
@@ -490,7 +539,7 @@ public class TestFileGenerator {
         "  }\n");
   }
 
-  public void addTestDataFields() {
+  public void addTestDataFields(String op) {
     String pk = replicatedFileGenerator.ddlsqlFileGenerator.uuidColumnNames.get(0);
     for (Map.Entry<String, String> entry: replicatedFileGenerator.columnTypes.entrySet()) {
       String field = entry.getKey();
@@ -499,8 +548,15 @@ public class TestFileGenerator {
       if (pk.equals(field) || replicatedFileGenerator.ehBaseColumnsSet.contains(field) || field.startsWith("B_")) {
         continue;
       }
+      String fieldValue;
+      switch (op) {
+        case "PT" -> fieldValue = insertContents.get(field)==null? null:"\"" + insertContents.get(field) + "\"";
+        case "UP" -> fieldValue = updateContents.get(field)==null? null:"\"" + updateContents.get(field) + "\"";
+        case "DL" -> fieldValue = deleteContents.get(field)==null? null:"\"" + deleteContents.get("B_"+field) + "\"";
+        default -> throw new IllegalArgumentException(op + "not supported");
+      }
       if (field.equalsIgnoreCase("TICKET_CREATE_TS")) {
-        lines.add("    assertEquals(, target.getTicketCreateTs"+"().toString());\n");
+        lines.add("    assertEquals("+fieldValue+", target.getTicketCreateTs"+"().toString());\n");
         continue;
       }
       if (replicatedFileGenerator.ddlsqlFileGenerator.uuidColumnNames.contains(field)) {
@@ -508,16 +564,30 @@ public class TestFileGenerator {
         continue;
       }
       if (value.equalsIgnoreCase("timestamp")) {
-        lines.add("    TestUtil.assertTimestamps(, target.get"+fieldUp+"(), formatter);\n");
+        if(fieldValue!=null) {
+          fieldValue = fieldValue.substring(0, 24).replace('T', ' ')+"\"";
+        }
+        if (fieldValue != null) {
+          lines.add("    TestUtil.assertTimestamps("+fieldValue+", target.get"+fieldUp+"(), formatter);\n");
+        } else {
+          lines.add("    assertEquals("+fieldValue+", target.get"+fieldUp+"(), \""+ fieldUp+" are not equal.\");\n");
+        }
+
       } else if (value.equalsIgnoreCase("date")) {
-        lines.add("    TestUtil.assertTrueTest(, target.get"+fieldUp+"(), \""+ fieldUp+" are not equal.\");\n");
+        lines.add("    TestUtil.assertTrueTest("+fieldValue+", target.get"+fieldUp+"(), \""+ fieldUp+" are not equal.\");\n");
       } else if(!value.equalsIgnoreCase("string")) {
-        lines.add("    assertEquals(, target.get"+fieldUp+"().toString(), \""+ fieldUp+" are not equal.\");\n");
+        if (fieldValue !=null ) {
+          lines.add("    assertEquals("+fieldValue+", target.get"+fieldUp+"().toString(), \""+ fieldUp+" are not equal.\");\n");
+        } else {
+          lines.add("    assertEquals("+fieldValue+", target.get"+fieldUp+"(), \""+ fieldUp+" are not equal.\");\n");
+        }
+      } else {
+        lines.add("    assertEquals("+fieldValue+", target.get"+fieldUp+"(), \""+ fieldUp+" are not equal.\");\n");
       }
     }
   }
 
-  public void addMethods() {
+  public void addMethods() throws IOException {
     addFields();
     lines.add("\n\n  /** Set Base services by generating with ServiceFactory. */\n" +
         "  @BeforeEach\n" +
@@ -537,7 +607,7 @@ public class TestFileGenerator {
         "   * @param target "+replicatedClassName+" object\n" +
         "   */\n" +
         "  public void testInsertData("+replicatedClassName+" target) { \n");
-    addTestDataFields();
+    addTestDataFields("PT");
     lines.add("  }\n\n");
     lines.add("  /**\n" +
         "   * Tests all the columns from Update event.\n" +
@@ -545,7 +615,7 @@ public class TestFileGenerator {
         "   * @param target "+replicatedClassName+" object\n" +
         "   */\n" +
         "  public void testUpdateData("+replicatedClassName+" target) { \n");
-    addTestDataFields();
+    addTestDataFields("UP");
     lines.add("  }\n\n");
     lines.add("  /**\n" +
         "   * Tests all the columns from Delete event.\n" +
@@ -553,7 +623,7 @@ public class TestFileGenerator {
         "   * @param target "+replicatedClassName+" object\n" +
         "   */\n" +
         "  public void testDeleteData("+replicatedClassName+" target) {\n");
-    addTestDataFields();
+    addTestDataFields("DL");
     lines.add("  }\n\n");
     addInsertTest();
     addUpdateTest();
