@@ -20,15 +20,16 @@ public class CuratorcodegeneratorApplication {
 
 	public static void main(String[] args) throws IOException {
 		SpringApplication.run(CuratorcodegeneratorApplication.class, args);
-		String resourcesPath = System.getProperty("user.dir").replace('\\', '/')
-				+ "/src/main/resources/";
 
-		String fileName = "agdename";
+		String fileName = "requests";
+
+		String resourcesPath = System.getProperty("user.dir").replace('\\', '/')
+				+ "/src/main/resources/" + fileName +"/";
 
 		String insertFilePath = resourcesPath + fileName + "_insert.txt";
 		String updateFilePath = resourcesPath + fileName + ".txt";
 		String deleteFilePath = resourcesPath + fileName + "_delete.txt";
-		String[] uuids = {"NAME_UUID"};
+		String[] uuids = {"REQUESTS_UUID", "TICKET_UUID"};
 
 		String ddlFilePath = resourcesPath + fileName + "_ddl.txt";
 		DDLSQLFileGenerator ddlsqlFileGenerator = new DDLSQLFileGenerator(ddlFilePath, FileUtil.getClassName(updateFilePath).toLowerCase(), uuids);

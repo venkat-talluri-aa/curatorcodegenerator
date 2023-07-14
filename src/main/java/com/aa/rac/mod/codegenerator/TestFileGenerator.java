@@ -552,7 +552,7 @@ public class TestFileGenerator {
       switch (op) {
         case "PT" -> fieldValue = insertContents.get(field)==null? null:"\"" + insertContents.get(field) + "\"";
         case "UP" -> fieldValue = updateContents.get(field)==null? null:"\"" + updateContents.get(field) + "\"";
-        case "DL" -> fieldValue = deleteContents.get(field)==null? null:"\"" + deleteContents.get("B_"+field) + "\"";
+        case "DL" -> fieldValue = deleteContents.get("B_"+field)==null? null:"\"" + deleteContents.get("B_"+field) + "\"";
         default -> throw new IllegalArgumentException(op + "not supported");
       }
       if (field.equalsIgnoreCase("TICKET_CREATE_TS")) {
