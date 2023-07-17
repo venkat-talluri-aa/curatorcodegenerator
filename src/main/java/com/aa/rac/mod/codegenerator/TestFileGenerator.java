@@ -470,8 +470,8 @@ public class TestFileGenerator {
   public void addExceptionHandlingTest() {
     lines.add("  /** Test Exception Handling. */\n" +
         "  @Test\n" +
-        "  @DisplayName(\"Exception Catch\")\n" +
-        "  public void testProcessingExceptionHandler() {\n" +
+        "  @DisplayName(\"Exception Catch with Payload\")\n" +
+        "  public void testProcessingExceptionHandlerPayload() {\n" +
         "    try {\n" +
         "      "+serviceVariable+".processAsync("+insertException+");\n" +
         "      lock.await(2000, TimeUnit.MILLISECONDS);\n" +
@@ -533,6 +533,24 @@ public class TestFileGenerator {
         "      assertEquals(false, "+replCamel+".get().getDeletedIndicator());\n" +
         "\n" +
         "      testInsertData("+replCamel+".get());\n" +
+        "    } catch (Exception e) {\n" +
+        "      fail(e.getMessage(), e);\n" +
+        "    }\n" +
+        "  }\n");
+  }
+
+  public void addExceptionHandlingProcessingExceptionTest() {
+    lines.add("  /** Test Exception Handling. */\n" +
+        "  @Test\n" +
+        "  @DisplayName(\"Exception Catch with ProcessingException\")\n" +
+        "  public void testProcessingExceptionHandlerProcessingException() {\n" +
+        "    try {\n" +
+        "      ProcessingException processingException = generateProcessingException("+insertVariable+"Exception);\n" +
+        "\n" +
+        "      "+serviceVariable+".processAsync(processingException);\n" +
+        "      lock.await(2000, TimeUnit.MILLISECONDS);\n" +
+        "\n" +
+        "      verify(processingExceptionHandler, times(1)).handleUncaughtException(Mockito.any(), Mockito.any(), Mockito.any());\n" +
         "    } catch (Exception e) {\n" +
         "      fail(e.getMessage(), e);\n" +
         "    }\n" +
@@ -634,6 +652,7 @@ public class TestFileGenerator {
     addExceptionHandlingTest();
     addGenerateException();
     addConsumeProcessingExceptionTest();
+    addExceptionHandlingProcessingExceptionTest();
   }
 
   public void addEndingLine() {
