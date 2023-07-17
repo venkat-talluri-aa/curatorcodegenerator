@@ -474,7 +474,7 @@ public class TestFileGenerator {
         "  public void testProcessingExceptionHandlerPayload() {\n" +
         "    try {\n" +
         "      "+serviceVariable+".processAsync("+insertException+");\n" +
-        "      lock.await(2000, TimeUnit.MILLISECONDS);\n" +
+        "      lock.await(1000, TimeUnit.MILLISECONDS);\n" +
         "      verify(processingExceptionHandler, times(1)).handleUncaughtException(Mockito.any(), Mockito.any(), Mockito.any());\n" +
         "    } catch (Exception e) {\n" +
         "      fail(e.getMessage(), e);\n" +
@@ -509,7 +509,7 @@ public class TestFileGenerator {
         "      ProcessingException processingException = generateProcessingException("+insertVariable+");\n" +
         "\n" +
         "      "+serviceVariable+".processAsync(processingException);\n" +
-        "      lock.await(2000, TimeUnit.MILLISECONDS);\n" +
+        "      lock.await(1000, TimeUnit.MILLISECONDS);\n" +
         "\n" +
         "      "+eventHubClassName+" "+eventHubClassName.toLowerCase()+" = mapper.readValue(processingException.getPayload(), "+eventHubClassName+".class);\n" +
         "\n" +
@@ -548,7 +548,7 @@ public class TestFileGenerator {
         "      ProcessingException processingException = generateProcessingException("+insertVariable+"Exception);\n" +
         "\n" +
         "      "+serviceVariable+".processAsync(processingException);\n" +
-        "      lock.await(2000, TimeUnit.MILLISECONDS);\n" +
+        "      lock.await(1000, TimeUnit.MILLISECONDS);\n" +
         "\n" +
         "      verify(processingExceptionHandler, times(1)).handleUncaughtException(Mockito.any(), Mockito.any(), Mockito.any());\n" +
         "    } catch (Exception e) {\n" +
