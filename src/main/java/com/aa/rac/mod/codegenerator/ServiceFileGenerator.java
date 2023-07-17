@@ -92,6 +92,8 @@ public class ServiceFileGenerator {
         "import " + replicatedImportPath + ";\n" +
         "import " + eventHubImportPath + ";\n" +
         "import " + repositoryImportPath + ";\n" +
+        "import java.time.LocalDateTime;\n" +
+        "import java.time.ZoneOffset;\n" +
         "import org.springframework.beans.factory.annotation.Autowired;\n" +
         "import org.springframework.beans.factory.annotation.Qualifier;\n" +
         "import org.springframework.scheduling.annotation.Async;\n" +
@@ -161,6 +163,7 @@ public class ServiceFileGenerator {
         "      e.setCuratedTarget(" + replicatedClassMapper + ");\n" +
         "      e.setPayload("+payload +");\n" +
         "      e.setRetryCount("+ retry +");\n" +
+        "      e.setExceptionTimestamp(LocalDateTime.now(ZoneOffset.UTC));\n" +
         "      throw e;\n" +
         "    }\n  }\n");
 

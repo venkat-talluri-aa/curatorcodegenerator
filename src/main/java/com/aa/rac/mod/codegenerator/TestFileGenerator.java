@@ -213,12 +213,12 @@ public class TestFileGenerator {
         + repoVariable + ";");
     lines.add("\n\n  private BaseService " + serviceVariable+";");
     lines.add("\n\n\n  private final String " + insertVariable + " = \""
-        + String.join("", FileUtil.readLinesFromFile(insFilepath)).replace("\"", "\\\"")+"\"");
+        + String.join("", FileUtil.readLinesFromFile(insFilepath)).replace("\"", "\\\"")+"\";");
     lines.add("\n\n  private final String " + updateVariable + " = \""
-        + String.join("", FileUtil.readLinesFromFile(updFilepath)).replace("\"", "\\\"")+"\"");
+        + String.join("", FileUtil.readLinesFromFile(updFilepath)).replace("\"", "\\\"")+"\";");
     lines.add("\n\n  private final String " + deleteVariable +  " = \""
-        + String.join("", FileUtil.readLinesFromFile(delFilepath)).replace("\"", "\\\"")+"\"");
-    lines.add("\n\n  private final String " + insertException + " = #TODO");
+        + String.join("", FileUtil.readLinesFromFile(delFilepath)).replace("\"", "\\\"")+"\";");
+    lines.add("\n\n  private final String " + insertException + " = #TODO;");
   }
   public void addInsertTest() {
     lines.add("  /** Test insert. */\n" +
