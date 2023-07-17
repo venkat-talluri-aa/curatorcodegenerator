@@ -73,7 +73,7 @@ public class FileUtil {
   }
 
   public static String getFieldName(String field) {
-    field = field.replaceAll("[^A-Za-z]", "_");
+    field = field.replaceAll("[^A-Za-z0-9]", "_");
     String[] splits = field.split("_");
     String suffix = splits.length !=0 && splits[0].equalsIgnoreCase("b") ? "Before" : "";
     String finalField = "";
