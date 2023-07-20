@@ -28,10 +28,14 @@ public class TopicProcessorFileGenerator {
 
   private ReplicatedFileGenerator replicatedFileGenerator;
 
+  private EventHubPojoGenerator eventHubPojoGenerator;
+
   private String generatedOutput;
 
-  public TopicProcessorFileGenerator(ReplicatedFileGenerator replicatedFileGenerator) {
+  public TopicProcessorFileGenerator(ReplicatedFileGenerator replicatedFileGenerator,
+                                     EventHubPojoGenerator eventHubPojoGenerator) {
     this.replicatedFileGenerator = replicatedFileGenerator;
+    this.eventHubPojoGenerator = eventHubPojoGenerator;
     this.replicatedClassName = replicatedFileGenerator.getReplicatedImportPath().substring(replicatedFileGenerator.getReplicatedImportPath().lastIndexOf('.')+1);
     this.eventHubClassName = this.replicatedClassName.replace("Repl", "");
     this.processorClassName = this.eventHubClassName + "TopicProcessor";
@@ -67,6 +71,7 @@ public class TopicProcessorFileGenerator {
   public void addImportStatements(String replicatedImportPath) throws IOException {
     String imports = "import com.aa.rac.mod.domain.BaseService;\n" +
         "import " + replicatedImportPath + ";\n" +
+        "import " + eventHubPojoGenerator.getEventHubImportPath() + ";\n" +
         "import java.util.function.Consumer;\n" +
         "import org.springframework.beans.factory.annotation.Autowired;\n" +
         "import org.springframework.beans.factory.annotation.Qualifier;\n" +
@@ -92,7 +97,7 @@ public class TopicProcessorFileGenerator {
   }
 
   public void addFields() {
-    lines.add("\n  @Autowired \n  BaseService<" + replicatedClassName + "> service;\n");
+    lines.add("\n  @Autowired \n  BaseService<"+ this.eventHubClassName + ", " + replicatedClassName + "> service;\n");
     lines.add("\n  @Value(#TODO) \n  String topicName;\n");
   }
 

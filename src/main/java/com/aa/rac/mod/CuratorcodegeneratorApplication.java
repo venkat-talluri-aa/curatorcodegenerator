@@ -60,7 +60,7 @@ public class CuratorcodegeneratorApplication {
 		serviceFileGenerator.generateConverterFile();
 
 		System.out.println("\n");
-		TopicProcessorFileGenerator topicProcessorFileGenerator = new TopicProcessorFileGenerator(replicatedFileGenerator);
+		TopicProcessorFileGenerator topicProcessorFileGenerator = new TopicProcessorFileGenerator(replicatedFileGenerator, eventHubPojoGenerator);
 		topicProcessorFileGenerator.generateConverterFile();
 
 		System.out.println("\n");

@@ -108,8 +108,7 @@ public class ServiceFileGenerator {
   public String getClassAnnotations() {
     return "@Service\n" +
         "@EnableAsync\n" +
-        "@SetAuditColumns(setEntityTypeInConverter = true,\n" +
-        "    targetCuratedCdcTimestampField = \"eventHubTimestamp\")\n" +
+        "@SetAuditColumns(targetCuratedCdcTimestampField = \"eventHubTimestamp\")\n" +
         "@SetServiceClasses(eventHubClassMapper = EventHubPojoClassMapper." + eventHubClassName.toUpperCase() + ",\n" +
         "    curatedTargetClassMapper = CuratedEntityClassMapper." + replicatedClassName.toUpperCase() + ",\n" +
         "    repoClass = " + repositoryClassName + ".class\n" +
