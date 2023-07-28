@@ -79,7 +79,7 @@ public class TestFileGenerator {
     this.replicatedClassName = replicatedFileGenerator.getReplicatedImportPath().substring(replicatedFileGenerator.getReplicatedImportPath().lastIndexOf('.')+1);
     this.repositoryClassName = repositoryFileGenerator.getRepositoryImportPath().substring(repositoryFileGenerator.getRepositoryImportPath().lastIndexOf('.')+1);
     this.serviceClassName = this.replicatedClassName + "ServiceImpl";
-    this.testClassName = this.serviceClassName + "H2Test";
+    this.testClassName = this.serviceClassName + "Test";
     this.serviceVariable = this.eventHubClassName.toLowerCase() + "Service";
     this.repoVariable = this.repositoryClassName.substring(0,1).toLowerCase()
         + this.repositoryClassName.substring(1);
