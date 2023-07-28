@@ -160,10 +160,10 @@ public class TestFileGenerator {
         "import com.aa.rac.mod.domain.exceptions.ProcessingException;\n" +
         "import com.aa.rac.mod.domain.exceptions.ProcessingExceptionHandler;\n" +
         "import com.aa.rac.mod.domain.util.RacUtil;\n" +
-        "import com.aa.rac.mod.domain.util.TestUtil;\n" +
         "import " + replicatedImportPath + ";\n" +
         "import " + eventHubImportPath + ";\n" +
         "import " + repositoryImportPath + ";\n" +
+        "import com.aa.rac.mod.util.TestUtil;\n" +
         "import com.fasterxml.jackson.databind.ObjectMapper;\n" +
         "import java.math.BigInteger;\n" +
         "import java.time.format.DateTimeFormatter;\n" +
