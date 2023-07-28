@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS curated_test.agmmtkts
+CREATE TABLE IF NOT EXISTS replicated.agmmtkts
 (
     TICKET_UUID                   CHAR(64) NOT NULL, 
     TKM_TICKET_NO                 VARCHAR(14) NOT NULL, 
@@ -128,8 +128,8 @@ CREATE TABLE IF NOT EXISTS curated_test.agmmtkts
     system_modified_timestamp     TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
     created_by                    VARCHAR(100) NOT NULL, 
     modified_by                   VARCHAR(100) NOT NULL, 
-    CONSTRAINT curated_test_agmmtkts_ticket_uuid_pkey PRIMARY KEY (TICKET_UUID)
+    CONSTRAINT replicated_agmmtkts_ticket_uuid_pkey PRIMARY KEY (TICKET_UUID)
 );
 
-COMMENT ON TABLE curated_test.agmmtkts IS 'UUID values are derived using SHA256 Hash';
-COMMENT ON COLUMN curated_test.agmmtkts.TICKET_UUID IS 'TICKET_UUID is derived using SHA256 Hash';
+COMMENT ON TABLE replicated.agmmtkts IS 'UUID values are derived using SHA256 Hash';
+COMMENT ON COLUMN replicated.agmmtkts.TICKET_UUID IS 'TICKET_UUID is derived using SHA256 Hash';

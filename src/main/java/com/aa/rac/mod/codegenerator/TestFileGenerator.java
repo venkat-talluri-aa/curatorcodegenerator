@@ -164,7 +164,6 @@ public class TestFileGenerator {
         "import " + replicatedImportPath + ";\n" +
         "import " + eventHubImportPath + ";\n" +
         "import " + repositoryImportPath + ";\n" +
-        "import com.aa.rac.mod.service.ServiceFactory;\n"+
         "import com.fasterxml.jackson.databind.ObjectMapper;\n" +
         "import java.math.BigInteger;\n" +
         "import java.time.format.DateTimeFormatter;\n" +
@@ -211,7 +210,7 @@ public class TestFileGenerator {
     lines.add("\n  @Autowired \n" +
         "  private " + repositoryClassName + " "
         + repoVariable + ";");
-    lines.add("\n\n  private BaseService " + serviceVariable+";");
+    lines.add("\n\n  @Autowired\n  private BaseService<"+eventHubClassName+", "+replicatedClassName+"> " + serviceVariable+";");
     lines.add("\n\n\n  private final String " + insertVariable + " = \""
         + String.join("", FileUtil.readLinesFromFile(insFilepath)).replace("\"", "\\\"")+"\";");
     lines.add("\n\n  private final String " + updateVariable + " = \""
@@ -607,13 +606,7 @@ public class TestFileGenerator {
 
   public void addMethods() throws IOException {
     addFields();
-    lines.add("\n\n  /** Set Base services by generating with ServiceFactory. */\n" +
-        "  @BeforeEach\n" +
-        "  public void setBaseService() {\n" +
-        "    "+ serviceVariable +" = ServiceFactory.getBaseService(\n" +
-        "        ServiceClassMapper."+replicatedClassName.toUpperCase()+"_SERVICE_IMPL);\n" +
-        "  }\n\n");
-    lines.add("  @BeforeEach\n" +
+    lines.add("\n\n  @BeforeEach\n" +
         "  public void removeDbEntries() {\n" +
         "    "+repoVariable+".deleteAll();\n" +
         "  }\n\n");
