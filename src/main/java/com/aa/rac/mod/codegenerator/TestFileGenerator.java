@@ -298,6 +298,85 @@ public class TestFileGenerator {
         "  }\n\n");
   }
 
+  public void addConcurrentInsertTest() {
+    lines.add("  /** Test concurrent inserts. */\n" +
+        "  @Test\n" +
+        "  @DisplayName(\"Concurrent INSERTS throwing Exception\")\n" +
+        "  public void testConcurrentInserts() {\n" +
+        "    try {\n" +
+        "\n" +
+        "      "+serviceVariable+".processAsync("+insertVariable+");\n" +
+        "      "+serviceVariable+".processAsync("+updateVariable+");\n" +
+        "      "+serviceVariable+".processAsync("+deleteVariable+");\n" +
+        "      lock.await(3000, TimeUnit.MILLISECONDS);\n" +
+        "\n      verify(processingExceptionHandler, times(2))\n" +
+        "          .handleUncaughtException(Mockito.any(), Mockito.any(), Mockito.any());"+
+        "\n" +
+        "      "+eventHubClassName+" "+eventHubClassName.toLowerCase()+" = mapper.readValue("+insertVariable+", "+eventHubClassName+".class);\n" +
+        "\n" +
+        "      String uuid = #TODO \n"+
+        "\n" +
+        "      Optional<"+replicatedClassName+"> "+replCamel+" =\n" +
+        "          "+repoVariable+".findBy"+uuidColumn+"(uuid);\n" +
+        "      assertNotNull("+replCamel+", \""+replCamel+" is null\");\n" +
+        "      assertTrue("+replCamel+".isPresent(), \"No "+replCamel+" present\");\n" +
+        "      assertEquals(uuid, "+replCamel+".get().get"+ uuidColumn +"(),\n" +
+        "          \"UUID: Expected=\" + uuid\n" +
+        "              + \"; Actual=\" + "+replCamel+".get().get"+uuidColumn+"());\n" +
+        "      TestUtil.assertTrueTest(\n"  +
+        "          \""+ insertContents.get("A_TIMSTAMP")+"\",\n" +
+        "          "+replCamel+".get().getEventHubTimestamp(),\n" +
+        "          DateTimeFormatter.ofPattern(\"yyyy-MM-dd HH:mm:ss.SSSSSS\"),\n" +
+        "          \"EventHubTimestamp are not equal\");\n" +
+        "\n" +
+        "      assertEquals(\"PT\", "+replCamel+".get().getDmlFlg());\n" +
+        "      assertEquals(0L, "+replCamel+".get().getVersion());\n" +
+        "    } catch (Exception e) {\n" +
+        "      fail(e.getMessage(), e);\n" +
+        "    }\n" +
+        "  }\n\n");
+  }
+
+  public void addConcurrentUpdateTest() {
+    lines.add("  /** Test concurrent updates. */\n" +
+        "  @Test\n" +
+        "  @DisplayName(\"Concurrent UPDATES throwing Exception\")\n" +
+        "  public void testConcurrentUpdates() {\n" +
+        "    try {\n" +
+        "\n" +
+        "      "+serviceVariable+".processAsync("+insertVariable+");\n" +
+        "      lock.await(1000, TimeUnit.MILLISECONDS);\n\n" +
+        "      "+serviceVariable+".processAsync("+updateVariable+");\n" +
+        "      "+serviceVariable+".processAsync("+deleteVariable+");\n" +
+        "      lock.await(2000, TimeUnit.MILLISECONDS);\n" +
+        "\n      verify(processingExceptionHandler, times(1))\n" +
+        "          .handleUncaughtException(Mockito.any(), Mockito.any(), Mockito.any());"+
+        "\n" +
+        "      "+eventHubClassName+" "+eventHubClassName.toLowerCase()+" = mapper.readValue("+insertVariable+", "+eventHubClassName+".class);\n" +
+        "\n" +
+        "      String uuid = #TODO \n"+
+        "\n" +
+        "      Optional<"+replicatedClassName+"> "+replCamel+" =\n" +
+        "          "+repoVariable+".findBy"+uuidColumn+"(uuid);\n" +
+        "      assertNotNull("+replCamel+", \""+replCamel+" is null\");\n" +
+        "      assertTrue("+replCamel+".isPresent(), \"No "+replCamel+" present\");\n" +
+        "      assertEquals(uuid, "+replCamel+".get().get"+ uuidColumn +"(),\n" +
+        "          \"UUID: Expected=\" + uuid\n" +
+        "              + \"; Actual=\" + "+replCamel+".get().get"+uuidColumn+"());\n" +
+        "      TestUtil.assertTrueTest(\n"  +
+        "          \""+ insertContents.get("A_TIMSTAMP")+"\",\n" +
+        "          "+replCamel+".get().getEventHubTimestamp(),\n" +
+        "          DateTimeFormatter.ofPattern(\"yyyy-MM-dd HH:mm:ss.SSSSSS\"),\n" +
+        "          \"EventHubTimestamp are not equal\");\n" +
+        "\n" +
+        "      assertEquals(\"UP\", "+replCamel+".get().getDmlFlg());\n" +
+        "      assertEquals(1L, "+replCamel+".get().getVersion());\n" +
+        "    } catch (Exception e) {\n" +
+        "      fail(e.getMessage(), e);\n" +
+        "    }\n" +
+        "  }\n\n");
+  }
+
   public void addDeleteTest() {
     lines.add("  /** Test delete. */\n" +
         "  @Test\n" +
@@ -638,6 +717,8 @@ public class TestFileGenerator {
     lines.add("  }\n\n");
     addInsertTest();
     addUpdateTest();
+    addConcurrentInsertTest();
+    addConcurrentUpdateTest();
     addDeleteTest();
     addOutOfOrderUpdateTest();
     addOutOfOrderDeleteTest();
