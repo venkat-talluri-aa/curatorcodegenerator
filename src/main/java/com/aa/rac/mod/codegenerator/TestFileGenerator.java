@@ -163,6 +163,7 @@ public class TestFileGenerator {
         "import " + replicatedImportPath + ";\n" +
         "import " + eventHubImportPath + ";\n" +
         "import " + repositoryImportPath + ";\n" +
+        "import com.aa.rac.mod.util.AbstractTestSupport;\n" +
         "import com.aa.rac.mod.util.TestUtil;\n" +
         "import com.fasterxml.jackson.databind.ObjectMapper;\n" +
         "import java.math.BigInteger;\n" +
@@ -196,7 +197,7 @@ public class TestFileGenerator {
 
   public void addInitialClassTemplate(String className) {
     lines.add(getClassAnnotations());
-    lines.add("public class " + testClassName +" {\n");
+    lines.add("public class " + testClassName +" extends AbstractTestSupport {\n");
   }
 
   public void addFields() throws IOException {
@@ -310,7 +311,7 @@ public class TestFileGenerator {
         "      "+serviceVariable+".processAsync("+deleteVariable+");\n" +
         "      lock.await(5000, TimeUnit.MILLISECONDS);\n" +
         "\n      verify(processingExceptionHandler, times(2))\n" +
-        "          .handleUncaughtException(Mockito.any(), Mockito.any(), Mockito.any());"+
+        "          .handleUncaughtException(Mockito.any(), Mockito.any(), Mockito.any());\n"+
         "\n" +
         "      "+eventHubClassName+" "+eventHubClassName.toLowerCase()+" = mapper.readValue("+insertVariable+", "+eventHubClassName+".class);\n" +
         "\n" +
@@ -345,7 +346,7 @@ public class TestFileGenerator {
         "      "+serviceVariable+".processAsync("+deleteVariable+");\n" +
         "      lock.await(4000, TimeUnit.MILLISECONDS);\n" +
         "\n      verify(processingExceptionHandler, times(1))\n" +
-        "          .handleUncaughtException(Mockito.any(), Mockito.any(), Mockito.any());"+
+        "          .handleUncaughtException(Mockito.any(), Mockito.any(), Mockito.any());\n"+
         "\n" +
         "      "+eventHubClassName+" "+eventHubClassName.toLowerCase()+" = mapper.readValue("+insertVariable+", "+eventHubClassName+".class);\n" +
         "\n" +
