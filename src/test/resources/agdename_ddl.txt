@@ -1,6 +1,6 @@
 CREATE TABLE IF NOT EXISTS replicated.agdename
 (
-    NAME_UUID                     CHAR(64) NOT NULL, 
+    TICKET_UUID                   CHAR(64) NOT NULL, 
     NAM_TICKET_NO                 VARCHAR(14) NOT NULL, 
     NAM_PASSENGER_NAME            VARCHAR(33), 
     NAM_PNR_NUMBER                VARCHAR(13), 
@@ -28,8 +28,8 @@ CREATE TABLE IF NOT EXISTS replicated.agdename
     system_modified_timestamp     TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
     created_by                    VARCHAR(100) NOT NULL, 
     modified_by                   VARCHAR(100) NOT NULL, 
-    CONSTRAINT replicated_agdename_name_uuid_pkey PRIMARY KEY (NAME_UUID)
+    CONSTRAINT replicated_agdename_ticket_uuid_pkey PRIMARY KEY (TICKET_UUID)
 );
 
 COMMENT ON TABLE replicated.agdename IS 'UUID values are derived using SHA256 Hash';
-COMMENT ON COLUMN replicated.agdename.NAME_UUID IS 'NAME_UUID is derived using SHA256 Hash';
+COMMENT ON COLUMN replicated.agdename.TICKET_UUID IS 'TICKET_UUID is derived using SHA256 Hash';

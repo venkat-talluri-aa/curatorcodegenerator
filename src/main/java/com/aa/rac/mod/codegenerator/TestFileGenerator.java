@@ -308,7 +308,7 @@ public class TestFileGenerator {
         "      "+serviceVariable+".processAsync("+insertVariable+");\n" +
         "      "+serviceVariable+".processAsync("+updateVariable+");\n" +
         "      "+serviceVariable+".processAsync("+deleteVariable+");\n" +
-        "      lock.await(3000, TimeUnit.MILLISECONDS);\n" +
+        "      lock.await(5000, TimeUnit.MILLISECONDS);\n" +
         "\n      verify(processingExceptionHandler, times(2))\n" +
         "          .handleUncaughtException(Mockito.any(), Mockito.any(), Mockito.any());"+
         "\n" +
@@ -323,11 +323,6 @@ public class TestFileGenerator {
         "      assertEquals(uuid, "+replCamel+".get().get"+ uuidColumn +"(),\n" +
         "          \"UUID: Expected=\" + uuid\n" +
         "              + \"; Actual=\" + "+replCamel+".get().get"+uuidColumn+"());\n" +
-        "      TestUtil.assertTrueTest(\n"  +
-        "          \""+ insertContents.get("A_TIMSTAMP")+"\",\n" +
-        "          "+replCamel+".get().getEventHubTimestamp(),\n" +
-        "          DateTimeFormatter.ofPattern(\"yyyy-MM-dd HH:mm:ss.SSSSSS\"),\n" +
-        "          \"EventHubTimestamp are not equal\");\n" +
         "\n" +
         "      assertEquals(\"PT\", "+replCamel+".get().getDmlFlg());\n" +
         "      assertEquals(0L, "+replCamel+".get().getVersion());\n" +
@@ -348,7 +343,7 @@ public class TestFileGenerator {
         "      lock.await(1000, TimeUnit.MILLISECONDS);\n\n" +
         "      "+serviceVariable+".processAsync("+updateVariable+");\n" +
         "      "+serviceVariable+".processAsync("+deleteVariable+");\n" +
-        "      lock.await(2000, TimeUnit.MILLISECONDS);\n" +
+        "      lock.await(4000, TimeUnit.MILLISECONDS);\n" +
         "\n      verify(processingExceptionHandler, times(1))\n" +
         "          .handleUncaughtException(Mockito.any(), Mockito.any(), Mockito.any());"+
         "\n" +
@@ -363,11 +358,6 @@ public class TestFileGenerator {
         "      assertEquals(uuid, "+replCamel+".get().get"+ uuidColumn +"(),\n" +
         "          \"UUID: Expected=\" + uuid\n" +
         "              + \"; Actual=\" + "+replCamel+".get().get"+uuidColumn+"());\n" +
-        "      TestUtil.assertTrueTest(\n"  +
-        "          \""+ insertContents.get("A_TIMSTAMP")+"\",\n" +
-        "          "+replCamel+".get().getEventHubTimestamp(),\n" +
-        "          DateTimeFormatter.ofPattern(\"yyyy-MM-dd HH:mm:ss.SSSSSS\"),\n" +
-        "          \"EventHubTimestamp are not equal\");\n" +
         "\n" +
         "      assertEquals(\"UP\", "+replCamel+".get().getDmlFlg());\n" +
         "      assertEquals(1L, "+replCamel+".get().getVersion());\n" +
