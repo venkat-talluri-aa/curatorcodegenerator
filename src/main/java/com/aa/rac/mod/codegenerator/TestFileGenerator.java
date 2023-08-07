@@ -329,9 +329,8 @@ public class TestFileGenerator {
         "      TestUtil.assertConcurrentEvents(\n" +
         "          "+replCamel+".get(),\n" +
         "          processingExceptionHandler,\n" +
-        "          logCaptor.getErrorLogs(),\n"+
-        "          ExceptionType.FAILURE_CONCURRENT_INSERT.name(),\n"+
-        "          ExceptionType.FAILURE_CONCURRENT_UPDATE.name());\n" +
+        "          logCaptor,\n"+
+        "          3, 0);\n" +
         "    } catch (Exception e) {\n" +
         "      fail(e.getMessage(), e);\n" +
         "    }\n" +
@@ -365,8 +364,8 @@ public class TestFileGenerator {
         "      TestUtil.assertConcurrentEvents(\n" +
         "          "+replCamel+".get(),\n" +
         "          processingExceptionHandler,\n" +
-        "          logCaptor.getErrorLogs(),\n" +
-        "          ExceptionType.FAILURE_CONCURRENT_UPDATE.name());\n" +
+        "          logCaptor,\n" +
+        "          2, 1);\n" +
         "    } catch (Exception e) {\n" +
         "      fail(e.getMessage(), e);\n" +
         "    }\n" +
