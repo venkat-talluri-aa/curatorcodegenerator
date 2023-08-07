@@ -156,6 +156,7 @@ public class TestFileGenerator {
         "import com.aa.rac.mod.domain.BaseService;\n" +
         "import com.aa.rac.mod.domain.enums.CuratedEntityClassMapper;\n" +
         "import com.aa.rac.mod.domain.enums.EventHubPojoClassMapper;\n" +
+        "import com.aa.rac.mod.domain.enums.ExceptionType;\n" +
         "import com.aa.rac.mod.domain.enums.ServiceClassMapper;\n" +
         "import com.aa.rac.mod.domain.exceptions.ProcessingException;\n" +
         "import com.aa.rac.mod.domain.exceptions.ProcessingExceptionHandler;\n" +
@@ -171,6 +172,7 @@ public class TestFileGenerator {
         "import java.util.Optional;\n" +
         "import java.util.concurrent.CountDownLatch;\n" +
         "import java.util.concurrent.TimeUnit;\n" +
+        "import nl.altindag.log.LogCaptor;\n" +
         "import org.junit.jupiter.api.BeforeEach;\n" +
         "import org.junit.jupiter.api.DisplayName;\n" +
         "import org.junit.jupiter.api.Test;\n" +
@@ -205,6 +207,8 @@ public class TestFileGenerator {
         "  private final ObjectMapper mapper = new ObjectMapper();\n" +
         "\n" +
         "  DateTimeFormatter formatter = DateTimeFormatter.ofPattern(\"yyyy-MM-dd HH:mm:ss.SSS\");\n" +
+        "\n" +
+        "  private LogCaptor logCaptor;\n" +
         "\n" +
         "  @MockBean\n" +
         "  ProcessingExceptionHandler processingExceptionHandler;\n");
@@ -309,10 +313,7 @@ public class TestFileGenerator {
         "      "+serviceVariable+".processAsync("+insertVariable+");\n" +
         "      "+serviceVariable+".processAsync("+updateVariable+");\n" +
         "      "+serviceVariable+".processAsync("+deleteVariable+");\n" +
-        "      lock.await(5000, TimeUnit.MILLISECONDS);\n" +
-        "\n      verify(processingExceptionHandler, times(2))\n" +
-        "          .handleUncaughtException(Mockito.any(), Mockito.any(), Mockito.any());\n"+
-        "\n" +
+        "      lock.await(5000, TimeUnit.MILLISECONDS);\n" + "\n" +
         "      "+eventHubClassName+" "+eventHubClassName.toLowerCase()+" = mapper.readValue("+insertVariable+", "+eventHubClassName+".class);\n" +
         "\n" +
         "      String uuid = #TODO \n"+
@@ -325,8 +326,12 @@ public class TestFileGenerator {
         "          \"UUID: Expected=\" + uuid\n" +
         "              + \"; Actual=\" + "+replCamel+".get().get"+uuidColumn+"());\n" +
         "\n" +
-        "      assertEquals(\"PT\", "+replCamel+".get().getDmlFlg());\n" +
-        "      assertEquals(0L, "+replCamel+".get().getVersion());\n" +
+        "      TestUtil.assertConcurrentEvents(\n" +
+        "          "+replCamel+".get(),\n" +
+        "          processingExceptionHandler,\n" +
+        "          logCaptor.getErrorLogs(),\n"+
+        "          ExceptionType.FAILURE_CONCURRENT_INSERT.name(),\n"+
+        "          ExceptionType.FAILURE_CONCURRENT_UPDATE.name());\n" +
         "    } catch (Exception e) {\n" +
         "      fail(e.getMessage(), e);\n" +
         "    }\n" +
@@ -344,10 +349,7 @@ public class TestFileGenerator {
         "      lock.await(1000, TimeUnit.MILLISECONDS);\n\n" +
         "      "+serviceVariable+".processAsync("+updateVariable+");\n" +
         "      "+serviceVariable+".processAsync("+deleteVariable+");\n" +
-        "      lock.await(4000, TimeUnit.MILLISECONDS);\n" +
-        "\n      verify(processingExceptionHandler, times(1))\n" +
-        "          .handleUncaughtException(Mockito.any(), Mockito.any(), Mockito.any());\n"+
-        "\n" +
+        "      lock.await(4000, TimeUnit.MILLISECONDS);\n" + "\n" +
         "      "+eventHubClassName+" "+eventHubClassName.toLowerCase()+" = mapper.readValue("+insertVariable+", "+eventHubClassName+".class);\n" +
         "\n" +
         "      String uuid = #TODO \n"+
@@ -360,8 +362,11 @@ public class TestFileGenerator {
         "          \"UUID: Expected=\" + uuid\n" +
         "              + \"; Actual=\" + "+replCamel+".get().get"+uuidColumn+"());\n" +
         "\n" +
-        "      assertEquals(\"UP\", "+replCamel+".get().getDmlFlg());\n" +
-        "      assertEquals(1L, "+replCamel+".get().getVersion());\n" +
+        "      TestUtil.assertConcurrentEvents(\n" +
+        "          "+replCamel+".get(),\n" +
+        "          processingExceptionHandler,\n" +
+        "          logCaptor.getErrorLogs(),\n" +
+        "          ExceptionType.FAILURE_CONCURRENT_UPDATE.name());\n" +
         "    } catch (Exception e) {\n" +
         "      fail(e.getMessage(), e);\n" +
         "    }\n" +
@@ -528,6 +533,10 @@ public class TestFileGenerator {
         "      assertEquals(\"PT\", " + replCamel + ".get().getDmlFlg());\n" +
         "      assertEquals(false, " + replCamel + ".get().getSrcDeletedIndicator());\n" +
         "      assertEquals(false, " + replCamel + ".get().getDeletedIndicator());\n" +
+        "      assertEquals(1,\n" +
+        "          TestUtil.getLogMessageCountWithMessages(\n" +
+        "              logCaptor.getInfoLogs(),\n" +
+        "              \"Current item is earlier than DB entry.\"));\n" +
         "\n" +
         "      testUpdateData(" + replCamel + ".get());\n" +
         "    } catch (Exception e) {\n" +
@@ -679,6 +688,11 @@ public class TestFileGenerator {
     lines.add("\n\n  @BeforeEach\n" +
         "  public void removeDbEntries() {\n" +
         "    "+repoVariable+".deleteAll();\n" +
+        "  }\n\n");
+
+    lines.add("  @BeforeEach\n" +
+        "  public void setLogCaptor() {\n" +
+        "    logCaptor = LogCaptor.forClass("+this.serviceClassName+".class);\n" +
         "  }\n\n");
 
     //#TODO
