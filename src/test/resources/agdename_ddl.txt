@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS replicated.agdename
     system_modified_timestamp     TIMESTAMP WITHOUT TIME ZONE NOT NULL, 
     created_by                    VARCHAR(100) NOT NULL, 
     modified_by                   VARCHAR(100) NOT NULL, 
+    version                       BIGINT NOT NULL, 
     CONSTRAINT replicated_agdename_ticket_uuid_pkey PRIMARY KEY (TICKET_UUID)
 );
 

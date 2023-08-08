@@ -132,6 +132,7 @@ public class DDLSQLFileGenerator {
     auditColumnsMap.put("system_modified_timestamp", "TIMESTAMP WITHOUT TIME ZONE");
     auditColumnsMap.put("created_by", "VARCHAR(100)");
     auditColumnsMap.put("modified_by", "VARCHAR(100)");
+    auditColumnsMap.put("version", "BIGINT");
     String auditColumns = "";
     for (String name: auditColumnsMap.keySet()) {
       auditColumns += "    "+name + " ".repeat(fieldDataTypeGapLength-name.length())
