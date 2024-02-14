@@ -1,0 +1,189 @@
+package com.aa.rac.mod.orm.dao.refundedrepl;
+
+import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
+import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
+
+import com.aa.rac.mod.domain.util.RacUtil;
+import com.aa.rac.mod.orm.dao.AbstractCuratedBaseEntity;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.sql.Date;
+import java.sql.Timestamp;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
+/** RefundedRepl replicated orm. */
+@Entity
+@Table(name = "refd0001_reft0020_refunded", schema = "replicated")
+@JsonAutoDetect(fieldVisibility = ANY, getterVisibility = NONE, setterVisibility = NONE)
+@NoArgsConstructor
+@ToString(callSuper = true)
+@Setter
+@Getter
+public class RefundedRepl extends AbstractCuratedBaseEntity { 
+
+  @Id
+  @Column(name = "REFUNDED_UUID", nullable = false)
+  @JsonProperty("REFUNDED_UUID")
+  private String refundedUuid;
+
+  @Column(name = "REF_FILE_NUMBER", nullable = false)
+  @JsonProperty("REF_FILE_NUMBER")
+  private String refFileNumber;
+
+  @Column(name = "REF_TICKET_NUMBER", nullable = false)
+  @JsonProperty("REF_TICKET_NUMBER")
+  private String refTicketNumber;
+
+  @Column(name = "REF_AGENCY_NUMBER")
+  @JsonProperty("REF_AGENCY_NUMBER")
+  private String refAgencyNumber;
+
+  @Column(name = "REF_BATCH_NUMBER")
+  @JsonProperty("REF_BATCH_NUMBER")
+  private String refBatchNumber;
+
+  @Column(name = "REF_BATCH_DATE", nullable = false)
+  @JsonProperty("REF_BATCH_DATE")
+  @JsonFormat(pattern = "yyyy-MM-dd")
+  private Date refBatchDate;
+
+  @Column(name = "REF_FOP_TYPE")
+  @JsonProperty("REF_FOP_TYPE")
+  private String refFopType;
+
+  @Column(name = "REF_FOP_REFERENCE")
+  @JsonProperty("REF_FOP_REFERENCE")
+  private String refFopReference;
+
+  @Column(name = "REF_REFUND_AMOUNT", nullable = false)
+  @JsonProperty("REF_REFUND_AMOUNT")
+  private BigDecimal refRefundAmount;
+
+  @Column(name = "REF_RECALL_PERCENT", nullable = false)
+  @JsonProperty("REF_RECALL_PERCENT")
+  private BigDecimal refRecallPercent;
+
+  @Column(name = "REF_RECALL_AMOUNT", nullable = false)
+  @JsonProperty("REF_RECALL_AMOUNT")
+  private BigDecimal refRecallAmount;
+
+  @Column(name = "REF_LAST_NAME")
+  @JsonProperty("REF_LAST_NAME")
+  private String refLastName;
+
+  @Column(name = "REF_FIRST_NAME")
+  @JsonProperty("REF_FIRST_NAME")
+  private String refFirstName;
+
+  @Column(name = "REF_CHECK_DATE", nullable = false)
+  @JsonProperty("REF_CHECK_DATE")
+  @JsonFormat(pattern = "yyyy-MM-dd")
+  private Date refCheckDate;
+
+  @Column(name = "REF_CHECK_RETURNED")
+  @JsonProperty("REF_CHECK_RETURNED")
+  private String refCheckReturned;
+
+  @Column(name = "REF_CHECK_CLEARED", nullable = false)
+  @JsonProperty("REF_CHECK_CLEARED")
+  @JsonFormat(pattern = "yyyy-MM-dd")
+  private Date refCheckCleared;
+
+  @Column(name = "REF_CHECK_PROCPER")
+  @JsonProperty("REF_CHECK_PROCPER")
+  private String refCheckProcper;
+
+  @Column(name = "REF_ID_REFUNDED")
+  @JsonProperty("REF_ID_REFUNDED")
+  private String refIdRefunded;
+
+  @Column(name = "REF_ENTERED_BY", nullable = false)
+  @JsonProperty("REF_ENTERED_BY")
+  private String refEnteredBy;
+
+  @Column(name = "REF_ENTERED_DATE", nullable = false)
+  @JsonProperty("REF_ENTERED_DATE")
+  @JsonFormat(pattern = "yyyy-MM-dd")
+  private Date refEnteredDate;
+
+  @Column(name = "REF_MODIFIED_BY")
+  @JsonProperty("REF_MODIFIED_BY")
+  private String refModifiedBy;
+
+  @Column(name = "REF_MODIFIED_DATE", nullable = false)
+  @JsonProperty("REF_MODIFIED_DATE")
+  @JsonFormat(pattern = "yyyy-MM-dd")
+  private Date refModifiedDate;
+
+  @Column(name = "REF_STA_COPY_RECD")
+  @JsonProperty("REF_STA_COPY_RECD")
+  private String refStaCopyRecd;
+
+  @Column(name = "REF_RFND_AMT_FORN", nullable = false)
+  @JsonProperty("REF_RFND_AMT_FORN")
+  private BigDecimal refRfndAmtForn;
+
+  @Column(name = "REF_RFND_AMT_CURCD")
+  @JsonProperty("REF_RFND_AMT_CURCD")
+  private String refRfndAmtCurcd;
+
+  @Column(name = "REF_RECALL_AMTFORN", nullable = false)
+  @JsonProperty("REF_RECALL_AMTFORN")
+  private BigDecimal refRecallAmtforn;
+
+  @Column(name = "REF_RAW_TOT_CUR")
+  @JsonProperty("REF_RAW_TOT_CUR")
+  private String refRawTotCur;
+
+  @Column(name = "REF_EXCHANGE_RATE", nullable = false)
+  @JsonProperty("REF_EXCHANGE_RATE")
+  private BigDecimal refExchangeRate;
+
+  @Column(name = "REF_PAYMENT_TICKET_NO")
+  @JsonProperty("REF_PAYMENT_TICKET_NO")
+  private String refPaymentTicketNo;
+
+  @Column(name = "REF_PAYMENT_SERVICES")
+  @JsonProperty("REF_PAYMENT_SERVICES")
+  private String refPaymentServices;
+
+  @Column(name = "REF_ORIG_RFND_AMT", nullable = false)
+  @JsonProperty("REF_ORIG_RFND_AMT")
+  private BigDecimal refOrigRfndAmt;
+
+  @Column(name = "REF_INCENT_RFND_AMT", nullable = false)
+  @JsonProperty("REF_INCENT_RFND_AMT")
+  private BigDecimal refIncentRfndAmt;
+
+  @Column(name = "REF_VCHR_TRANSACTION_ID")
+  @JsonProperty("REF_VCHR_TRANSACTION_ID")
+  private String refVchrTransactionId;
+
+  @Column(name = "REF_SEQUENCE_NUM", nullable = false)
+  @JsonProperty("REF_SEQUENCE_NUM")
+  private BigInteger refSequenceNum;
+
+  @Column(name = "REF_TC_EXP_DATE", nullable = false)
+  @JsonProperty("REF_TC_EXP_DATE")
+  @JsonFormat(pattern = "yyyy-MM-dd")
+  private Date refTcExpDate;
+
+  @Column(name = "TICKET_CREATE_TS", nullable = false)
+  @JsonProperty("TICKET_CREATE_TS")
+  private Timestamp ticketCreateTs;
+
+  @Override
+  public String getUniqueIdentifier() { 
+    return refundedUuid; 
+  }
+}

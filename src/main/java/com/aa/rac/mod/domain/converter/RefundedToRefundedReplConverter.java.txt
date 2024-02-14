@@ -1,0 +1,116 @@
+package com.aa.rac.mod.domain.converter;
+
+import com.aa.rac.mod.domain.util.RacUtil;
+import com.aa.rac.mod.orm.dao.refundedrepl.RefundedRepl;
+import com.aa.rac.mod.repository.eventhub.Refunded;
+import java.math.RoundingMode;
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.time.temporal.ChronoUnit;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.convert.converter.Converter;
+
+/** Refunded to RefundedRepl converter. */
+@SuppressWarnings("checkstyle:LineLength")
+public class RefundedToRefundedReplConverter
+    implements Converter<Refunded, RefundedRepl> {
+
+  protected final Logger logger = LoggerFactory.getLogger(this.getClass());
+
+  @Override
+  public RefundedRepl convert(@NotNull Refunded source) {
+    RefundedRepl target = new RefundedRepl();
+    try { 
+      if (source.getEntityType() == null) {
+        throw new IllegalArgumentException("EntityType in eventhub pojo cannot be null");
+      }
+      switch (source.getEntityType()) {
+        case "PT", "UP", "RR" -> {
+          target.setRefundedUuid(#TODO: GENERATE HASH);
+          target.setRefFileNumber(source.getRefFileNumber());
+          target.setRefTicketNumber(source.getRefTicketNumber());
+          target.setRefAgencyNumber(source.getRefAgencyNumber());
+          target.setRefBatchNumber(source.getRefBatchNumber());
+          target.setRefBatchDate(Date.valueOf(RacUtil.getDate(source.getRefBatchDate())));
+          target.setRefFopType(source.getRefFopType());
+          target.setRefFopReference(source.getRefFopReference());
+          target.setRefRefundAmount(RacUtil.convertStringtoBigDecimal(source.getRefRefundAmount(), 2, RoundingMode.UP));
+          target.setRefRecallPercent(RacUtil.convertStringtoBigDecimal(source.getRefRecallPercent(), 1, RoundingMode.UP));
+          target.setRefRecallAmount(RacUtil.convertStringtoBigDecimal(source.getRefRecallAmount(), 2, RoundingMode.UP));
+          target.setRefLastName(source.getRefLastName());
+          target.setRefFirstName(source.getRefFirstName());
+          target.setRefCheckDate(Date.valueOf(RacUtil.getDate(source.getRefCheckDate())));
+          target.setRefCheckReturned(source.getRefCheckReturned());
+          target.setRefCheckCleared(Date.valueOf(RacUtil.getDate(source.getRefCheckCleared())));
+          target.setRefCheckProcper(source.getRefCheckProcper());
+          target.setRefIdRefunded(source.getRefIdRefunded());
+          target.setRefEnteredBy(source.getRefEnteredBy());
+          target.setRefEnteredDate(Date.valueOf(RacUtil.getDate(source.getRefEnteredDate())));
+          target.setRefModifiedBy(source.getRefModifiedBy());
+          target.setRefModifiedDate(Date.valueOf(RacUtil.getDate(source.getRefModifiedDate())));
+          target.setRefStaCopyRecd(source.getRefStaCopyRecd());
+          target.setRefRfndAmtForn(RacUtil.convertStringtoBigDecimal(source.getRefRfndAmtForn(), 2, RoundingMode.UP));
+          target.setRefRfndAmtCurcd(source.getRefRfndAmtCurcd());
+          target.setRefRecallAmtforn(RacUtil.convertStringtoBigDecimal(source.getRefRecallAmtforn(), 2, RoundingMode.UP));
+          target.setRefRawTotCur(source.getRefRawTotCur());
+          target.setRefExchangeRate(RacUtil.convertStringtoBigDecimal(source.getRefExchangeRate(), 6, RoundingMode.UP));
+          target.setRefPaymentTicketNo(source.getRefPaymentTicketNo());
+          target.setRefPaymentServices(source.getRefPaymentServices());
+          target.setRefOrigRfndAmt(RacUtil.convertStringtoBigDecimal(source.getRefOrigRfndAmt(), 2, RoundingMode.UP));
+          target.setRefIncentRfndAmt(RacUtil.convertStringtoBigDecimal(source.getRefIncentRfndAmt(), 2, RoundingMode.UP));
+          target.setRefVchrTransactionId(source.getRefVchrTransactionId());
+          target.setRefSequenceNum(RacUtil.convertStringtoBigInteger(source.getRefSequenceNum()));
+          target.setRefTcExpDate(Date.valueOf(RacUtil.getDate(source.getRefTcExpDate())));
+          target.setTicketCreateTs(RacUtil.getSqlTimeFromDb2DateTime(source.getTicketCreateTs(), ChronoUnit.SECONDS));
+        }
+        case "DL" -> {
+          target.setRefundedUuid(#TODO: GENERATE HASH);
+          target.setRefFileNumber(source.getRefFileNumberBefore());
+          target.setRefTicketNumber(source.getRefTicketNumberBefore());
+          target.setRefAgencyNumber(source.getRefAgencyNumberBefore());
+          target.setRefBatchNumber(source.getRefBatchNumberBefore());
+          target.setRefBatchDate(Date.valueOf(RacUtil.getDate(source.getRefBatchDateBefore())));
+          target.setRefFopType(source.getRefFopTypeBefore());
+          target.setRefFopReference(source.getRefFopReferenceBefore());
+          target.setRefRefundAmount(RacUtil.convertStringtoBigDecimal(source.getRefRefundAmountBefore(), 2, RoundingMode.UP));
+          target.setRefRecallPercent(RacUtil.convertStringtoBigDecimal(source.getRefRecallPercentBefore(), 1, RoundingMode.UP));
+          target.setRefRecallAmount(RacUtil.convertStringtoBigDecimal(source.getRefRecallAmountBefore(), 2, RoundingMode.UP));
+          target.setRefLastName(source.getRefLastNameBefore());
+          target.setRefFirstName(source.getRefFirstNameBefore());
+          target.setRefCheckDate(Date.valueOf(RacUtil.getDate(source.getRefCheckDateBefore())));
+          target.setRefCheckReturned(source.getRefCheckReturnedBefore());
+          target.setRefCheckCleared(Date.valueOf(RacUtil.getDate(source.getRefCheckClearedBefore())));
+          target.setRefCheckProcper(source.getRefCheckProcperBefore());
+          target.setRefIdRefunded(source.getRefIdRefundedBefore());
+          target.setRefEnteredBy(source.getRefEnteredByBefore());
+          target.setRefEnteredDate(Date.valueOf(RacUtil.getDate(source.getRefEnteredDateBefore())));
+          target.setRefModifiedBy(source.getRefModifiedByBefore());
+          target.setRefModifiedDate(Date.valueOf(RacUtil.getDate(source.getRefModifiedDateBefore())));
+          target.setRefStaCopyRecd(source.getRefStaCopyRecdBefore());
+          target.setRefRfndAmtForn(RacUtil.convertStringtoBigDecimal(source.getRefRfndAmtFornBefore(), 2, RoundingMode.UP));
+          target.setRefRfndAmtCurcd(source.getRefRfndAmtCurcdBefore());
+          target.setRefRecallAmtforn(RacUtil.convertStringtoBigDecimal(source.getRefRecallAmtfornBefore(), 2, RoundingMode.UP));
+          target.setRefRawTotCur(source.getRefRawTotCurBefore());
+          target.setRefExchangeRate(RacUtil.convertStringtoBigDecimal(source.getRefExchangeRateBefore(), 6, RoundingMode.UP));
+          target.setRefPaymentTicketNo(source.getRefPaymentTicketNoBefore());
+          target.setRefPaymentServices(source.getRefPaymentServicesBefore());
+          target.setRefOrigRfndAmt(RacUtil.convertStringtoBigDecimal(source.getRefOrigRfndAmtBefore(), 2, RoundingMode.UP));
+          target.setRefIncentRfndAmt(RacUtil.convertStringtoBigDecimal(source.getRefIncentRfndAmtBefore(), 2, RoundingMode.UP));
+          target.setRefVchrTransactionId(source.getRefVchrTransactionIdBefore());
+          target.setRefSequenceNum(RacUtil.convertStringtoBigInteger(source.getRefSequenceNumBefore()));
+          target.setRefTcExpDate(Date.valueOf(RacUtil.getDate(source.getRefTcExpDateBefore())));
+          target.setTicketCreateTs(RacUtil.getSqlTimeFromDb2DateTime(source.getTicketCreateTsBefore(), ChronoUnit.SECONDS));
+        }
+        default -> throw new IllegalStateException(
+            "Unexpected value: " + source.getEntityType());
+      }
+    } catch (Exception ex) {
+      logger.error("Error occured in refunded convertor {} ", ex.getMessage());
+      ex.printStackTrace();
+      throw new RuntimeException(ex);
+    }
+    return target;
+  }
+}

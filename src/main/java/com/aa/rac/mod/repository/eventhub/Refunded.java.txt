@@ -1,0 +1,344 @@
+package com.aa.rac.mod.repository.eventhub;
+
+import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;
+import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;
+
+import com.aa.rac.mod.domain.serialization.RepackNestedStringSerializer;
+import com.aa.rac.mod.domain.serialization.TrimmingDeserializer;
+import com.aa.rac.mod.domain.serialization.UnpackingNestedStringTrimDeserializer;
+import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
+
+/** Refunded eventhub pojo. */
+@JsonIgnoreProperties(ignoreUnknown = true)
+@JsonAutoDetect(fieldVisibility = ANY, getterVisibility = NONE, setterVisibility = NONE)
+@NoArgsConstructor
+@ToString(callSuper = true)
+@Setter
+@Getter
+public class Refunded extends AbstractEventHubBaseEntity { 
+
+  @JsonProperty("B_REF_FILE_NUMBER")
+  @JsonDeserialize(using = TrimmingDeserializer.class)
+  private String refFileNumberBefore;
+
+  @JsonProperty("B_REF_TICKET_NUMBER")
+  @JsonDeserialize(using = TrimmingDeserializer.class)
+  private String refTicketNumberBefore;
+
+  @JsonProperty("B_REF_AGENCY_NUMBER")
+  @JsonDeserialize(using = UnpackingNestedStringTrimDeserializer.class)
+  @JsonSerialize(using = RepackNestedStringSerializer.class)
+  private String refAgencyNumberBefore;
+
+  @JsonProperty("B_REF_BATCH_NUMBER")
+  @JsonDeserialize(using = UnpackingNestedStringTrimDeserializer.class)
+  @JsonSerialize(using = RepackNestedStringSerializer.class)
+  private String refBatchNumberBefore;
+
+  @JsonProperty("B_REF_BATCH_DATE")
+  @JsonDeserialize(using = UnpackingNestedStringTrimDeserializer.class)
+  @JsonSerialize(using = RepackNestedStringSerializer.class)
+  private String refBatchDateBefore;
+
+  @JsonProperty("B_REF_FOP_TYPE")
+  @JsonDeserialize(using = UnpackingNestedStringTrimDeserializer.class)
+  @JsonSerialize(using = RepackNestedStringSerializer.class)
+  private String refFopTypeBefore;
+
+  @JsonProperty("B_REF_FOP_REFERENCE")
+  @JsonDeserialize(using = UnpackingNestedStringTrimDeserializer.class)
+  @JsonSerialize(using = RepackNestedStringSerializer.class)
+  private String refFopReferenceBefore;
+
+  @JsonProperty("B_REF_REFUND_AMOUNT")
+  @JsonDeserialize(using = UnpackingNestedStringTrimDeserializer.class)
+  @JsonSerialize(using = RepackNestedStringSerializer.class)
+  private String refRefundAmountBefore;
+
+  @JsonProperty("B_REF_RECALL_PERCENT")
+  @JsonDeserialize(using = UnpackingNestedStringTrimDeserializer.class)
+  @JsonSerialize(using = RepackNestedStringSerializer.class)
+  private String refRecallPercentBefore;
+
+  @JsonProperty("B_REF_RECALL_AMOUNT")
+  @JsonDeserialize(using = UnpackingNestedStringTrimDeserializer.class)
+  @JsonSerialize(using = RepackNestedStringSerializer.class)
+  private String refRecallAmountBefore;
+
+  @JsonProperty("B_REF_LAST_NAME")
+  @JsonDeserialize(using = UnpackingNestedStringTrimDeserializer.class)
+  @JsonSerialize(using = RepackNestedStringSerializer.class)
+  private String refLastNameBefore;
+
+  @JsonProperty("B_REF_FIRST_NAME")
+  @JsonDeserialize(using = UnpackingNestedStringTrimDeserializer.class)
+  @JsonSerialize(using = RepackNestedStringSerializer.class)
+  private String refFirstNameBefore;
+
+  @JsonProperty("B_REF_CHECK_DATE")
+  @JsonDeserialize(using = UnpackingNestedStringTrimDeserializer.class)
+  @JsonSerialize(using = RepackNestedStringSerializer.class)
+  private String refCheckDateBefore;
+
+  @JsonProperty("B_REF_CHECK_RETURNED")
+  @JsonDeserialize(using = UnpackingNestedStringTrimDeserializer.class)
+  @JsonSerialize(using = RepackNestedStringSerializer.class)
+  private String refCheckReturnedBefore;
+
+  @JsonProperty("B_REF_CHECK_CLEARED")
+  @JsonDeserialize(using = TrimmingDeserializer.class)
+  private String refCheckClearedBefore;
+
+  @JsonProperty("B_REF_CHECK_PROCPER")
+  @JsonDeserialize(using = UnpackingNestedStringTrimDeserializer.class)
+  @JsonSerialize(using = RepackNestedStringSerializer.class)
+  private String refCheckProcperBefore;
+
+  @JsonProperty("B_REF_ID_REFUNDED")
+  @JsonDeserialize(using = UnpackingNestedStringTrimDeserializer.class)
+  @JsonSerialize(using = RepackNestedStringSerializer.class)
+  private String refIdRefundedBefore;
+
+  @JsonProperty("B_REF_ENTERED_BY")
+  @JsonDeserialize(using = UnpackingNestedStringTrimDeserializer.class)
+  @JsonSerialize(using = RepackNestedStringSerializer.class)
+  private String refEnteredByBefore;
+
+  @JsonProperty("B_REF_ENTERED_DATE")
+  @JsonDeserialize(using = UnpackingNestedStringTrimDeserializer.class)
+  @JsonSerialize(using = RepackNestedStringSerializer.class)
+  private String refEnteredDateBefore;
+
+  @JsonProperty("B_REF_MODIFIED_BY")
+  @JsonDeserialize(using = UnpackingNestedStringTrimDeserializer.class)
+  @JsonSerialize(using = RepackNestedStringSerializer.class)
+  private String refModifiedByBefore;
+
+  @JsonProperty("B_REF_MODIFIED_DATE")
+  @JsonDeserialize(using = UnpackingNestedStringTrimDeserializer.class)
+  @JsonSerialize(using = RepackNestedStringSerializer.class)
+  private String refModifiedDateBefore;
+
+  @JsonProperty("B_REF_STA_COPY_RECD")
+  @JsonDeserialize(using = TrimmingDeserializer.class)
+  private String refStaCopyRecdBefore;
+
+  @JsonProperty("B_REF_RFND_AMT_FORN")
+  @JsonDeserialize(using = TrimmingDeserializer.class)
+  private String refRfndAmtFornBefore;
+
+  @JsonProperty("B_REF_RFND_AMT_CURCD")
+  @JsonDeserialize(using = TrimmingDeserializer.class)
+  private String refRfndAmtCurcdBefore;
+
+  @JsonProperty("B_REF_RECALL_AMTFORN")
+  @JsonDeserialize(using = TrimmingDeserializer.class)
+  private String refRecallAmtfornBefore;
+
+  @JsonProperty("B_REF_RAW_TOT_CUR")
+  @JsonDeserialize(using = TrimmingDeserializer.class)
+  private String refRawTotCurBefore;
+
+  @JsonProperty("B_REF_EXCHANGE_RATE")
+  @JsonDeserialize(using = TrimmingDeserializer.class)
+  private String refExchangeRateBefore;
+
+  @JsonProperty("B_REF_PAYMENT_TICKET_NO")
+  @JsonDeserialize(using = TrimmingDeserializer.class)
+  private String refPaymentTicketNoBefore;
+
+  @JsonProperty("B_REF_PAYMENT_SERVICES")
+  @JsonDeserialize(using = TrimmingDeserializer.class)
+  private String refPaymentServicesBefore;
+
+  @JsonProperty("B_REF_ORIG_RFND_AMT")
+  @JsonDeserialize(using = TrimmingDeserializer.class)
+  private String refOrigRfndAmtBefore;
+
+  @JsonProperty("B_REF_INCENT_RFND_AMT")
+  @JsonDeserialize(using = TrimmingDeserializer.class)
+  private String refIncentRfndAmtBefore;
+
+  @JsonProperty("B_REF_VCHR_TRANSACTION_ID")
+  @JsonDeserialize(using = TrimmingDeserializer.class)
+  private String refVchrTransactionIdBefore;
+
+  @JsonProperty("B_REF_SEQUENCE_NUM")
+  @JsonDeserialize(using = TrimmingDeserializer.class)
+  private String refSequenceNumBefore;
+
+  @JsonProperty("B_REF_TC_EXP_DATE")
+  @JsonDeserialize(using = TrimmingDeserializer.class)
+  private String refTcExpDateBefore;
+
+  @JsonProperty("B_TICKET_CREATE_TS")
+  @JsonDeserialize(using = TrimmingDeserializer.class)
+  private String ticketCreateTsBefore;
+
+  @JsonProperty("REF_FILE_NUMBER")
+  @JsonDeserialize(using = TrimmingDeserializer.class)
+  private String refFileNumber;
+
+  @JsonProperty("REF_TICKET_NUMBER")
+  @JsonDeserialize(using = TrimmingDeserializer.class)
+  private String refTicketNumber;
+
+  @JsonProperty("REF_AGENCY_NUMBER")
+  @JsonDeserialize(using = UnpackingNestedStringTrimDeserializer.class)
+  @JsonSerialize(using = RepackNestedStringSerializer.class)
+  private String refAgencyNumber;
+
+  @JsonProperty("REF_BATCH_NUMBER")
+  @JsonDeserialize(using = UnpackingNestedStringTrimDeserializer.class)
+  @JsonSerialize(using = RepackNestedStringSerializer.class)
+  private String refBatchNumber;
+
+  @JsonProperty("REF_BATCH_DATE")
+  @JsonDeserialize(using = UnpackingNestedStringTrimDeserializer.class)
+  @JsonSerialize(using = RepackNestedStringSerializer.class)
+  private String refBatchDate;
+
+  @JsonProperty("REF_FOP_TYPE")
+  @JsonDeserialize(using = UnpackingNestedStringTrimDeserializer.class)
+  @JsonSerialize(using = RepackNestedStringSerializer.class)
+  private String refFopType;
+
+  @JsonProperty("REF_FOP_REFERENCE")
+  @JsonDeserialize(using = UnpackingNestedStringTrimDeserializer.class)
+  @JsonSerialize(using = RepackNestedStringSerializer.class)
+  private String refFopReference;
+
+  @JsonProperty("REF_REFUND_AMOUNT")
+  @JsonDeserialize(using = UnpackingNestedStringTrimDeserializer.class)
+  @JsonSerialize(using = RepackNestedStringSerializer.class)
+  private String refRefundAmount;
+
+  @JsonProperty("REF_RECALL_PERCENT")
+  @JsonDeserialize(using = UnpackingNestedStringTrimDeserializer.class)
+  @JsonSerialize(using = RepackNestedStringSerializer.class)
+  private String refRecallPercent;
+
+  @JsonProperty("REF_RECALL_AMOUNT")
+  @JsonDeserialize(using = UnpackingNestedStringTrimDeserializer.class)
+  @JsonSerialize(using = RepackNestedStringSerializer.class)
+  private String refRecallAmount;
+
+  @JsonProperty("REF_LAST_NAME")
+  @JsonDeserialize(using = UnpackingNestedStringTrimDeserializer.class)
+  @JsonSerialize(using = RepackNestedStringSerializer.class)
+  private String refLastName;
+
+  @JsonProperty("REF_FIRST_NAME")
+  @JsonDeserialize(using = UnpackingNestedStringTrimDeserializer.class)
+  @JsonSerialize(using = RepackNestedStringSerializer.class)
+  private String refFirstName;
+
+  @JsonProperty("REF_CHECK_DATE")
+  @JsonDeserialize(using = UnpackingNestedStringTrimDeserializer.class)
+  @JsonSerialize(using = RepackNestedStringSerializer.class)
+  private String refCheckDate;
+
+  @JsonProperty("REF_CHECK_RETURNED")
+  @JsonDeserialize(using = UnpackingNestedStringTrimDeserializer.class)
+  @JsonSerialize(using = RepackNestedStringSerializer.class)
+  private String refCheckReturned;
+
+  @JsonProperty("REF_CHECK_CLEARED")
+  @JsonDeserialize(using = TrimmingDeserializer.class)
+  private String refCheckCleared;
+
+  @JsonProperty("REF_CHECK_PROCPER")
+  @JsonDeserialize(using = UnpackingNestedStringTrimDeserializer.class)
+  @JsonSerialize(using = RepackNestedStringSerializer.class)
+  private String refCheckProcper;
+
+  @JsonProperty("REF_ID_REFUNDED")
+  @JsonDeserialize(using = UnpackingNestedStringTrimDeserializer.class)
+  @JsonSerialize(using = RepackNestedStringSerializer.class)
+  private String refIdRefunded;
+
+  @JsonProperty("REF_ENTERED_BY")
+  @JsonDeserialize(using = UnpackingNestedStringTrimDeserializer.class)
+  @JsonSerialize(using = RepackNestedStringSerializer.class)
+  private String refEnteredBy;
+
+  @JsonProperty("REF_ENTERED_DATE")
+  @JsonDeserialize(using = UnpackingNestedStringTrimDeserializer.class)
+  @JsonSerialize(using = RepackNestedStringSerializer.class)
+  private String refEnteredDate;
+
+  @JsonProperty("REF_MODIFIED_BY")
+  @JsonDeserialize(using = UnpackingNestedStringTrimDeserializer.class)
+  @JsonSerialize(using = RepackNestedStringSerializer.class)
+  private String refModifiedBy;
+
+  @JsonProperty("REF_MODIFIED_DATE")
+  @JsonDeserialize(using = UnpackingNestedStringTrimDeserializer.class)
+  @JsonSerialize(using = RepackNestedStringSerializer.class)
+  private String refModifiedDate;
+
+  @JsonProperty("REF_STA_COPY_RECD")
+  @JsonDeserialize(using = TrimmingDeserializer.class)
+  private String refStaCopyRecd;
+
+  @JsonProperty("REF_RFND_AMT_FORN")
+  @JsonDeserialize(using = TrimmingDeserializer.class)
+  private String refRfndAmtForn;
+
+  @JsonProperty("REF_RFND_AMT_CURCD")
+  @JsonDeserialize(using = TrimmingDeserializer.class)
+  private String refRfndAmtCurcd;
+
+  @JsonProperty("REF_RECALL_AMTFORN")
+  @JsonDeserialize(using = TrimmingDeserializer.class)
+  private String refRecallAmtforn;
+
+  @JsonProperty("REF_RAW_TOT_CUR")
+  @JsonDeserialize(using = TrimmingDeserializer.class)
+  private String refRawTotCur;
+
+  @JsonProperty("REF_EXCHANGE_RATE")
+  @JsonDeserialize(using = TrimmingDeserializer.class)
+  private String refExchangeRate;
+
+  @JsonProperty("REF_PAYMENT_TICKET_NO")
+  @JsonDeserialize(using = TrimmingDeserializer.class)
+  private String refPaymentTicketNo;
+
+  @JsonProperty("REF_PAYMENT_SERVICES")
+  @JsonDeserialize(using = TrimmingDeserializer.class)
+  private String refPaymentServices;
+
+  @JsonProperty("REF_ORIG_RFND_AMT")
+  @JsonDeserialize(using = TrimmingDeserializer.class)
+  private String refOrigRfndAmt;
+
+  @JsonProperty("REF_INCENT_RFND_AMT")
+  @JsonDeserialize(using = TrimmingDeserializer.class)
+  private String refIncentRfndAmt;
+
+  @JsonProperty("REF_VCHR_TRANSACTION_ID")
+  @JsonDeserialize(using = TrimmingDeserializer.class)
+  private String refVchrTransactionId;
+
+  @JsonProperty("REF_SEQUENCE_NUM")
+  @JsonDeserialize(using = TrimmingDeserializer.class)
+  private String refSequenceNum;
+
+  @JsonProperty("REF_TC_EXP_DATE")
+  @JsonDeserialize(using = TrimmingDeserializer.class)
+  private String refTcExpDate;
+
+  @JsonProperty("TICKET_CREATE_TS")
+  @JsonDeserialize(using = TrimmingDeserializer.class)
+  private String ticketCreateTs;
+
+}

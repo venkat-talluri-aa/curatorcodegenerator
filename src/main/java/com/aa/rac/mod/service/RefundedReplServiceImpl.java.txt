@@ -1,0 +1,37 @@
+package com.aa.rac.mod.service.refundedrepl;
+
+import com.aa.rac.mod.domain.annotations.EmitToEventHub;
+import com.aa.rac.mod.domain.annotations.SetAuditColumns;
+import com.aa.rac.mod.domain.annotations.SetServiceClasses;
+import com.aa.rac.mod.domain.enums.CuratedEntityClassMapper;
+import com.aa.rac.mod.domain.enums.EventHubPojoClassMapper;
+import com.aa.rac.mod.domain.exceptions.QueueException;
+import com.aa.rac.mod.orm.dao.refundedrepl.RefundedRepl;
+import com.aa.rac.mod.repository.eventhub.Refunded;
+import com.aa.rac.mod.repository.findatahub.refundedrepl.RefundedReplRepository;
+import com.aa.rac.mod.service.abstracts.AbstractServiceEventHub;
+import java.util.concurrent.Future;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.stereotype.Service;
+
+
+/** RefundedRepl service implemenation. */
+@Service("RefundedReplServiceImpl")
+@EnableAsync
+@SetAuditColumns(targetCuratedCdcTimestampField = "eventHubTimestamp")
+@SetServiceClasses(eventHubClassMapper = EventHubPojoClassMapper.REFUNDED,
+    curatedTargetClassMapper = CuratedEntityClassMapper.REFUNDEDREPL,
+    repoClass = RefundedReplRepository.class
+)
+@EmitToEventHub(topicPropertyName = "spring.kafka.topics.emit.refunded")
+@SuppressWarnings("checkstyle:LineLength")
+public class RefundedReplServiceImpl 
+    extends AbstractServiceEventHub<Refunded, RefundedRepl, RefundedReplRepository> {
+  
+  @Override
+  @Async
+  public void processAsync(String topicPayload) throws QueueException { 
+    return processPayload(topicPayload);
+  }
+}

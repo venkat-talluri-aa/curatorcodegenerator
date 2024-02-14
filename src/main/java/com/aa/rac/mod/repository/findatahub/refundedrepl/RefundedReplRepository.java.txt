@@ -1,0 +1,17 @@
+package com.aa.rac.mod.repository.findatahub.refundedrepl;
+
+import com.aa.rac.mod.orm.dao.refundedrepl.RefundedRepl;
+import java.util.Optional;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
+
+/** RefundedRepl repository. */
+@Repository
+public interface RefundedReplRepository extends JpaRepository<RefundedRepl, String> { 
+
+  @Query(value = "SELECT * FROM replicated.refd0001_reft0020_refunded"
+                + " WHERE refunded_uuid=?1", 
+                  nativeQuery = true)
+  Optional<RefundedRepl> findByRefundedUuid(String refundedUuid);
+}

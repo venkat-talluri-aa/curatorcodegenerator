@@ -1,0 +1,48 @@
+package com.aa.rac.mod.resources.kafka;
+
+import com.aa.rac.mod.orm.dao.agdexfarrepl.AgdexfarRepl;
+import com.aa.rac.mod.repository.eventhub.Agdexfar;
+import com.aa.rac.mod.domain.BaseService;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import java.util.concurrent.ExecutionException;
+import org.apache.kafka.clients.consumer.ConsumerRecords;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Profile;
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.support.Acknowledgment;
+import org.springframework.stereotype.Component;
+
+/** Agdexfar topic processor. */
+@Component
+@Profile("!JunitTest")
+@ConditionalOnProperty(name = "spring.kafka.topics.recieve.agdexfar.enabled", havingValue = "true")
+public class AgdexfarTopicProcessor 
+    extends AbstractTopicProcessor {
+
+  @Autowired
+  public AgdexfarTopicProcessor(
+      @Qualifier("AgdexfarReplServiceImpl")
+      BaseService<Agdexfar, AgdexfarRepl> baseService) {
+    super(baseService);
+  }
+
+  @KafkaListener(
+      id = "${spring.kafka.topics.recieve.agdexfar.destination}",
+      topics = "#{'${spring.kafka.topics.recieve.agdexfar.destination}'.split(',')}",
+      concurrency = "${CONSUMER_CONCURRENCY_COUNT}",
+      clientIdPrefix = "agdexfar",
+      batch = "true",
+      properties = {
+        "auto.offset.reset:earliest",
+        "reconnect.backoff.max.ms:5000",
+        "reconnect.backoff.ms:1000",
+        "retry.backoff.ms:5000"
+      })
+  @CircuitBreaker(name = "${spring.kafka.topics.recieve.agdexfar.destination}")
+  public void agdexfar(ConsumerRecords<String, String> payload, Acknowledgment acknowledgment)
+      throws InterruptedException, ExecutionException {
+    processItems(payload);
+    acknowledgment.acknowledge();
+  }}

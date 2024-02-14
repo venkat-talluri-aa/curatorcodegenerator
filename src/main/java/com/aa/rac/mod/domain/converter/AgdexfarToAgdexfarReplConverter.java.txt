@@ -1,0 +1,62 @@
+package com.aa.rac.mod.domain.converter;
+
+import com.aa.rac.mod.domain.util.RacUtil;
+import com.aa.rac.mod.orm.dao.agdexfarrepl.AgdexfarRepl;
+import com.aa.rac.mod.repository.eventhub.Agdexfar;
+import java.math.RoundingMode;
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.time.temporal.ChronoUnit;
+import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.core.convert.converter.Converter;
+
+/** Agdexfar to AgdexfarRepl converter. */
+@SuppressWarnings("checkstyle:LineLength")
+public class AgdexfarToAgdexfarReplConverter
+    implements Converter<Agdexfar, AgdexfarRepl> {
+
+  protected final Logger logger = LoggerFactory.getLogger(this.getClass());
+
+  @Override
+  public AgdexfarRepl convert(@NotNull Agdexfar source) {
+    AgdexfarRepl target = new AgdexfarRepl();
+    try { 
+      if (source.getEntityType() == null) {
+        throw new IllegalArgumentException("EntityType in eventhub pojo cannot be null");
+      }
+      switch (source.getEntityType()) {
+        case "PT", "UP", "RR" -> {
+          target.setTicketUuid(#TODO: GENERATE HASH);
+          target.setXtdTicketNo(source.getXtdTicketNo());
+          target.setXtdFareCalc(source.getXtdFareCalc());
+          target.setXtdCreatedBy(source.getXtdCreatedBy());
+          target.setXtdCreatedTime(RacUtil.getSqlTimeFromDb2DateTime(source.getXtdCreatedTime()));
+          target.setXtdModifiedBy(source.getXtdModifiedBy());
+          target.setXtdModifiedTime(RacUtil.getSqlTimeFromDb2DateTime(source.getXtdModifiedTime()));
+          target.setXtdPartitionNbr(Integer.parseInt(source.getXtdPartitionNbr()));
+          target.setTicketCreateTs(RacUtil.getSqlTimeFromDb2DateTime(source.getTicketCreateTs(), ChronoUnit.SECONDS));
+        }
+        case "DL" -> {
+          target.setTicketUuid(#TODO: GENERATE HASH);
+          target.setXtdTicketNo(source.getXtdTicketNoBefore());
+          target.setXtdFareCalc(source.getXtdFareCalcBefore());
+          target.setXtdCreatedBy(source.getXtdCreatedByBefore());
+          target.setXtdCreatedTime(RacUtil.getSqlTimeFromDb2DateTime(source.getXtdCreatedTimeBefore()));
+          target.setXtdModifiedBy(source.getXtdModifiedByBefore());
+          target.setXtdModifiedTime(RacUtil.getSqlTimeFromDb2DateTime(source.getXtdModifiedTimeBefore()));
+          target.setXtdPartitionNbr(Integer.parseInt(source.getXtdPartitionNbrBefore()));
+          target.setTicketCreateTs(RacUtil.getSqlTimeFromDb2DateTime(source.getTicketCreateTsBefore(), ChronoUnit.SECONDS));
+        }
+        default -> throw new IllegalStateException(
+            "Unexpected value: " + source.getEntityType());
+      }
+    } catch (Exception ex) {
+      logger.error("Error occured in agdexfar convertor {} ", ex.getMessage());
+      ex.printStackTrace();
+      throw new RuntimeException(ex);
+    }
+    return target;
+  }
+}
