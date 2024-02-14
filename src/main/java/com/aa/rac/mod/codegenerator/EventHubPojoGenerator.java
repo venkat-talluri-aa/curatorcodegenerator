@@ -29,6 +29,7 @@ public class EventHubPojoGenerator {
   private Map<String, Object> json = new LinkedHashMap<>();
 
   private String unpackedTrim = "UnpackingNestedStringTrimDeserializer";
+  private String repacked = "RepackNestedStringSerializer";
   private String unpacked = "";
 
   private String trimmed = "TrimmingDeserializer";
@@ -80,11 +81,16 @@ public class EventHubPojoGenerator {
   }
 
   public void addImportStatements() throws IOException {
-    String imports = "import com.aa.rac.mod.domain.serialization.TrimmingDeserializer;\n" +
+    String imports = "import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;\n" +
+        "import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;\n\n" +
+        "import com.aa.rac.mod.domain.serialization.RepackNestedStringSerializer;\n" +
+        "import com.aa.rac.mod.domain.serialization.TrimmingDeserializer;\n" +
         "import com.aa.rac.mod.domain.serialization.UnpackingNestedStringTrimDeserializer;\n" +
+        "import com.fasterxml.jackson.annotation.JsonAutoDetect;\n" +
         "import com.fasterxml.jackson.annotation.JsonIgnoreProperties;\n" +
         "import com.fasterxml.jackson.annotation.JsonProperty;\n" +
         "import com.fasterxml.jackson.databind.annotation.JsonDeserialize;\n" +
+        "import com.fasterxml.jackson.databind.annotation.JsonSerialize;\n" +
         "import lombok.Getter;\n" +
         "import lombok.NoArgsConstructor;\n" +
         "import lombok.Setter;\n" +
@@ -98,6 +104,7 @@ public class EventHubPojoGenerator {
 
   public void addClassAnnotations() throws IOException {
     String annotations = "\n@JsonIgnoreProperties(ignoreUnknown = true)\n" +
+        "@JsonAutoDetect(fieldVisibility = ANY, getterVisibility = NONE, setterVisibility = NONE)\n" +
         "@NoArgsConstructor\n" +
         "@ToString(callSuper = true)\n" +
         "@Setter\n" +
@@ -125,6 +132,10 @@ public class EventHubPojoGenerator {
     return "@JsonDeserialize(using = " + className + ".class)\n";
   }
 
+  public String getJsonSerializeAnnotation(String className) {
+    return "@JsonSerialize(using = " + className + ".class)\n";
+  }
+
   public void addFields() {
     for (Map.Entry<String, Object> entry: json.entrySet()) {
       String field = entry.getKey();
@@ -138,6 +149,7 @@ public class EventHubPojoGenerator {
 
         if (value.contains("{")) {
           lines.add("  " + getJsonDeserializeAnnotation(unpackedTrim));
+          lines.add("  " + getJsonSerializeAnnotation(repacked));
         } else {
           lines.add("  " + getJsonDeserializeAnnotation(trimmed));
         }

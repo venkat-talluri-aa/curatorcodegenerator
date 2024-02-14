@@ -19,7 +19,7 @@ public class DDLSQLFileGenerator {
 
   private static final String replSourcePath = "./src/test/resources/";
 
-  private String tableName;
+  public String tableName;
 
   private static final String end = ";";
   private FileWriter fileWriter = null;
@@ -57,7 +57,7 @@ public class DDLSQLFileGenerator {
 
   public DDLSQLFileGenerator(String filePath, String tableName, String[] uuidColumnNames) {
     this.filePath = filePath;
-    this.tableName = tableName;
+    this.tableName = tableName.toLowerCase();
     this.uuidColumnNames = Arrays.asList(uuidColumnNames);
   }
 

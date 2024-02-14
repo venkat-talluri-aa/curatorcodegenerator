@@ -82,19 +82,17 @@ public class ServiceFileGenerator {
   public void addImportStatements(String eventHubImportPath,
                                   String replicatedImportPath,
                                   String repositoryImportPath) throws IOException {
-    String imports = "import com.aa.rac.mod.domain.AbstractServiceEventHub;\n" +
+    String imports = "import com.aa.rac.mod.domain.annotations.EmitToEventHub;\n" +
         "import com.aa.rac.mod.domain.annotations.SetAuditColumns;\n" +
         "import com.aa.rac.mod.domain.annotations.SetServiceClasses;\n" +
         "import com.aa.rac.mod.domain.enums.CuratedEntityClassMapper;\n" +
         "import com.aa.rac.mod.domain.enums.EventHubPojoClassMapper;\n" +
-        "import com.aa.rac.mod.domain.enums.ServiceClassMapper;\n" +
-        "import com.aa.rac.mod.domain.exceptions.ProcessingException;\n" +
+        "import com.aa.rac.mod.domain.exceptions.QueueException;\n" +
         "import " + replicatedImportPath + ";\n" +
         "import " + eventHubImportPath + ";\n" +
         "import " + repositoryImportPath + ";\n" +
-        "import java.time.LocalDateTime;\n" +
-        "import org.springframework.beans.factory.annotation.Autowired;\n" +
-        "import org.springframework.beans.factory.annotation.Qualifier;\n" +
+        "import com.aa.rac.mod.service.abstracts.AbstractServiceEventHub;\n" +
+        "import java.util.concurrent.Future;\n" +
         "import org.springframework.scheduling.annotation.Async;\n" +
         "import org.springframework.scheduling.annotation.EnableAsync;\n" +
         "import org.springframework.stereotype.Service;\n";
@@ -102,17 +100,19 @@ public class ServiceFileGenerator {
   }
 
   public void addClassJavaDoc() {
-    lines.add("/** " + replicatedClassName + " service implemenation. */\n");
+    lines.add("/** " + replicatedClassName + " service implementation. */\n");
   }
 
   public String getClassAnnotations() {
-    return "@Service\n" +
+    return "@Service(\""+serviceClassName+"\")\n" +
         "@EnableAsync\n" +
         "@SetAuditColumns(targetCuratedCdcTimestampField = \"eventHubTimestamp\")\n" +
         "@SetServiceClasses(eventHubClassMapper = EventHubPojoClassMapper." + eventHubClassName.toUpperCase() + ",\n" +
         "    curatedTargetClassMapper = CuratedEntityClassMapper." + replicatedClassName.toUpperCase() + ",\n" +
         "    repoClass = " + repositoryClassName + ".class\n" +
-        ")\n";
+        ")\n" +
+        "@EmitToEventHub(topicPropertyName = \"spring.kafka.topics.emit."+eventHubClassName.toLowerCase()+"\")\n"+
+        "@SuppressWarnings(\"checkstyle:LineLength\")\n";
   }
 
   public void addInitialClassTemplate(String className) {
@@ -126,44 +126,11 @@ public class ServiceFileGenerator {
     return "\n  @Override\n" + "  @Async";
   }
 
-  public void addMethod(boolean isException) {
-    String parameter;
-    String retry;
-    String payload;
-    String serviceClassMapper;
-    String eventHubClassMapper;
-    String replicatedClassMapper;
-    if (isException) {
-      parameter = "ProcessingException processingException";
-      retry = "processingException.getRetryCount() + 1";
-      payload = "processingException.getPayload()";
-      serviceClassMapper = "processingException.getCurator()";
-      eventHubClassMapper = "processingException.getEventHubSource()";
-      replicatedClassMapper = "processingException.getCuratedTarget()";
-    } else {
-      parameter = "String topicPayload";
-      retry = "1";
-      payload = "topicPayload";
-      serviceClassMapper = "ServiceClassMapper."+ replicatedClassName.toUpperCase() +"_SERVICE_IMPL";
-      eventHubClassMapper = "EventHubPojoClassMapper." + eventHubClassName.toUpperCase();
-      replicatedClassMapper = "CuratedEntityClassMapper." + replicatedClassName.toUpperCase();
-      this.serviceClassMapper = serviceClassMapper;
-      this.eventHubClassMapper = eventHubClassMapper;
-      this.replicatedClassMapper = replicatedClassMapper;
-    }
+  public void addMethod() {
     lines.add("  " + getMethodAnnotation());
-    lines.add("\n  public void processAsync("+ parameter + ") throws ProcessingException { \n");
-    lines.add("    try {\n" +
-        "      processToCuratedAndEmit("+ payload + ");\n" +
-        "    } catch (ProcessingException e) {\n" +
-        "      e.setCurator("+ serviceClassMapper +");\n" +
-        "      e.setEventHubSource(" + eventHubClassMapper + ");\n" +
-        "      e.setCuratedTarget(" + replicatedClassMapper + ");\n" +
-        "      e.setPayload("+payload +");\n" +
-        "      e.setRetryCount("+ retry +");\n" +
-        "      e.setExceptionTimestamp(LocalDateTime.now());\n" +
-        "      throw e;\n" +
-        "    }\n  }\n");
+    lines.add("\n  public void processAsync(String topicPayload) throws QueueException { \n");
+    lines.add("    return processPayload(topicPayload);\n" +
+        "  }\n");
 
 
   }
@@ -182,8 +149,7 @@ public class ServiceFileGenerator {
         repositoryFileGenerator.getRepositoryImportPath());
     addClassJavaDoc();
     addInitialClassTemplate(serviceClassName);
-    addMethod(false);
-    addMethod(true);
+    addMethod();
     addEndingLine();
     this.generatedOutput = String.join("", lines);
 //    System.out.println(this.generatedOutput);
