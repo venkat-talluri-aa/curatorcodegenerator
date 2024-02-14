@@ -57,7 +57,7 @@ public class ServiceFileGenerator {
   }
 
   public String getServiceDirectory() {
-    return pwd + replSourcePath.substring(1);
+    return pwd + replSourcePath.substring(1)+replicatedClassName.toLowerCase();
   }
 
   public String getServiceImportPath() {
