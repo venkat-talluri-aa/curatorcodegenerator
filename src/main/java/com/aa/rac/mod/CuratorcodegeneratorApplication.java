@@ -21,9 +21,9 @@ public class CuratorcodegeneratorApplication {
 	public static void main(String[] args) throws IOException {
 		SpringApplication.run(CuratorcodegeneratorApplication.class, args);
 
-		String fileName = "refunded";
-		String[] uuids = {"REFUNDED_UUID"};
-		String tableName = "refd0001_reft0020_refunded";
+		String fileName = "agdexfar";
+		String[] uuids = {"TICKET_UUID"};
+		String tableName = "agyd0001_agyt0900_agdexfar";
 
 		String resourcesPath = System.getProperty("user.dir").replace('\\', '/')
 				+ "/src/main/resources/" + fileName +"/";
