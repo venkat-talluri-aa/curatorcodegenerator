@@ -134,10 +134,11 @@ public class ReplicatedFileGenerator {
     String imports = "import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.ANY;\n" +
         "import static com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility.NONE;\n" +
         "\n" +
-        "import com.aa.rac.mod.domain.enums.CuratedEntityClassMapper;\n" +
         "import com.aa.rac.mod.domain.util.RacUtil;\n" +
         "import com.aa.rac.mod.orm.dao.AbstractCuratedBaseEntity;\n" +
         "import com.fasterxml.jackson.annotation.JsonAutoDetect;\n" +
+        "import com.fasterxml.jackson.annotation.JsonFormat;\n" +
+        "import com.fasterxml.jackson.annotation.JsonProperty;\n" +
         "import jakarta.persistence.Column;\n" +
         "import jakarta.persistence.Entity;\n" +
         "import jakarta.persistence.Id;\n" +
@@ -159,7 +160,7 @@ public class ReplicatedFileGenerator {
 
   public void addClassAnnotations() throws IOException {
     String annotations = "@Entity\n" +
-        "@Table(name = \"" + tableName + "\", schema = \""
+        "@Table(name = \"" +ddlsqlFileGenerator.tableName+ "\", schema = \""
         + CuratorcodegeneratorApplication.SCHEMA_NAME + "\")\n" +
         "@JsonAutoDetect(fieldVisibility = ANY, getterVisibility = NONE, setterVisibility = NONE)\n" +
         "@NoArgsConstructor\n" +
@@ -191,6 +192,17 @@ public class ReplicatedFileGenerator {
     return "@Column(name = \"" + field + "\"" + nullable + ")\n";
   }
 
+  public String getJsonPropertyAnnotation(String field) {
+    if (!ddlsqlFileGenerator.uuidColumnNames.contains(field) && !ddlsqlFileGenerator.getNullMap().containsKey(field)) {
+      throw new IllegalArgumentException("Field not found: " + field);
+    }
+    return "@JsonProperty(\"" + field + "\")\n";
+  }
+
+  public String getJsonFormatAnnotation(String field) {
+    return "@JsonFormat(pattern = \"yyyy-MM-dd\")\n";
+  }
+
   public String getIdAnnotation() {
     return "@Id\n";
   }
@@ -202,6 +214,7 @@ public class ReplicatedFileGenerator {
         lines.add("  " + getIdAnnotation());
       }
       lines.add("  " + getColumnAnnotation(uuidColumnName));
+      lines.add("  " + getJsonPropertyAnnotation(uuidColumnName));
       columnTypes.put(uuidColumnName, "String");
       lines.add("  private String " + FileUtil.getFieldName(uuidColumnName) + ";\n\n");
     }
@@ -212,6 +225,10 @@ public class ReplicatedFileGenerator {
         continue;
       }
       lines.add("  " + getColumnAnnotation(field));
+      lines.add("  " + getJsonPropertyAnnotation(field));
+      if (ddlsqlFileGenerator.getDataTypeMap().get(field).equalsIgnoreCase("date")) {
+        lines.add("  " + getJsonFormatAnnotation(field));
+      }
       if (field.equalsIgnoreCase("TICKET_CREATE_TS")) {
         columnTypes.put(field, "Timestamp");
         lines.add("  private Timestamp " + FileUtil.getFieldName(field) +";\n\n");

@@ -12,10 +12,6 @@ import org.springframework.util.StringUtils;
 
 public class TestFileGenerator {
 
-  private static final String pwd = System.getProperty("user.dir").replace('\\', '/');
-
-  private static final String replSourcePath = "./src/test/java/com/aa/rac/mod/service/";
-
   private static final String packageName = "com.aa.rac.mod.service.";
 
   private String eventHubClassName;
@@ -25,6 +21,10 @@ public class TestFileGenerator {
   private String repositoryClassName;
 
   private String serviceClassName;
+
+  private String mockedServiceClassName;
+
+  private String spyServiceClassName;
 
   private String testClassName;
 
@@ -57,6 +57,10 @@ public class TestFileGenerator {
 
   private String insertException;
 
+  private String hexCharsVariable;
+
+  private String logPiiException;
+
   String insFilepath;
   String updFilepath;
   String delFilepath;
@@ -86,9 +90,13 @@ public class TestFileGenerator {
     this.insertVariable = "insert"+this.eventHubClassName;
     this.updateVariable = "update"+this.eventHubClassName;
     this.deleteVariable = "delete"+this.eventHubClassName;
+    this.hexCharsVariable = "hexChars"+this.eventHubClassName;
+    this.logPiiException = "logPii"+this.eventHubClassName+"Exception";
     this.replCamel = this.replicatedClassName.substring(0, 1).toLowerCase() + this.replicatedClassName.substring(1);
     this.uuidColumn = StringUtils.capitalize(FileUtil.getFieldName(repositoryFileGenerator.uuidColumnName));
     this.insertException = this.insertVariable +"Exception";
+    this.mockedServiceClassName = this.serviceClassName.substring(0, 1).toLowerCase()+this.serviceClassName.substring(1).replace("Impl", "");
+    this.spyServiceClassName = this.mockedServiceClassName + "Spy";
     readFiles();
   }
 
@@ -125,7 +133,7 @@ public class TestFileGenerator {
   }
 
   public String getServiceDirectory() {
-    return pwd + replSourcePath.substring(1) + "/" + replicatedClassName.toLowerCase() ;
+    return serviceFileGenerator.getServiceDirectory().replace("main", "test");
   }
 
   public String getFullServiceFilePath() {
@@ -148,41 +156,57 @@ public class TestFileGenerator {
                                   String repositoryImportPath) throws IOException {
     String imports = "import static org.junit.jupiter.api.Assertions.assertEquals;\n" +
         "import static org.junit.jupiter.api.Assertions.assertNotNull;\n" +
+        "import static org.junit.jupiter.api.Assertions.assertNull;\n" +
+        "import static org.junit.jupiter.api.Assertions.assertThrows;\n" +
         "import static org.junit.jupiter.api.Assertions.assertTrue;\n" +
         "import static org.junit.jupiter.api.Assertions.fail;\n" +
+        "import static org.mockito.ArgumentMatchers.any;\n" +
+        "import static org.mockito.ArgumentMatchers.anyInt;\n" +
+        "import static org.mockito.ArgumentMatchers.anyString;\n" +
+        "import static org.mockito.Mockito.doThrow;\n" +
+        "import static org.mockito.Mockito.spy;\n" +
         "import static org.mockito.Mockito.times;\n" +
         "import static org.mockito.Mockito.verify;\n" +
         "\n" +
-        "import com.aa.rac.mod.domain.BaseService;\n" +
-        "import com.aa.rac.mod.domain.enums.CuratedEntityClassMapper;\n" +
-        "import com.aa.rac.mod.domain.enums.EventHubPojoClassMapper;\n" +
         "import com.aa.rac.mod.domain.enums.ExceptionType;\n" +
-        "import com.aa.rac.mod.domain.enums.ServiceClassMapper;\n" +
         "import com.aa.rac.mod.domain.exceptions.ProcessingException;\n" +
         "import com.aa.rac.mod.domain.exceptions.ProcessingExceptionHandler;\n" +
+        "import com.aa.rac.mod.domain.exceptions.QueueException;\n" +
         "import com.aa.rac.mod.domain.util.RacUtil;\n" +
         "import " + replicatedImportPath + ";\n" +
         "import " + eventHubImportPath + ";\n" +
         "import " + repositoryImportPath + ";\n" +
+            "import com.aa.rac.mod.service.BaseService;\n" +
         "import com.aa.rac.mod.util.AbstractTestSupport;\n" +
         "import com.aa.rac.mod.util.TestUtil;\n" +
+        "import com.azure.messaging.servicebus.ServiceBusSenderClient;\n" +
         "import com.fasterxml.jackson.databind.ObjectMapper;\n" +
         "import java.math.BigInteger;\n" +
         "import java.time.format.DateTimeFormatter;\n" +
         "import java.util.Optional;\n" +
         "import java.util.concurrent.CountDownLatch;\n" +
+            "import java.util.concurrent.ExecutionException;\n" +
+            "import java.util.concurrent.Future;\n" +
         "import java.util.concurrent.TimeUnit;\n" +
-        "import nl.altindag.log.LogCaptor;\n" +
         "import org.junit.jupiter.api.BeforeEach;\n" +
         "import org.junit.jupiter.api.DisplayName;\n" +
         "import org.junit.jupiter.api.Test;\n" +
         "import org.junit.jupiter.api.extension.ExtendWith;\n" +
-        "import org.mockito.Mockito;\n" +
+            "import org.mockito.ArgumentCaptor;\n" +
+        "import org.mockito.Captor;\n" +
+        "import org.mockito.InjectMocks;\n" +
         "import org.mockito.junit.jupiter.MockitoExtension;\n" +
         "import org.springframework.beans.factory.annotation.Autowired;\n" +
+            "import org.springframework.beans.factory.annotation.Qualifier;\n" +
         "import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;\n" +
         "import org.springframework.boot.test.context.SpringBootTest;\n" +
-        "import org.springframework.boot.test.mock.mockito.MockBean;\n";
+        "import org.springframework.boot.test.mock.mockito.MockBean;\n" +
+            "import org.springframework.boot.test.system.CapturedOutput;\n" +
+            "import org.springframework.boot.test.system.OutputCaptureExtension;\n" +
+            "import org.springframework.data.mapping.MappingException;\n" +
+            "import org.springframework.kafka.annotation.EnableKafka;\n" +
+            "import org.springframework.kafka.core.KafkaTemplate;\n" +
+            "import org.springframework.kafka.test.context.EmbeddedKafka;\n";
     lines.add(imports +"\n\n");
   }
 
@@ -191,9 +215,14 @@ public class TestFileGenerator {
   }
 
   public String getClassAnnotations() {
-    return "@SpringBootTest\n" +
+    return "@EnableKafka\n" +
+            "@SpringBootTest\n" +
+            "@EmbeddedKafka(\n" +
+            "    partitions = 1,\n" +
+            "    controlledShutdown = false,\n" +
+            "    brokerProperties = {\"listeners=PLAINTEXT://localhost:3333\", \"port=3333\"})\n" +
         "@AutoConfigureTestDatabase\n" +
-        "@ExtendWith(MockitoExtension.class)\n" +
+        "@ExtendWith(MockitoExtension.class, OutputCaptureExtension.class)\n" +
         "@SuppressWarnings(\"checkstyle:LineLength\")\n";
   }
 
@@ -208,21 +237,31 @@ public class TestFileGenerator {
         "\n" +
         "  DateTimeFormatter formatter = DateTimeFormatter.ofPattern(\"yyyy-MM-dd HH:mm:ss.SSS\");\n" +
         "\n" +
-        "  private LogCaptor logCaptor;\n" +
+        "  @MockBean KafkaTemplate<String, String> kafkaTemplate;\n" +
         "\n" +
-        "  @MockBean\n" +
-        "  ProcessingExceptionHandler processingExceptionHandler;\n");
+        "  @Captor ArgumentCaptor<String> throwableCaptor;\n" +
+        "\n" +
+        "  @MockBean ProcessingExceptionHandler processingExceptionHandler;\n" +
+            "\n" +
+        "  @MockBean ServiceBusSenderClient serviceBusSenderClient;\n");
     lines.add("\n  @Autowired \n" +
         "  private " + repositoryClassName + " "
         + repoVariable + ";");
-    lines.add("\n\n  @Autowired\n  private BaseService<"+eventHubClassName+", "+replicatedClassName+"> " + serviceVariable+";");
-    lines.add("\n\n\n  private final String " + insertVariable + " = \""
-        + String.join("", FileUtil.readLinesFromFile(insFilepath)).replace("\"", "\\\"")+"\";");
+    lines.add("\n\n  @Autowired\n  @Qualifier(\""+serviceClassName+"\")\n  private BaseService<"+eventHubClassName+", "+replicatedClassName+"> " + serviceVariable+";");
+    lines.add("\n\n  @InjectMocks\n  " + serviceClassName + " " + mockedServiceClassName+";");
+    lines.add("\n\n  " + serviceClassName + " " + spyServiceClassName + ";");
+  }
+
+  public void addEndingFields() throws IOException {
+    lines.add("\n  private final String " + insertVariable + " = \""
+            + String.join("", FileUtil.readLinesFromFile(insFilepath)).replace("\"", "\\\"")+"\";");
     lines.add("\n\n  private final String " + updateVariable + " = \""
-        + String.join("", FileUtil.readLinesFromFile(updFilepath)).replace("\"", "\\\"")+"\";");
+            + String.join("", FileUtil.readLinesFromFile(updFilepath)).replace("\"", "\\\"")+"\";");
     lines.add("\n\n  private final String " + deleteVariable +  " = \""
-        + String.join("", FileUtil.readLinesFromFile(delFilepath)).replace("\"", "\\\"")+"\";");
+            + String.join("", FileUtil.readLinesFromFile(delFilepath)).replace("\"", "\\\"")+"\";");
     lines.add("\n\n  private final String " + insertException + " = #TODO;");
+    lines.add("\n\n  private final String " + hexCharsVariable + " = #TODO;");
+    lines.add("\n\n  private final String " + logPiiException + " = #TODO;\n\n");
   }
   public void addInsertTest() {
     lines.add("  /** Test insert. */\n" +
@@ -231,8 +270,7 @@ public class TestFileGenerator {
         "  public void testInsert() {\n" +
         "    try {\n" +
         "\n" +
-        "      "+serviceVariable+".processAsync("+insertVariable+");\n" +
-        "      lock.await(1000, TimeUnit.MILLISECONDS);\n" +
+        "      "+serviceVariable+".processAsync("+insertVariable+").get();\n" +
         "\n" +
         "      "+eventHubClassName+" "+eventHubClassName.toLowerCase()+" = mapper.readValue("+insertVariable+", "+eventHubClassName+".class);\n" +
         "\n" +
@@ -269,12 +307,8 @@ public class TestFileGenerator {
         "  public void testUpdate() {\n" +
         "    try {\n" +
         "\n" +
-        "      "+serviceVariable+".processAsync("+insertVariable+");\n" +
-        "      lock.await(1000, TimeUnit.MILLISECONDS);\n" +
-        "\n" +
-        "      "+serviceVariable+".processAsync("+updateVariable+");\n" +
-        "      lock.await(1000, TimeUnit.MILLISECONDS);\n" +
-        "\n" +
+        "      "+serviceVariable+".processAsync("+insertVariable+").get();\n" + "\n" +
+        "      "+serviceVariable+".processAsync("+updateVariable+").get();\n" + "\n" +
         "      "+eventHubClassName+" "+eventHubClassName.toLowerCase()+" = mapper.readValue("+insertVariable+", "+eventHubClassName+".class);\n" +
         "\n" +
         "      String uuid = #TODO \n"+
@@ -303,52 +337,18 @@ public class TestFileGenerator {
         "  }\n\n");
   }
 
-  public void addConcurrentInsertTest() {
-    lines.add("  /** Test concurrent inserts. */\n" +
-        "  @Test\n" +
-        "  @DisplayName(\"Concurrent INSERTS throwing Exception\")\n" +
-        "  public void testConcurrentInserts() {\n" +
-        "    try {\n" +
-        "\n" +
-        "      "+serviceVariable+".processAsync("+insertVariable+");\n" +
-        "      "+serviceVariable+".processAsync("+updateVariable+");\n" +
-        "      "+serviceVariable+".processAsync("+deleteVariable+");\n" +
-        "      lock.await(5000, TimeUnit.MILLISECONDS);\n" + "\n" +
-        "      "+eventHubClassName+" "+eventHubClassName.toLowerCase()+" = mapper.readValue("+insertVariable+", "+eventHubClassName+".class);\n" +
-        "\n" +
-        "      String uuid = #TODO \n"+
-        "\n" +
-        "      Optional<"+replicatedClassName+"> "+replCamel+" =\n" +
-        "          "+repoVariable+".findBy"+uuidColumn+"(uuid);\n" +
-        "      assertNotNull("+replCamel+", \""+replCamel+" is null\");\n" +
-        "      assertTrue("+replCamel+".isPresent(), \"No "+replCamel+" present\");\n" +
-        "      assertEquals(uuid, "+replCamel+".get().get"+ uuidColumn +"(),\n" +
-        "          \"UUID: Expected=\" + uuid\n" +
-        "              + \"; Actual=\" + "+replCamel+".get().get"+uuidColumn+"());\n" +
-        "\n" +
-        "      TestUtil.assertConcurrentEvents(\n" +
-        "          "+replCamel+".get(),\n" +
-        "          processingExceptionHandler,\n" +
-        "          logCaptor,\n"+
-        "          3, 0);\n" +
-        "    } catch (Exception e) {\n" +
-        "      fail(e.getMessage(), e);\n" +
-        "    }\n" +
-        "  }\n\n");
-  }
-
-  public void addConcurrentUpdateTest() {
+  public void addConcurrentUpdatesAndRetriesTest() {
     lines.add("  /** Test concurrent updates. */\n" +
         "  @Test\n" +
-        "  @DisplayName(\"Concurrent UPDATES throwing Exception\")\n" +
-        "  public void testConcurrentUpdates() {\n" +
+        "  @DisplayName(\"Concurrent UPDATES and RETRIES\")\n" +
+        "  public void testConcurrentUpdates(CapturedOutput output) {\n" +
         "    try {\n" +
         "\n" +
-        "      "+serviceVariable+".processAsync("+insertVariable+");\n" +
-        "      lock.await(1000, TimeUnit.MILLISECONDS);\n\n" +
+        "      "+serviceVariable+".processAsync("+insertVariable+").get();\n" +
+        "      "+serviceVariable+".processAsync("+updateVariable+");\n" +
         "      "+serviceVariable+".processAsync("+updateVariable+");\n" +
         "      "+serviceVariable+".processAsync("+deleteVariable+");\n" +
-        "      lock.await(4000, TimeUnit.MILLISECONDS);\n" + "\n" +
+        "      lock.await(12, TimeUnit.SECONDS);\n" + "\n" +
         "      "+eventHubClassName+" "+eventHubClassName.toLowerCase()+" = mapper.readValue("+insertVariable+", "+eventHubClassName+".class);\n" +
         "\n" +
         "      String uuid = #TODO \n"+
@@ -364,8 +364,13 @@ public class TestFileGenerator {
         "      TestUtil.assertConcurrentEvents(\n" +
         "          "+replCamel+".get(),\n" +
         "          processingExceptionHandler,\n" +
-        "          logCaptor,\n" +
-        "          2, 1);\n" +
+        "          output,\n" +
+        "          3, 1);\n" +
+        "    int errorsExpected =\n" +
+                    "          TestUtil.getLogMessageCountWithMessages(\n" +
+                    "              output.getErr(), ExceptionType.FAILURE_CONCURRENT_UPDATE.name());\n" +
+                    "      assertEquals(0, errorsExpected, \"errorsExpected is not 0\");\n" +
+                    "      assertTrue("+replCamel+".get().getSrcDeletedIndicator(), \"srcDeletedIndicator is false\");\n"+
         "    } catch (Exception e) {\n" +
         "      fail(e.getMessage(), e);\n" +
         "    }\n" +
@@ -379,12 +384,8 @@ public class TestFileGenerator {
         "  public void testDelete() {\n" +
         "    try {\n" +
         "\n" +
-        "      "+serviceVariable+".processAsync("+insertVariable+");\n" +
-        "      lock.await(1000, TimeUnit.MILLISECONDS);\n" +
-        "\n" +
-        "      "+serviceVariable+".processAsync("+deleteVariable+");\n" +
-        "      lock.await(1000, TimeUnit.MILLISECONDS);\n" +
-        "\n" +
+        "      "+serviceVariable+".processAsync("+insertVariable+").get();\n" + "\n" +
+        "      "+serviceVariable+".processAsync("+deleteVariable+").get();\n" + "\n" +
         "      "+eventHubClassName+" "+eventHubClassName.toLowerCase()+" = mapper.readValue("+insertVariable+", "+eventHubClassName+".class);\n" +
         "\n" +
         "      String uuid = #TODO \n"+
@@ -423,8 +424,7 @@ public class TestFileGenerator {
         "  public void testOutOfOrderUpdate() {\n" +
         "    try {\n" +
         "\n" +
-        "      "+serviceVariable+".processAsync("+updateVariable+");\n" +
-        "      lock.await(1000, TimeUnit.MILLISECONDS);\n" +
+        "      "+serviceVariable+".processAsync("+updateVariable+").get();\n" +
         "\n" +
         "      "+eventHubClassName+" "+eventHubClassName.toLowerCase()+" = mapper.readValue("+updateVariable+", "+eventHubClassName+".class);\n" +
         "\n" +
@@ -464,8 +464,7 @@ public class TestFileGenerator {
         "  public void testOutOfOrderDelete() {\n" +
         "    try {\n" +
         "\n" +
-        "      "+serviceVariable+".processAsync("+deleteVariable+");\n" +
-        "      lock.await(1000, TimeUnit.MILLISECONDS);\n" +
+        "      "+serviceVariable+".processAsync("+deleteVariable+").get();\n" +
         "\n" +
         "      "+eventHubClassName+" "+eventHubClassName.toLowerCase()+" = mapper.readValue("+deleteVariable+", "+eventHubClassName+".class);\n" +
         "\n" +
@@ -496,20 +495,18 @@ public class TestFileGenerator {
   }
 
   public void addIgnoreTest() {
-    lines.add("  /**\n" +
+    lines.add("\n  /**\n" +
         "   * Event out of order with older record coming later.\n" +
         "   * For e.g. INSERT comes later than UPDATE\n" +
         "   */\n" +
         "  @Test\n" +
         "  @DisplayName(\"Out-of-order IGNORE: Older record coming later\")\n" +
-        "  public void testIgnore() {\n" +
+        "  public void testIgnore(CapturedOutput output) {\n" +
         "    try {\n" +
         "\n" +
-        "      " + serviceVariable + ".processAsync(" + updateVariable + ");\n" +
-        "      lock.await(1000, TimeUnit.MILLISECONDS);\n" +
+        "      " + serviceVariable + ".processAsync(" + updateVariable + ").get();\n" +
         "\n" +
-        "      " + serviceVariable + ".processAsync(" + insertVariable + ");\n" +
-        "      lock.await(1000, TimeUnit.MILLISECONDS);\n" +
+        "      " + serviceVariable + ".processAsync(" + insertVariable + ").get();\n" +
         "\n" +
         "      " + eventHubClassName + " " + eventHubClassName.toLowerCase() +
         " = mapper.readValue(" + updateVariable + ", " + eventHubClassName + ".class);\n" +
@@ -534,8 +531,7 @@ public class TestFileGenerator {
         "      assertEquals(false, " + replCamel + ".get().getDeletedIndicator());\n" +
         "      assertEquals(1,\n" +
         "          TestUtil.getLogMessageCountWithMessages(\n" +
-        "              logCaptor.getInfoLogs(),\n" +
-        "              \"Current item is earlier than DB entry.\"));\n" +
+        "              output.getOut(), \"IGNORE\"));\n" +
         "\n" +
         "      testUpdateData(" + replCamel + ".get());\n" +
         "    } catch (Exception e) {\n" +
@@ -544,104 +540,127 @@ public class TestFileGenerator {
         "  }\n\n");
   }
 
-  public void addExceptionHandlingTest() {
-    lines.add("  /** Test Exception Handling. */\n" +
+  public void addProcessingExceptionHandlerPayloadTest() {
+    lines.add("\n  /** Test Exception Handling. */\n" +
         "  @Test\n" +
         "  @DisplayName(\"Exception Catch with Payload\")\n" +
         "  public void testProcessingExceptionHandlerPayload() {\n" +
         "    try {\n" +
-        "      "+serviceVariable+".processAsync("+insertException+");\n" +
-        "      lock.await(1000, TimeUnit.MILLISECONDS);\n" +
-        "      verify(processingExceptionHandler, times(1)).handleUncaughtException(Mockito.any(), Mockito.any(), Mockito.any());\n" +
+        "      "+serviceVariable+".processAsync("+insertException+").get();\n" +
+        "      verify(processingExceptionHandler, times(1))" +
+            "          .submitToExceptionQueue(throwableCaptor.capture(), any(), anyInt());\n" +
+            "      String payload = throwableCaptor.getValue();\n" +
+            "      "+eventHubClassName + " " + eventHubClassName.toLowerCase()
+            + " = mapper.readValue(" +insertException+", "+eventHubClassName+ ".class);\n" +
+            "      "+eventHubClassName+" exception"+eventHubClassName+" = mapper.readValue(payload, "+eventHubClassName+".class);\n" +
+            "      #TODO: Test some columns using assertions\n" +
+            "      assertEquals("+eventHubClassName.toLowerCase()+".get, exceptionAgdename.get);" +
         "    } catch (Exception e) {\n" +
         "      fail(e.getMessage(), e);\n" +
         "    }\n" +
-        "  }\n");
+        "  }\n\n");
   }
 
-  public void addGenerateException() {
-    lines.add("\n  /**\n" +
-        "   * Generates ProcessingException with given payload and additional details.\n" +
-        "   *\n" +
-        "   * @param payload event as string\n" +
-        "   * @return ProcessingException with details\n" +
-        "   */\n" +
-        "  public ProcessingException generateProcessingException(String payload) {\n" +
-        "    ProcessingException processingException = new ProcessingException();\n" +
-        "    processingException.setPayload(payload);\n" +
-        "    processingException.setCurator("+serviceFileGenerator.serviceClassMapper+");\n" +
-        "    processingException.setEventHubSource("+serviceFileGenerator.eventHubClassMapper+");\n" +
-        "    processingException.setCuratedTarget("+serviceFileGenerator.replicatedClassMapper+");\n" +
-        "    processingException.setRetryCount(1);\n" +
-        "    return processingException;\n" +
-        "  }\n");
+  public void addHexUnicodeCharsTest() {
+    lines.add("  /** Test Hex Unicode Char. */\n" +
+            "  @Test\n" +
+            "  @DisplayName(\"Replace Hex Unicode Char\")\n" +
+            "  public void testHexUnicodeChars() {\n" +
+            "    try {\n" +
+            "\n" +
+            "      "+serviceVariable+".processAsync("+hexCharsVariable+").get();\n" +
+            "\n" +
+            "      "+eventHubClassName + " " +eventHubClassName.toLowerCase()+ " = mapper.readValue("+hexCharsVariable+", "+eventHubClassName+".class);\n" +
+            "\n" +
+            "      String uuid = #TODO \n" +
+            "\n" +
+            "      Optional<" + replicatedClassName + "> " + replCamel + " =\n" +
+            "          " + repoVariable + ".findBy" + uuidColumn + "(uuid);\n" +
+            "      assertNotNull(" + replCamel + ", \"" + replCamel + " is null\");\n" +
+            "      assertTrue(" + replCamel + ".isPresent(), \"No " + replCamel + " present\");\n" +
+            "      assertEquals(uuid, " + replCamel + ".get().get" + uuidColumn + "(),\n" +
+            "          \"UUID: Expected=\" + uuid\n" +
+            "              + \"; Actual=\" + " + replCamel + ".get().get" + uuidColumn + "());\n" +
+            "\n" +
+            "      #TODO: Test Columns that have unicode chars using assertions\n" +
+            "    } catch (Exception e) {\n" +
+            "      fail(e.getMessage(), e);\n" +
+            "    }\n" +
+            "  }\n\n");
   }
 
-  public void addConsumeProcessingExceptionTest() {
-    lines.add("\n  /** Test Consume ProcessingException. */\n" +
-        "  @Test\n" +
-        "  @DisplayName(\"Consume ProcessingException\")\n" +
-        "  public void testConsumeProcessingException() {\n" +
-        "    try {\n" +
-        "      ProcessingException processingException = generateProcessingException("+insertVariable+");\n" +
-        "\n" +
-        "      "+serviceVariable+".processAsync(processingException);\n" +
-        "      lock.await(1000, TimeUnit.MILLISECONDS);\n" +
-        "\n" +
-        "      "+eventHubClassName+" "+eventHubClassName.toLowerCase()+" = mapper.readValue(processingException.getPayload(), "+eventHubClassName+".class);\n" +
-        "\n" +
-        "      String uuid = #TODO\n" +
-        "\n" +
-        "      Optional<"+replicatedClassName+"> "+replCamel+" =\n" +
-        "          "+repoVariable+".findBy"+uuidColumn+"(uuid);\n" +
-        "      assertNotNull("+replCamel+", \""+replCamel+" is null\");\n" +
-        "      assertTrue("+replCamel+".isPresent(), \"No "+replCamel+" present\");\n" +
-        "      assertEquals(uuid, "+replCamel+".get().get"+ uuidColumn +"(),\n" +
-        "          \"UUID: Expected=\" + uuid\n" +
-        "              + \"; Actual=\" + "+replCamel+".get().get"+uuidColumn+"());\n" +
-        "      TestUtil.assertTrueTest(\n" +
-        "          \""+ insertContents.get("A_TIMSTAMP")+"\",\n" +
-        "          "+replCamel+".get().getEventHubTimestamp(),\n" +
-        "          DateTimeFormatter.ofPattern(\"yyyy-MM-dd HH:mm:ss.SSSSSS\"),\n" +
-        "          \"EventHubTimestamp are not equal\");\n" +
-        "\n" +
-        "      assertEquals(\"PT\", "+replCamel+".get().getDmlFlg());\n" +
-        "      assertEquals(false, "+replCamel+".get().getSrcDeletedIndicator());\n" +
-        "      assertEquals(false, "+replCamel+".get().getDeletedIndicator());\n" +
-        "\n" +
-        "      testInsertData("+replCamel+".get());\n" +
-        "    } catch (Exception e) {\n" +
-        "      fail(e.getMessage(), e);\n" +
-        "    }\n" +
-        "  }\n");
+  public void addQueueExceptionTest() {
+    lines.add("  /** Test Logging Masked Payload with QueueException. */\n" +
+            "  @Test\n" +
+            "  @DisplayName(\"Logging Masked Payload with QueueException\")\n" +
+            "  public void testLoggingMaskedPayloadOnQueueException(CapturedOutput output) {\n" +
+            "    try {\n" +
+            "      doThrow(QueueException.class)\n" +
+            "              .when(processingExceptionHandler)\n" +
+            "              .submitToExceptionQueue(anyString(), any(ProcessingException.class), anyInt());\n" +
+            "\n" +
+            "      assertThrows(ExecutionException.class, () -> {\n" +
+            "        "+serviceVariable+".processAsync("+logPiiException+").get();\n" +
+            "      });\n" +
+            "      verify(processingExceptionHandler, times(1))\n" +
+            "              .submitToExceptionQueue(anyString(), any(ProcessingException.class), anyInt());\n" +
+            "      assertTrue(TestUtil.checkLogMessageContains(output.getErr(),\n" +
+            "              \"Throwing QueueException for payload\"));\n" +
+            "      #TODO: Test masked columns from paylod using assertions\n" +
+            "    } catch (Exception e) {\n" +
+            "      fail(e.getMessage(), e);\n" +
+            "    }\n" +
+            "  }\n\n");
   }
 
-  public void addExceptionHandlingProcessingExceptionTest() {
-    lines.add("  /** Test Exception Handling. */\n" +
-        "  @Test\n" +
-        "  @DisplayName(\"Exception Catch with ProcessingException\")\n" +
-        "  public void testProcessingExceptionHandlerProcessingException() {\n" +
-        "    try {\n" +
-        "      ProcessingException processingException = generateProcessingException("+insertVariable+"Exception);\n" +
-        "\n" +
-        "      "+serviceVariable+".processAsync(processingException);\n" +
-        "      lock.await(1000, TimeUnit.MILLISECONDS);\n" +
-        "\n" +
-        "      verify(processingExceptionHandler, times(1)).handleUncaughtException(Mockito.any(), Mockito.any(), Mockito.any());\n" +
-        "    } catch (Exception e) {\n" +
-        "      fail(e.getMessage(), e);\n" +
-        "    }\n" +
-        "  }\n");
+  public void addMappingExceptionTest() {
+    lines.add ("  /** Test Logging Masked Payload with MappingException. */\n" +
+            "  @Test\n" +
+            "  @DisplayName(\"Send to DLQ with MappingException\")\n" +
+            "  public void testMappingException(CapturedOutput output) {\n" +
+            "    try {\n" +
+            "      doThrow(MappingException.class)\n" +
+            "          .when("+spyServiceClassName+")\n" +
+            "          .mapExceptionDetailsToEventhubObject(any(), any());\n" +
+            "\n" +
+            "      "+spyServiceClassName+".processAsync("+logPiiException+");\n" +
+            "      verify("+spyServiceClassName+", times(1)).mapExceptionDetailsToEventhubObject(any(), any());\n" +
+            "      assertTrue(\n" +
+            "          TestUtil.checkLogMessageContains(\n" +
+            "              output.getErr(), \"Encountered JsonProcessingException/MappingException for payload\"));\n" +
+            "      verify(processingExceptionHandler, times(1)).sendWithDeadLetterSubject(anyString());\n" +
+            "    } catch (Exception e) {\n" +
+            "      fail(e.getMessage(), e);\n" +
+            "    }\n" +
+            "  }\n\n");
   }
 
-  public void addTestDataFields(String op) {
+  public void addEventhubPojoSerializationTest() {
+    lines.add("  /** Test Serialization of event hub pojo. */\n" +
+            "  @Test\n" +
+            "  @DisplayName(\"Test Eventhub Pojo Serialization\")\n" +
+            "  public void testEventhubPojoSerialization() {\n" +
+            "    try {\n" +
+            "      "+eventHubClassName+" "+eventHubClassName.toLowerCase()+" = mapper.readValue(update"+eventHubClassName+", "+eventHubClassName+".class);\n" +
+            "      testUpdateEventhubPojo("+eventHubClassName.toLowerCase()+");\n" +
+            "\n" +
+            "      String serialized = mapper.writeValueAsString("+eventHubClassName.toLowerCase()+");\n" +
+            "      "+eventHubClassName+" serialized"+eventHubClassName+" = mapper.readValue(serialized, "+eventHubClassName+".class);\n" +
+            "      testUpdateEventhubPojo(serialized"+eventHubClassName+");\n" +
+            "    } catch (Exception e) {\n" +
+            "      fail(e.getMessage(), e);\n" +
+            "    }\n" +
+            "  }\n\n");
+  }
+
+  public void addTestDataFieldsTarget(String op, String objectName) {
     String pk = replicatedFileGenerator.ddlsqlFileGenerator.uuidColumnNames.get(0);
     for (Map.Entry<String, String> entry: replicatedFileGenerator.columnTypes.entrySet()) {
       String field = entry.getKey();
       String value = entry.getValue();
       String fieldUp = StringUtils.capitalize(FileUtil.getFieldName(field));
       if (pk.equals(field) || replicatedFileGenerator.ehBaseColumnsSet.contains(field) || field.startsWith("B_")) {
-        continue;
+          continue;
       }
       String fieldValue;
       switch (op) {
@@ -651,11 +670,11 @@ public class TestFileGenerator {
         default -> throw new IllegalArgumentException(op + "not supported");
       }
       if (field.equalsIgnoreCase("TICKET_CREATE_TS")) {
-        lines.add("    assertEquals("+fieldValue+", target.getTicketCreateTs"+"().toString());\n");
+        lines.add("    assertEquals("+fieldValue+", "+objectName+".getTicketCreateTs"+"().toString());\n");
         continue;
       }
       if (replicatedFileGenerator.ddlsqlFileGenerator.uuidColumnNames.contains(field)) {
-        lines.add("    assertEquals(, target.get"+ fieldUp+"());\n");
+        lines.add("    assertEquals(, "+objectName+".get"+ fieldUp+"());\n");
         continue;
       }
       if (value.equalsIgnoreCase("timestamp")) {
@@ -663,22 +682,37 @@ public class TestFileGenerator {
           fieldValue = fieldValue.substring(0, 24).replace('T', ' ')+"\"";
         }
         if (fieldValue != null) {
-          lines.add("    TestUtil.assertTimestamps("+fieldValue+", target.get"+fieldUp+"(), formatter);\n");
+          lines.add("    TestUtil.assertTimestamps("+fieldValue+", "+objectName+".get"+fieldUp+"(), formatter);\n");
         } else {
-          lines.add("    assertEquals("+fieldValue+", target.get"+fieldUp+"(), \""+ fieldUp+" are not equal.\");\n");
+          lines.add("    assertEquals("+fieldValue+", "+objectName+".get"+fieldUp+"(), \""+ fieldUp+" are not equal.\");\n");
         }
 
       } else if (value.equalsIgnoreCase("date")) {
-        lines.add("    TestUtil.assertTrueTest("+fieldValue+", target.get"+fieldUp+"(), \""+ fieldUp+" are not equal.\");\n");
+        lines.add("    TestUtil.assertTrueTest("+fieldValue+", "+objectName+".get"+fieldUp+"(), \""+ fieldUp+" are not equal.\");\n");
       } else if(!value.equalsIgnoreCase("string")) {
         if (fieldValue !=null ) {
-          lines.add("    assertEquals("+fieldValue+", target.get"+fieldUp+"().toString(), \""+ fieldUp+" are not equal.\");\n");
+          lines.add("    assertEquals("+fieldValue+", "+objectName+".get"+fieldUp+"().toString(), \""+ fieldUp+" are not equal.\");\n");
         } else {
-          lines.add("    assertEquals("+fieldValue+", target.get"+fieldUp+"(), \""+ fieldUp+" are not equal.\");\n");
+          lines.add("    assertEquals("+fieldValue+", "+objectName+".get"+fieldUp+"(), \""+ fieldUp+" are not equal.\");\n");
         }
       } else {
-        lines.add("    assertEquals("+fieldValue+", target.get"+fieldUp+"(), \""+ fieldUp+" are not equal.\");\n");
+        lines.add("    assertEquals("+fieldValue+", "+objectName+".get"+fieldUp+"(), \""+ fieldUp+" are not equal.\");\n");
       }
+    }
+  }
+
+  public void addTestDataFieldsSource(String op, String objectName) {
+    for (Map.Entry<String, Object> entry: eventHubPojoGenerator.getJson().entrySet()) {
+      String field = entry.getKey();
+      String fieldUp = StringUtils.capitalize(FileUtil.getFieldName(field));
+      String fieldValue;
+      switch (op) {
+        case "PT" -> fieldValue = insertContents.get(field)==null? null:"\"" + insertContents.get(field) + "\"";
+        case "UP" -> fieldValue = updateContents.get(field)==null? null:"\"" + updateContents.get(field) + "\"";
+        case "DL" -> fieldValue = deleteContents.get(field)==null? null:"\"" + deleteContents.get(field) + "\"";
+        default -> throw new IllegalArgumentException(op + "not supported");
+      }
+      lines.add("    assertEquals("+fieldValue+", "+objectName+".get"+fieldUp+"(), \""+ field+" are not equal.\");\n");
     }
   }
 
@@ -690,47 +724,53 @@ public class TestFileGenerator {
         "  }\n\n");
 
     lines.add("  @BeforeEach\n" +
-        "  public void setLogCaptor() {\n" +
-        "    logCaptor = LogCaptor.forClass("+this.serviceClassName+".class);\n" +
+        "  public void setServiceSpy() {\n" +
+        "    " + spyServiceClassName+" = spy("+ mockedServiceClassName+");\n" +
         "  }\n\n");
-
-    //#TODO
-    lines.add("  /**\n" +
-        "   * Tests all the columns from Insert event.\n" +
-        "   *\n" +
-        "   * @param target "+replicatedClassName+" object\n" +
-        "   */\n" +
-        "  public void testInsertData("+replicatedClassName+" target) { \n");
-    addTestDataFields("PT");
-    lines.add("  }\n\n");
-    lines.add("  /**\n" +
-        "   * Tests all the columns from Update event.\n" +
-        "   *\n" +
-        "   * @param target "+replicatedClassName+" object\n" +
-        "   */\n" +
-        "  public void testUpdateData("+replicatedClassName+" target) { \n");
-    addTestDataFields("UP");
-    lines.add("  }\n\n");
-    lines.add("  /**\n" +
-        "   * Tests all the columns from Delete event.\n" +
-        "   *\n" +
-        "   * @param target "+replicatedClassName+" object\n" +
-        "   */\n" +
-        "  public void testDeleteData("+replicatedClassName+" target) {\n");
-    addTestDataFields("DL");
-    lines.add("  }\n\n");
     addInsertTest();
     addUpdateTest();
-    addConcurrentInsertTest();
-    addConcurrentUpdateTest();
+    addConcurrentUpdatesAndRetriesTest();
     addDeleteTest();
     addOutOfOrderUpdateTest();
     addOutOfOrderDeleteTest();
     addIgnoreTest();
-    addExceptionHandlingTest();
-    addGenerateException();
-    addConsumeProcessingExceptionTest();
-    addExceptionHandlingProcessingExceptionTest();
+    addProcessingExceptionHandlerPayloadTest();
+    addQueueExceptionTest();
+    addMappingExceptionTest();
+    addHexUnicodeCharsTest();
+    addEventhubPojoSerializationTest();
+    lines.add("  /**\n" +
+            "   * Tests all the columns from Update event.\n" +
+            "   *\n" +
+            "   * @param source "+eventHubClassName+" object\n" +
+            "   */\n" +
+            "  public void testUpdateEventhubPojo("+eventHubClassName+" source) { \n");
+    addTestDataFieldsSource("UP", "source");
+    lines.add("  }\n\n");
+    lines.add("  /**\n" +
+            "   * Tests all the columns from Insert event.\n" +
+            "   *\n" +
+            "   * @param target "+replicatedClassName+" object\n" +
+            "   */\n" +
+            "  public void testInsertData("+replicatedClassName+" target) { \n");
+    addTestDataFieldsTarget("PT", "target");
+    lines.add("  }\n\n");
+    lines.add("  /**\n" +
+            "   * Tests all the columns from Update event.\n" +
+            "   *\n" +
+            "   * @param target "+replicatedClassName+" object\n" +
+            "   */\n" +
+            "  public void testUpdateData("+replicatedClassName+" target) { \n");
+    addTestDataFieldsTarget("UP", "target");
+    lines.add("  }\n\n");
+    lines.add("  /**\n" +
+            "   * Tests all the columns from Delete event.\n" +
+            "   *\n" +
+            "   * @param target "+replicatedClassName+" object\n" +
+            "   */\n" +
+            "  public void testDeleteData("+replicatedClassName+" target) {\n");
+    addTestDataFieldsTarget("DL", "target");
+    lines.add("  }\n\n");
   }
 
   public void addEndingLine() {
@@ -748,6 +788,7 @@ public class TestFileGenerator {
     addClassJavaDoc();
     addInitialClassTemplate(serviceClassName);
     addMethods();
+    addEndingFields();
     addEndingLine();
     this.generatedOutput = String.join("", lines);
 //    System.out.println(this.generatedOutput);

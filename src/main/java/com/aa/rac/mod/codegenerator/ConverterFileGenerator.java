@@ -96,6 +96,8 @@ public class ConverterFileGenerator {
         "import java.sql.Timestamp;\n" +
         "import java.time.temporal.ChronoUnit;\n" +
         "import org.jetbrains.annotations.NotNull;\n" +
+        "import org.slf4j.Logger;\n" +
+        "import org.slf4j.LoggerFactory;\n" +
         "import org.springframework.core.convert.converter.Converter;";
     lines.add(imports +"\n\n");
   }
@@ -116,6 +118,10 @@ public class ConverterFileGenerator {
 
   public String getMethodAnnotation() {
     return "@Override";
+  }
+
+  public void addClassFields() {
+    lines.add("  protected final Logger logger = LoggerFactory.getLogger(this.getClass());\n\n");
   }
 
   public void addFields(boolean isBefore) {
@@ -173,6 +179,8 @@ public class ConverterFileGenerator {
         "            \"Unexpected value: \" + source.getEntityType());\n" +
         "      }\n" +
         "    } catch (Exception ex) {\n" +
+        "      logger.error(\"Error occured in "+eventHubClassName.toLowerCase()+" convertor {} \", ex.getMessage());\n" +
+        "      ex.printStackTrace();\n" +
         "      throw new RuntimeException(ex);\n" +
         "    }\n" +
         "    return target;\n" +
@@ -192,6 +200,7 @@ public class ConverterFileGenerator {
     addClassJavaDoc();
     addClassAnnotation();
     addInitialClassTemplate(converterClassName);
+    addClassFields();
     addMethod();
     addEndingLine();
     this.generatedOutput = String.join("", lines);

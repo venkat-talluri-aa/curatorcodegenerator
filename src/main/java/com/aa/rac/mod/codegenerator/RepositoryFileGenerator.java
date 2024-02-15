@@ -27,10 +27,13 @@ public class RepositoryFileGenerator {
 
   public String uuidColumnName;
 
+  private DDLSQLFileGenerator ddlsqlFileGenerator;
+
 
   public RepositoryFileGenerator(DDLSQLFileGenerator ddlsqlFileGenerator, String replicatedClassName) {
     this.replicatedClassName = replicatedClassName;
     this.repositoryClassName = this.replicatedClassName + "Repository";
+    this.ddlsqlFileGenerator = ddlsqlFileGenerator;
     this.uuidColumnName = ddlsqlFileGenerator.uuidColumnNames.get(0);
   }
 
@@ -91,7 +94,7 @@ public class RepositoryFileGenerator {
 
   public String getQueryAnnotation() {
     return "@Query(value = \"SELECT * FROM "+ CuratorcodegeneratorApplication.SCHEMA_NAME + "."
-        + replicatedClassName.replace("Repl", "").toLowerCase()
+        + ddlsqlFileGenerator.tableName
         + "\"\n                + \" WHERE " + uuidColumnName.toLowerCase() + "=?1\", " +
         "\n                  nativeQuery = true)\n";
   }

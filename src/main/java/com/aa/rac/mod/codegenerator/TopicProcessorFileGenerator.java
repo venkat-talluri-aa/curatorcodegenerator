@@ -9,9 +9,9 @@ public class TopicProcessorFileGenerator {
 
   private static final String pwd = System.getProperty("user.dir").replace('\\', '/');
 
-  private static final String replSourcePath = "./src/main/java/com/aa/rac/mod/resources/";
+  private static final String replSourcePath = "./src/main/java/com/aa/rac/mod/resources/kafka";
 
-  private static final String packageName = "com.aa.rac.mod.resources.";
+  private static final String packageName = "com.aa.rac.mod.resources.kafka.";
 
   private String eventHubClassName;
 
@@ -69,15 +69,18 @@ public class TopicProcessorFileGenerator {
   }
 
   public void addImportStatements(String replicatedImportPath) throws IOException {
-    String imports = "import com.aa.rac.mod.domain.BaseService;\n" +
-        "import " + replicatedImportPath + ";\n" +
+    String imports = "import " + replicatedImportPath + ";\n" +
         "import " + eventHubPojoGenerator.getEventHubImportPath() + ";\n" +
-        "import java.util.function.Consumer;\n" +
+        "import com.aa.rac.mod.domain.BaseService;\n" +
+        "import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;\n" +
+        "import java.util.concurrent.ExecutionException;\n" +
+        "import org.apache.kafka.clients.consumer.ConsumerRecords;\n" +
         "import org.springframework.beans.factory.annotation.Autowired;\n" +
         "import org.springframework.beans.factory.annotation.Qualifier;\n" +
-        "import org.springframework.beans.factory.annotation.Value;\n" +
-        "import org.springframework.context.annotation.Bean;\n" +
-        "import org.springframework.messaging.Message;\n" +
+        "import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;\n" +
+        "import org.springframework.context.annotation.Profile;\n" +
+        "import org.springframework.kafka.annotation.KafkaListener;\n" +
+        "import org.springframework.kafka.support.Acknowledgment;\n" +
         "import org.springframework.stereotype.Component;\n";
     lines.add(imports +"\n");
   }
@@ -87,34 +90,48 @@ public class TopicProcessorFileGenerator {
   }
 
   public String getClassAnnotations() {
-    return "@Component\n";
+    return "@Component\n" +
+            "@Profile(\"!JunitTest\")\n" +
+            "@ConditionalOnProperty(name = \"spring.kafka.topics.recieve." + eventHubClassName.toLowerCase() + ".enabled\", havingValue = \"true\")";
   }
 
   public void addInitialClassTemplate(String className) {
     lines.add(getClassAnnotations());
-    lines.add("public class " + processorClassName
+    lines.add("\npublic class " + processorClassName
         + " \n    extends AbstractTopicProcessor {\n");
   }
 
   public void addFields() {
-    lines.add("\n  @Autowired \n  BaseService<"+ this.eventHubClassName + ", " + replicatedClassName + "> service;\n");
-    lines.add("\n  @Value(#TODO) \n  String topicName;\n");
+  }
+
+  public void addConstructor() {
+    lines.add("\n  @Autowired\n" +
+            "  public "+processorClassName+"(\n" +
+            "      @Qualifier(\""+replicatedClassName+"ServiceImpl\")\n" +
+            "      BaseService<"+eventHubClassName+", "+ replicatedClassName +"> baseService) {\n" +
+            "    super(baseService);\n" +
+            "  }\n");
   }
 
   public void addMethods() {
-    lines.add("\n  /**\n" +
-        "   * Recieve " + eventHubClassName + " consumer.\n" +
-        "   *\n" +
-        "   * @return the consumer\n" +
-        "   */");
-    lines.add("\n  @Bean\n" +
-        "  public Consumer<Message<String>> receive"+eventHubClassName+"() {\n" +
-        "    return consume(topicName);\n" +
-        "  }\n");
-    lines.add("\n  @Override\n" +
-        "  public BaseService getService() {\n" +
-        "    return service;\n" +
-        "  }\n");
+    lines.add("\n  @KafkaListener(\n" +
+            "      id = \"${spring.kafka.topics.recieve."+eventHubClassName.toLowerCase()+".destination}\",\n" +
+            "      topics = \"#{'${spring.kafka.topics.recieve."+eventHubClassName.toLowerCase()+".destination}'.split(',')}\",\n" +
+            "      concurrency = \"${CONSUMER_CONCURRENCY_COUNT}\",\n" +
+            "      clientIdPrefix = \""+eventHubClassName.toLowerCase()+"\",\n" +
+            "      batch = \"true\",\n" +
+            "      properties = {\n" +
+            "        \"auto.offset.reset:earliest\",\n" +
+            "        \"reconnect.backoff.max.ms:5000\",\n" +
+            "        \"reconnect.backoff.ms:1000\",\n" +
+            "        \"retry.backoff.ms:5000\"\n" +
+            "      })\n" +
+            "  @CircuitBreaker(name = \"${spring.kafka.topics.recieve."+eventHubClassName.toLowerCase()+".destination}\")\n" +
+            "  public void "+eventHubClassName.toLowerCase()+"(ConsumerRecords<String, String> payload, Acknowledgment acknowledgment)\n" +
+            "      throws InterruptedException, ExecutionException {\n" +
+            "    processItems(payload);\n" +
+            "    acknowledgment.acknowledge();\n" +
+            "  }");
   }
 
   public void addEndingLine() {
@@ -131,6 +148,7 @@ public class TopicProcessorFileGenerator {
     addClassJavaDoc();
     addInitialClassTemplate(processorClassName);
     addFields();
+    addConstructor();
     addMethods();
     addEndingLine();
     this.generatedOutput = String.join("", lines);

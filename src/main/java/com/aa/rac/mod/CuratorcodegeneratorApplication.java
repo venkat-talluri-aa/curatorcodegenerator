@@ -21,8 +21,9 @@ public class CuratorcodegeneratorApplication {
 	public static void main(String[] args) throws IOException {
 		SpringApplication.run(CuratorcodegeneratorApplication.class, args);
 
-		String fileName = "comments";
-		String[] uuids = {"COMMENTS_UUID"};
+		String fileName = "agdexfar";
+		String[] uuids = {"TICKET_UUID"};
+		String tableName = "agyd0001_agyt0900_agdexfar";
 
 		String resourcesPath = System.getProperty("user.dir").replace('\\', '/')
 				+ "/src/main/resources/" + fileName +"/";
@@ -33,7 +34,7 @@ public class CuratorcodegeneratorApplication {
 
 
 		String ddlFilePath = resourcesPath + fileName + "_ddl.txt";
-		DDLSQLFileGenerator ddlsqlFileGenerator = new DDLSQLFileGenerator(ddlFilePath, FileUtil.getClassName(updateFilePath).toLowerCase(), uuids);
+		DDLSQLFileGenerator ddlsqlFileGenerator = new DDLSQLFileGenerator(ddlFilePath, tableName, uuids);
 		ddlsqlFileGenerator.generateDDLFile();
 		System.out.println("\n");
 
