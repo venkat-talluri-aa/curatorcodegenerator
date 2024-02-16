@@ -1,5 +1,7 @@
 package com.aa.rac.mod;
 
+import com.aa.rac.mod.codegenerator.AdhoDeleteServiceTestFileGenerator;
+import com.aa.rac.mod.codegenerator.AdhocDeleteServiceFileGenerator;
 import com.aa.rac.mod.codegenerator.ConverterFileGenerator;
 import com.aa.rac.mod.codegenerator.DDLSQLFileGenerator;
 import com.aa.rac.mod.codegenerator.FileUtil;
@@ -24,6 +26,7 @@ public class CuratorcodegeneratorApplication {
 		String fileName = "agdexfar";
 		String[] uuids = {"TICKET_UUID"};
 		String tableName = "agyd0001_agyt0900_agdexfar";
+		boolean adhocDeleteEquivalent = true;
 
 		String resourcesPath = System.getProperty("user.dir").replace('\\', '/')
 				+ "/src/main/resources/" + fileName +"/";
@@ -61,6 +64,7 @@ public class CuratorcodegeneratorApplication {
 		ServiceFileGenerator serviceFileGenerator = new ServiceFileGenerator(replicatedFileGenerator, eventHubPojoGenerator, repositoryFileGenerator);
 		serviceFileGenerator.generateConverterFile();
 
+
 		System.out.println("\n");
 		TopicProcessorFileGenerator topicProcessorFileGenerator = new TopicProcessorFileGenerator(replicatedFileGenerator, eventHubPojoGenerator);
 		topicProcessorFileGenerator.generateConverterFile();
@@ -68,6 +72,16 @@ public class CuratorcodegeneratorApplication {
 		System.out.println("\n");
 		TestFileGenerator testFileGenerator = new TestFileGenerator(serviceFileGenerator, ddlsqlFileGenerator, insertFilePath, updateFilePath, deleteFilePath);
 		testFileGenerator.generateConverterFile();
+
+		if (adhocDeleteEquivalent) {
+			System.out.println("\n");
+			AdhocDeleteServiceFileGenerator adhocDeleteServiceFileGenerator = new AdhocDeleteServiceFileGenerator(replicatedFileGenerator, eventHubPojoGenerator, repositoryFileGenerator);
+			adhocDeleteServiceFileGenerator.generateConverterFile();
+
+			System.out.println("\n");
+			AdhoDeleteServiceTestFileGenerator adhoDeleteServiceTestFileGenerator = new AdhoDeleteServiceTestFileGenerator(adhocDeleteServiceFileGenerator, ddlsqlFileGenerator, insertFilePath, updateFilePath, deleteFilePath);
+			adhoDeleteServiceTestFileGenerator.generateConverterFile();
+		}
 	}
 
 }

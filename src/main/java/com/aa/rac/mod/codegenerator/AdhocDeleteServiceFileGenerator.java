@@ -4,18 +4,19 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import org.springframework.util.StringUtils;
 
-public class ServiceFileGenerator {
+public class AdhocDeleteServiceFileGenerator {
 
   private static final String pwd = System.getProperty("user.dir").replace('\\', '/');
 
-  private static final String replSourcePath = "./src/main/java/com/aa/rac/mod/service/";
+  private static final String replSourcePath = "./src/main/java/com/aa/rac/mod/service/adhocdeletes/agmmtkts/";
 
-  private static final String packageName = "com.aa.rac.mod.service.";
+  private static final String packageName = "com.aa.rac.mod.service.adhocdeletes.agmmtkts.";
 
   private String eventHubClassName;
+
+  private String adhocDeleteEventhubClassName = "AgmmtktsAdhocDelete";
+  private String adhocDeleteEventhubPojoClassMapper = "AGMMTKTS_ADHOC_DELETE";
 
   private String replicatedClassName;
 
@@ -40,16 +41,20 @@ public class ServiceFileGenerator {
   public String eventHubClassMapper;
   public String replicatedClassMapper;
 
-  public ServiceFileGenerator(ReplicatedFileGenerator replicatedFileGenerator,
-                              EventHubPojoGenerator eventHubPojoGenerator,
-                              RepositoryFileGenerator repositoryFileGenerator) {
+  public AdhocDeleteServiceFileGenerator(ReplicatedFileGenerator replicatedFileGenerator,
+                                         EventHubPojoGenerator eventHubPojoGenerator,
+                                         RepositoryFileGenerator repositoryFileGenerator) {
     this.replicatedFileGenerator = replicatedFileGenerator;
     this.eventHubPojoGenerator = eventHubPojoGenerator;
     this.repositoryFileGenerator = repositoryFileGenerator;
     this.eventHubClassName = eventHubPojoGenerator.getEventHubImportPath().substring(eventHubPojoGenerator.getEventHubImportPath().lastIndexOf('.')+1);
     this.replicatedClassName = replicatedFileGenerator.getReplicatedImportPath().substring(replicatedFileGenerator.getReplicatedImportPath().lastIndexOf('.')+1);
     this.repositoryClassName = repositoryFileGenerator.getRepositoryImportPath().substring(repositoryFileGenerator.getRepositoryImportPath().lastIndexOf('.')+1);
-    this.serviceClassName = this.replicatedClassName + "ServiceImpl";
+    this.serviceClassName = this.eventHubClassName + "AdhocDeleteServiceImpl";
+  }
+
+  public String getAdhocDeleteEventhubImportPath() {
+    return eventHubPojoGenerator.getEventHubImportPath().substring(0, eventHubPojoGenerator.getEventHubImportPath().lastIndexOf('.')+1) + adhocDeleteEventhubClassName;
   }
 
   public String getGeneratedOutput() {
@@ -57,7 +62,7 @@ public class ServiceFileGenerator {
   }
 
   public String getServiceDirectory() {
-    return pwd + replSourcePath.substring(1)+replicatedClassName.toLowerCase();
+    return pwd + replSourcePath.substring(1);
   }
 
   public String getServiceImportPath() {
@@ -76,7 +81,7 @@ public class ServiceFileGenerator {
   }
 
   public void addPackageContents(String packageName) {
-    lines.add("package " + packageName + replicatedClassName.toLowerCase() + end + "\n\n");
+    lines.add("package " + packageName + end + "\n\n");
   }
 
   public void addImportStatements(String eventHubImportPath,
@@ -91,8 +96,10 @@ public class ServiceFileGenerator {
         "import " + replicatedImportPath + ";\n" +
         "import " + eventHubImportPath + ";\n" +
         "import " + repositoryImportPath + ";\n" +
-        "import com.aa.rac.mod.service.abstracts.AbstractServiceEventHub;\n" +
+        "import com.aa.rac.mod.service.abstracts.AbstractAdhocDeleteService;\n" +
+            "import java.util.Optional;\n"+
         "import java.util.concurrent.Future;\n" +
+            "import org.springframework.beans.factory.annotation.Autowired;\n" +
         "import org.springframework.scheduling.annotation.Async;\n" +
         "import org.springframework.scheduling.annotation.EnableAsync;\n" +
         "import org.springframework.stereotype.Service;\n";
@@ -100,14 +107,14 @@ public class ServiceFileGenerator {
   }
 
   public void addClassJavaDoc() {
-    lines.add("/** " + replicatedClassName + " service implementation. */\n");
+    lines.add("/** " + serviceClassName + " class. */\n");
   }
 
   public String getClassAnnotations() {
     return "@Service(\""+serviceClassName+"\")\n" +
         "@EnableAsync\n" +
         "@SetAuditColumns(targetCuratedCdcTimestampField = \"eventHubTimestamp\")\n" +
-        "@SetServiceClasses(eventHubClassMapper = EventHubPojoClassMapper." + eventHubClassName.toUpperCase() + ",\n" +
+        "@SetServiceClasses(eventHubClassMapper = EventHubPojoClassMapper." + adhocDeleteEventhubPojoClassMapper + ",\n" +
         "    curatedTargetClassMapper = CuratedEntityClassMapper." + replicatedClassName.toUpperCase() + ",\n" +
         "    repoClass = " + repositoryClassName + ".class\n" +
         ")\n" +
@@ -118,8 +125,19 @@ public class ServiceFileGenerator {
   public void addInitialClassTemplate(String className) {
     lines.add(getClassAnnotations());
     lines.add("public class " + serviceClassName
-        + " \n    extends AbstractServiceEventHub<" + eventHubClassName + ", "
+        + " \n    extends AbstractAdhocDeleteService<" + adhocDeleteEventhubClassName + ", "
         + replicatedClassName + ", " + repositoryClassName + "> {\n");
+  }
+
+  public void addFields() {
+    lines.add("\n  @Autowired private AgdexfarReplRepository agdexfarReplRepository;\n");
+  }
+
+  public void addExistingDbRowMethod() {
+    lines.add("\n  @Override\n" +
+            "  protected Optional<"+replicatedClassName+"> getExistingDbRow(AgmmtktsAdhocDelete adhocDelete) {\n" +
+            "    return "+repositoryClassName.substring(0,1).toLowerCase()+repositoryClassName.substring(1)+".findByTicketUuid(adhocDelete.getUniqueIdentifier());\n" +
+            "  }\n");
   }
 
   public String getMethodAnnotation() {
@@ -127,12 +145,11 @@ public class ServiceFileGenerator {
   }
 
   public void addMethod() {
+    addExistingDbRowMethod();
     lines.add("  " + getMethodAnnotation());
     lines.add("\n  public Future<String> processAsync(String topicPayload) throws QueueException { \n");
     lines.add("    return processPayload(topicPayload);\n" +
         "  }\n");
-
-
   }
 
   public void addEndingLine() {
@@ -144,11 +161,12 @@ public class ServiceFileGenerator {
     FileUtil.createFile(getServiceDirectory(), fullPath);
     FileWriter writer = getFileWriter(fullPath);
     addPackageContents(packageName);
-    addImportStatements(eventHubPojoGenerator.getEventHubImportPath(),
+    addImportStatements(getAdhocDeleteEventhubImportPath(),
         replicatedFileGenerator.getReplicatedImportPath(),
         repositoryFileGenerator.getRepositoryImportPath());
     addClassJavaDoc();
     addInitialClassTemplate(serviceClassName);
+    addFields();
     addMethod();
     addEndingLine();
     this.generatedOutput = String.join("", lines);
@@ -158,7 +176,7 @@ public class ServiceFileGenerator {
     } finally {
       writer.close();
     }
-    System.out.println("Service file successfully generated. Please review at location: " + fullPath);
+    System.out.println("AdhocDeleteService file successfully generated. Please review at location: " + fullPath);
     System.out.println("\tNOTE: Please review the generated code.");
   }
 }
