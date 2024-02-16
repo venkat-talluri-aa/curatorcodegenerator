@@ -623,7 +623,7 @@ public class TestFileGenerator {
             "          .when("+spyServiceClassName+")\n" +
             "          .mapExceptionDetailsToEventhubObject(any(), any());\n" +
             "\n" +
-            "      "+spyServiceClassName+".processAsync("+logPiiException+");\n" +
+            "      "+spyServiceClassName+".processAsync("+logPiiException+").get();\n" +
             "      verify("+spyServiceClassName+", times(1)).mapExceptionDetailsToEventhubObject(any(), any());\n" +
             "      assertTrue(\n" +
             "          TestUtil.checkLogMessageContains(\n" +

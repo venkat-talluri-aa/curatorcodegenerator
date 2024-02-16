@@ -128,7 +128,7 @@ public class ServiceFileGenerator {
 
   public void addMethod() {
     lines.add("  " + getMethodAnnotation());
-    lines.add("\n  public void processAsync(String topicPayload) throws QueueException { \n");
+    lines.add("\n  public Future<String> processAsync(String topicPayload) throws QueueException { \n");
     lines.add("    return processPayload(topicPayload);\n" +
         "  }\n");
 
