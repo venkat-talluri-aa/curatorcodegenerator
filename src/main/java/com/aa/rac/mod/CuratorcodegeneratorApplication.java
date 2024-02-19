@@ -23,9 +23,10 @@ public class CuratorcodegeneratorApplication {
 	public static void main(String[] args) throws IOException {
 		SpringApplication.run(CuratorcodegeneratorApplication.class, args);
 
-		String fileName = "agdexfar";
-		String[] uuids = {"TICKET_UUID"};
-		String tableName = "agyd0001_agyt0900_agdexfar";
+		String fileName = "agdescit";
+		String[] uuids = {"COUPON_UUID","TICKET_UUID"};
+		String tableName = "agyd0001_agyt0410_agdescit";
+		boolean filterDefaultTicketCreateTs = true;
 		boolean adhocDeleteEquivalent = true;
 
 		String resourcesPath = System.getProperty("user.dir").replace('\\', '/')
@@ -61,7 +62,7 @@ public class CuratorcodegeneratorApplication {
 		converterFileGenerator.generateConverterFile();
 
 		System.out.println("\n");
-		ServiceFileGenerator serviceFileGenerator = new ServiceFileGenerator(replicatedFileGenerator, eventHubPojoGenerator, repositoryFileGenerator);
+		ServiceFileGenerator serviceFileGenerator = new ServiceFileGenerator(replicatedFileGenerator, eventHubPojoGenerator, repositoryFileGenerator, filterDefaultTicketCreateTs);
 		serviceFileGenerator.generateConverterFile();
 
 
