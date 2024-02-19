@@ -34,6 +34,8 @@ public class ServiceFileGenerator {
 
   public RepositoryFileGenerator repositoryFileGenerator;
 
+  public boolean filterDefaultTicketCreatets;
+
   private String generatedOutput;
 
   public String serviceClassMapper;
@@ -42,7 +44,8 @@ public class ServiceFileGenerator {
 
   public ServiceFileGenerator(ReplicatedFileGenerator replicatedFileGenerator,
                               EventHubPojoGenerator eventHubPojoGenerator,
-                              RepositoryFileGenerator repositoryFileGenerator) {
+                              RepositoryFileGenerator repositoryFileGenerator,
+                              boolean filterDefaultTicketCreatets) {
     this.replicatedFileGenerator = replicatedFileGenerator;
     this.eventHubPojoGenerator = eventHubPojoGenerator;
     this.repositoryFileGenerator = repositoryFileGenerator;
@@ -50,6 +53,7 @@ public class ServiceFileGenerator {
     this.replicatedClassName = replicatedFileGenerator.getReplicatedImportPath().substring(replicatedFileGenerator.getReplicatedImportPath().lastIndexOf('.')+1);
     this.repositoryClassName = repositoryFileGenerator.getRepositoryImportPath().substring(repositoryFileGenerator.getRepositoryImportPath().lastIndexOf('.')+1);
     this.serviceClassName = this.replicatedClassName + "ServiceImpl";
+    this.filterDefaultTicketCreatets = filterDefaultTicketCreatets;
   }
 
   public String getGeneratedOutput() {
@@ -104,15 +108,23 @@ public class ServiceFileGenerator {
   }
 
   public String getClassAnnotations() {
-    return "@Service(\""+serviceClassName+"\")\n" +
-        "@EnableAsync\n" +
-        "@SetAuditColumns(targetCuratedCdcTimestampField = \"eventHubTimestamp\")\n" +
-        "@SetServiceClasses(eventHubClassMapper = EventHubPojoClassMapper." + eventHubClassName.toUpperCase() + ",\n" +
-        "    curatedTargetClassMapper = CuratedEntityClassMapper." + replicatedClassName.toUpperCase() + ",\n" +
-        "    repoClass = " + repositoryClassName + ".class\n" +
-        ")\n" +
-        "@EmitToEventHub(topicPropertyName = \"spring.kafka.topics.emit."+eventHubClassName.toLowerCase()+"\")\n"+
-        "@SuppressWarnings(\"checkstyle:LineLength\")\n";
+    String s = "@Service(\""+serviceClassName+"\")\n" +
+            "@EnableAsync\n" +
+            "@SetAuditColumns(targetCuratedCdcTimestampField = \"eventHubTimestamp\")\n" +
+            "@SetServiceClasses(eventHubClassMapper = EventHubPojoClassMapper." + eventHubClassName.toUpperCase() + ",\n" +
+            "    curatedTargetClassMapper = CuratedEntityClassMapper." + replicatedClassName.toUpperCase() + ",\n" +
+            "    repoClass = " + repositoryClassName + ".class\n" +
+            ")\n";
+    if (filterDefaultTicketCreatets) {
+      s += "@Filter(\n" +
+              "        clazz = "+eventHubClassName+".class,\n" +
+              "        methodName = \"filterDefaultTicketCreateTs\",\n" +
+              "        throwDeadLetterQueueException = false,\n" +
+              "        referenceType = Filter.ClassType.SOURCE)\n";
+    }
+    s += "@EmitToEventHub(topicPropertyName = \"spring.kafka.topics.emit."+eventHubClassName.toLowerCase()+"\")\n"+
+            "@SuppressWarnings(\"checkstyle:LineLength\")\n";
+    return s;
   }
 
   public void addInitialClassTemplate(String className) {

@@ -259,6 +259,10 @@ public class TestFileGenerator {
             + String.join("", FileUtil.readLinesFromFile(updFilepath)).replace("\"", "\\\"")+"\";");
     lines.add("\n\n  private final String " + deleteVariable +  " = \""
             + String.join("", FileUtil.readLinesFromFile(delFilepath)).replace("\"", "\\\"")+"\";");
+    if (serviceFileGenerator.filterDefaultTicketCreatets) {
+      lines.add("\n\n  private final String insertDefaultTicketCreateTs = #TODO;");
+      lines.add("\n\n  private final String deleteDefaultTicketCreateTs = #TODO;");
+    }
     lines.add("\n\n  private final String " + insertException + " = #TODO;");
     lines.add("\n\n  private final String " + hexCharsVariable + " = #TODO;");
     lines.add("\n\n  private final String " + logPiiException + " = #TODO;\n\n");
@@ -653,6 +657,48 @@ public class TestFileGenerator {
             "  }\n\n");
   }
 
+  public void addInsertFilterDefaultTicketCreateTsTest() {
+    lines.add("  /** Test Insert AA tickets with default TicketCreateTs. */\n" +
+            "  @Test\n" +
+            "  @DisplayName(\"Filter INSERT Tickets with default TicketCreateTs\")\n" +
+            "  public void testInsertFilterDefaultTicketCreateTs(CapturedOutput output) {\n" +
+            "    try {\n" +
+            "\n" +
+            "      "+serviceVariable+".processAsync(insertDefaultTicketCreateTs).get();\n" +
+            "\n" +
+            "      assertTrue(\n" +
+            "          TestUtil.checkLogMessageContains(\n" +
+            "              output.getOut(),\n" +
+            "              \"Filtered record from "+eventHubClassName+" class using method name filterDefaultTicketCreateTs of\"\n" +
+            "                  + \" Filter.ClassType.SOURCE\"),\n" +
+            "          \"Log message not found\");\n" +
+            "    } catch (Exception e) {\n" +
+            "      fail(e.getMessage(), e);\n" +
+            "    }\n" +
+            "  }\n\n");
+  }
+
+  public void addDeleteFilterDefaultTicketCreateTsTest() {
+    lines.add("  /** Test Delete AA tickets with default TicketCreateTs. */\n" +
+            "  @Test\n" +
+            "  @DisplayName(\"Filter DELETE Tickets with default TicketCreateTs\")\n" +
+            "  public void testDeleteFilterDefaultTicketCreateTs(CapturedOutput output) {\n" +
+            "    try {\n" +
+            "\n" +
+            "      "+serviceVariable+".processAsync(deleteDefaultTicketCreateTs);\n" +
+            "\n" +
+            "      assertTrue(\n" +
+            "          TestUtil.checkLogMessageContains(\n" +
+            "              output.getOut(),\n" +
+            "              \"Filtered record from "+eventHubClassName+" class using method name filterDefaultTicketCreateTs of\"\n" +
+            "                  + \" Filter.ClassType.SOURCE\"),\n" +
+            "          \"Log message not found\");\n" +
+            "    } catch (Exception e) {\n" +
+            "      fail(e.getMessage(), e);\n" +
+            "    }\n" +
+            "  }\n\n");
+  }
+
   public void addTestDataFieldsTarget(String op, String objectName) {
     String pk = replicatedFileGenerator.ddlsqlFileGenerator.uuidColumnNames.get(0);
     for (Map.Entry<String, String> entry: replicatedFileGenerator.columnTypes.entrySet()) {
@@ -735,6 +781,10 @@ public class TestFileGenerator {
     addOutOfOrderDeleteTest();
     addIgnoreTest();
     addProcessingExceptionHandlerPayloadTest();
+    if (serviceFileGenerator.filterDefaultTicketCreatets) {
+      addInsertFilterDefaultTicketCreateTsTest();
+      addDeleteFilterDefaultTicketCreateTsTest();
+    }
     addQueueExceptionTest();
     addMappingExceptionTest();
     addHexUnicodeCharsTest();
