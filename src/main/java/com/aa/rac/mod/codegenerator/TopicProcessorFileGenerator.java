@@ -71,7 +71,7 @@ public class TopicProcessorFileGenerator {
   public void addImportStatements(String replicatedImportPath) throws IOException {
     String imports = "import " + replicatedImportPath + ";\n" +
         "import " + eventHubPojoGenerator.getEventHubImportPath() + ";\n" +
-        "import com.aa.rac.mod.domain.BaseService;\n" +
+        "import com.aa.rac.mod.service.BaseService;\n" +
         "import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;\n" +
         "import java.util.concurrent.ExecutionException;\n" +
         "import org.apache.kafka.clients.consumer.ConsumerRecords;\n" +

@@ -92,19 +92,19 @@ public class RepositoryFileGenerator {
 //      nativeQuery = true)
 //  Optional<ProcessedRefund> findByRefundedAmountUuid(String refundedAmountUuid);
 
-  public String getQueryAnnotation() {
+  public String getQueryAnnotation(String uuidColumnName) {
     return "@Query(value = \"SELECT * FROM "+ CuratorcodegeneratorApplication.SCHEMA_NAME + "."
         + ddlsqlFileGenerator.tableName
         + "\"\n                + \" WHERE " + uuidColumnName.toLowerCase() + "=?1\", " +
         "\n                  nativeQuery = true)\n";
   }
 
-  public void addMethod() {
-    lines.add("  " + getQueryAnnotation());
+  public void addMethod(String uuidColumnName) {
+    lines.add("  " + getQueryAnnotation(uuidColumnName));
     String fieldName = FileUtil.getFieldName(uuidColumnName);
     lines.add("  " + "Optional<"+replicatedClassName+"> findBy"
         + StringUtils.capitalize(fieldName)
-        + "(String " + fieldName + ");\n");
+        + "(String " + fieldName + ");\n\n");
   }
 
   public void addEndingLine() {
@@ -120,7 +120,9 @@ public class RepositoryFileGenerator {
     addClassJavaDoc();
     addClassAnnotations();
     addInitialClassTemplate(repositoryClassName);
-    addMethod();
+    for (String uuidColName: ddlsqlFileGenerator.uuidColumnNames) {
+      addMethod(uuidColName);
+    }
     addEndingLine();
     this.generatedOutput = String.join("", lines);
     try {
