@@ -18,6 +18,8 @@ public class AdhocDeleteServiceFileGenerator {
   private String adhocDeleteEventhubClassName = "AgmmtktsAdhocDelete";
   private String adhocDeleteEventhubPojoClassMapper = "AGMMTKTS_ADHOC_DELETE";
 
+  private String repoVar;
+
   private String replicatedClassName;
 
   private String repositoryClassName;
@@ -51,6 +53,7 @@ public class AdhocDeleteServiceFileGenerator {
     this.replicatedClassName = replicatedFileGenerator.getReplicatedImportPath().substring(replicatedFileGenerator.getReplicatedImportPath().lastIndexOf('.')+1);
     this.repositoryClassName = repositoryFileGenerator.getRepositoryImportPath().substring(repositoryFileGenerator.getRepositoryImportPath().lastIndexOf('.')+1);
     this.serviceClassName = this.eventHubClassName + "AdhocDeleteServiceImpl";
+    this.repoVar = repositoryClassName.substring(0,1).toLowerCase() + repositoryClassName.substring(1);
   }
 
   public String getAdhocDeleteEventhubImportPath() {
@@ -81,7 +84,7 @@ public class AdhocDeleteServiceFileGenerator {
   }
 
   public void addPackageContents(String packageName) {
-    lines.add("package " + packageName + end + "\n\n");
+    lines.add("package " + packageName.substring(0, packageName.length()-1) + end + "\n\n");
   }
 
   public void addImportStatements(String eventHubImportPath,
@@ -130,7 +133,7 @@ public class AdhocDeleteServiceFileGenerator {
   }
 
   public void addFields() {
-    lines.add("\n  @Autowired private AgdexfarReplRepository agdexfarReplRepository;\n");
+    lines.add("\n  @Autowired private "+repositoryClassName+" "+repoVar+";\n");
   }
 
   public void addExistingDbRowMethod() {

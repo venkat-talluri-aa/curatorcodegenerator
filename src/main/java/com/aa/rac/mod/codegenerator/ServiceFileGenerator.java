@@ -86,7 +86,8 @@ public class ServiceFileGenerator {
   public void addImportStatements(String eventHubImportPath,
                                   String replicatedImportPath,
                                   String repositoryImportPath) throws IOException {
-    String imports = "import com.aa.rac.mod.domain.annotations.EmitToEventHub;\n" +
+    String imports = "import com.aa.rac.mod.domain.annotations.Filter;\n" +
+        "import com.aa.rac.mod.domain.annotations.EmitToEventHub;\n" +
         "import com.aa.rac.mod.domain.annotations.SetAuditColumns;\n" +
         "import com.aa.rac.mod.domain.annotations.SetServiceClasses;\n" +
         "import com.aa.rac.mod.domain.enums.CuratedEntityClassMapper;\n" +

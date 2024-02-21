@@ -222,7 +222,7 @@ public class TestFileGenerator {
             "    controlledShutdown = false,\n" +
             "    brokerProperties = {\"listeners=PLAINTEXT://localhost:3333\", \"port=3333\"})\n" +
         "@AutoConfigureTestDatabase\n" +
-        "@ExtendWith(MockitoExtension.class, OutputCaptureExtension.class)\n" +
+        "@ExtendWith({MockitoExtension.class, OutputCaptureExtension.class})\n" +
         "@SuppressWarnings(\"checkstyle:LineLength\")\n";
   }
 
@@ -535,7 +535,7 @@ public class TestFileGenerator {
         "      assertEquals(false, " + replCamel + ".get().getDeletedIndicator());\n" +
         "      assertEquals(1,\n" +
         "          TestUtil.getLogMessageCountWithMessages(\n" +
-        "              output.getOut(), \"IGNORE\"));\n" +
+        "              output.getOut(), \"\\\"IGNORE\\\"\"));\n" +
         "\n" +
         "      testUpdateData(" + replCamel + ".get());\n" +
         "    } catch (Exception e) {\n" +
@@ -558,7 +558,7 @@ public class TestFileGenerator {
             + " = mapper.readValue(" +insertException+", "+eventHubClassName+ ".class);\n" +
             "      "+eventHubClassName+" exception"+eventHubClassName+" = mapper.readValue(payload, "+eventHubClassName+".class);\n" +
             "      #TODO: Test some columns using assertions\n" +
-            "      assertEquals("+eventHubClassName.toLowerCase()+".get, exceptionAgdename.get);" +
+            "      assertEquals("+eventHubClassName.toLowerCase()+".get, exceptionAgdename.get);\n" +
         "    } catch (Exception e) {\n" +
         "      fail(e.getMessage(), e);\n" +
         "    }\n" +
@@ -685,7 +685,7 @@ public class TestFileGenerator {
             "  public void testDeleteFilterDefaultTicketCreateTs(CapturedOutput output) {\n" +
             "    try {\n" +
             "\n" +
-            "      "+serviceVariable+".processAsync(deleteDefaultTicketCreateTs);\n" +
+            "      "+serviceVariable+".processAsync(deleteDefaultTicketCreateTs).get();\n" +
             "\n" +
             "      assertTrue(\n" +
             "          TestUtil.checkLogMessageContains(\n" +

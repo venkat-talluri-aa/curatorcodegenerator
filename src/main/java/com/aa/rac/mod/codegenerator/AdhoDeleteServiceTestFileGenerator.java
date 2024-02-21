@@ -228,7 +228,7 @@ public class AdhoDeleteServiceTestFileGenerator {
             "    controlledShutdown = false,\n" +
             "    brokerProperties = {\"listeners=PLAINTEXT://localhost:3333\", \"port=3333\"})\n" +
         "@AutoConfigureTestDatabase\n" +
-        "@ExtendWith(MockitoExtension.class, OutputCaptureExtension.class)\n" +
+        "@ExtendWith({MockitoExtension.class, OutputCaptureExtension.class})\n" +
         "@SuppressWarnings(\"checkstyle:LineLength\")\n";
   }
 
@@ -262,13 +262,13 @@ public class AdhoDeleteServiceTestFileGenerator {
   public void addEndingFields() throws IOException {
     lines.add("\n  private final String " + insertVariable + " = \""
             + String.join("", FileUtil.readLinesFromFile(insFilepath)).replace("\"", "\\\"")+"\";");
-    lines.add("\n\n  private final String oldDeleteAdhoc = #TODO");
-    lines.add("\n\n  private final String deleteAdhoc = #TODO");
-    lines.add("\n\n  private final String deleteAdhocException = #TODO");
-    lines.add("\n\n  private final String notDeleteAdhoc = #TODO");
-    lines.add("\n\n  private final String unrelatedDeleteAdhoc = #TODO");
-    lines.add("\n\n  private final String deleteAgmmtktsAdhocException = #TODO");
-    lines.add("\n\n  private final String deleteAgmmtktsAdhoc = #TODO");
+    lines.add("\n\n  private final String oldDeleteAdhoc = #TODO;");
+    lines.add("\n\n  private final String deleteAdhoc = #TODO;");
+    lines.add("\n\n  private final String deleteAdhocException = #TODO;");
+    lines.add("\n\n  private final String notDeleteAdhoc = #TODO;");
+    lines.add("\n\n  private final String unrelatedDeleteAdhoc = #TODO;");
+    lines.add("\n\n  private final String deleteAgmmtktsAdhocException = #TODO;");
+    lines.add("\n\n  private final String deleteAgmmtktsAdhoc = #TODO;\n\n");
   }
   public void addAdhocDeleteWithPartialAgmmtktsPayloadTest() {
     lines.add("\n  /** Test Adhoc Delete with partial AGMMTKTS payload. */\n" +
@@ -292,8 +292,7 @@ public class AdhoDeleteServiceTestFileGenerator {
             "      assertEquals(uuid, "+replCamel+".get().get"+ uuidColumn +"(),\n" +
             "          \"UUID: Expected=\" + uuid\n" +
             "              + \"; Actual=\" + "+replCamel+".get().get"+uuidColumn+"());\n" +
-            "      TestUtil.assertTrueTest(\n" +
-            "          \""+ updateContents.get("A_TIMSTAMP")+"\",\n" +
+            "      TestUtil.assertTrueTest(\n          ,\n" +
             "          "+replCamel+".get().getEventHubTimestamp(),\n" +
             "          DateTimeFormatter.ofPattern(\"yyyy-MM-dd HH:mm:ss.SSSSSS\"),\n" +
             "          \"EventHubTimestamp are not equal\");\n" +
@@ -333,8 +332,7 @@ public class AdhoDeleteServiceTestFileGenerator {
             "      assertEquals(uuid, "+replCamel+".get().get"+ uuidColumn +"(),\n" +
             "          \"UUID: Expected=\" + uuid\n" +
             "              + \"; Actual=\" + "+replCamel+".get().get"+uuidColumn+"());\n" +
-            "      TestUtil.assertTrueTest(\n" +
-            "          \""+ updateContents.get("A_TIMSTAMP")+"\",\n" +
+            "      TestUtil.assertTrueTest(\n          ,\n" +
             "          "+replCamel+".get().getEventHubTimestamp(),\n" +
             "          DateTimeFormatter.ofPattern(\"yyyy-MM-dd HH:mm:ss.SSSSSS\"),\n" +
             "          \"EventHubTimestamp are not equal\");\n" +
@@ -375,7 +373,7 @@ public class AdhoDeleteServiceTestFileGenerator {
             "          \"UUID: Expected=\" + uuid\n" +
             "              + \"; Actual=\" + "+replCamel+".get().get"+uuidColumn+"());\n" +
             "      TestUtil.assertTrueTest(\n" +
-            "          \""+ updateContents.get("A_TIMSTAMP")+"\",\n" +
+            "          \""+ insertContents.get("A_TIMSTAMP")+"\",\n" +
             "          "+replCamel+".get().getEventHubTimestamp(),\n" +
             "          DateTimeFormatter.ofPattern(\"yyyy-MM-dd HH:mm:ss.SSSSSS\"),\n" +
             "          \"EventHubTimestamp are not equal\");\n" +
@@ -416,7 +414,7 @@ public class AdhoDeleteServiceTestFileGenerator {
             "          \"UUID: Expected=\" + uuid\n" +
             "              + \"; Actual=\" + "+replCamel+".get().get"+uuidColumn+"());\n" +
             "      TestUtil.assertTrueTest(\n" +
-            "          \""+ updateContents.get("A_TIMSTAMP")+"\",\n" +
+            "          \""+ insertContents.get("A_TIMSTAMP")+"\",\n" +
             "          "+replCamel+".get().getEventHubTimestamp(),\n" +
             "          DateTimeFormatter.ofPattern(\"yyyy-MM-dd HH:mm:ss.SSSSSS\"),\n" +
             "          \"EventHubTimestamp are not equal\");\n" +
@@ -457,7 +455,7 @@ public class AdhoDeleteServiceTestFileGenerator {
             "          \"UUID: Expected=\" + uuid\n" +
             "              + \"; Actual=\" + "+replCamel+".get().get"+uuidColumn+"());\n" +
             "      TestUtil.assertTrueTest(\n" +
-            "          \""+ updateContents.get("A_TIMSTAMP")+"\",\n" +
+            "          \""+ insertContents.get("A_TIMSTAMP")+"\",\n" +
             "          "+replCamel+".get().getEventHubTimestamp(),\n" +
             "          DateTimeFormatter.ofPattern(\"yyyy-MM-dd HH:mm:ss.SSSSSS\"),\n" +
             "          \"EventHubTimestamp are not equal\");\n" +
@@ -490,7 +488,7 @@ public class AdhoDeleteServiceTestFileGenerator {
             "      "+adhocDeleteEventhubClassName+" exception"+adhocDeleteEventhubClassName.replace("AdhocDelete", "").toLowerCase()+
             " = mapper.readValue(payload, "+adhocDeleteEventhubClassName+".class);\n" +
             "      #TODO: Test some columns using assertions\n" +
-            "      assertEquals("+eventHubClassName.toLowerCase()+".get, exceptionAgdename.get);" +
+            "      assertEquals("+eventHubClassName.toLowerCase()+".get, exceptionAgdename.get);\n" +
         "    } catch (Exception e) {\n" +
         "      fail(e.getMessage(), e);\n" +
         "    }\n" +
