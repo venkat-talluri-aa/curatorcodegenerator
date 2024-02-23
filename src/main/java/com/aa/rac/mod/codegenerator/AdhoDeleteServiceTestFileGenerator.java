@@ -480,7 +480,7 @@ public class AdhoDeleteServiceTestFileGenerator {
         "  public void testProcessingExceptionHandlerPayload() {\n" +
         "    try {\n" +
         "      "+adhocDeleteServiceVar+".processAsync(deleteAdhocException).get();\n" +
-        "      verify(processingExceptionHandler, times(1))" +
+        "      verify(processingExceptionHandler, times(1))\n" +
             "          .submitToExceptionQueue(throwableCaptor.capture(), any(), anyInt());\n" +
             "      String payload = throwableCaptor.getValue();\n" +
             "      "+adhocDeleteEventhubClassName + " " + adhocDeleteEventhubClassName.replace("AdhocDelete", "").toLowerCase()
