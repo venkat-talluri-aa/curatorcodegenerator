@@ -480,15 +480,17 @@ public class AdhoDeleteServiceTestFileGenerator {
         "  public void testProcessingExceptionHandlerPayload() {\n" +
         "    try {\n" +
         "      "+adhocDeleteServiceVar+".processAsync(deleteAdhocException).get();\n" +
-        "      verify(processingExceptionHandler, times(1))" +
+        "      verify(processingExceptionHandler, times(1))\n" +
             "          .submitToExceptionQueue(throwableCaptor.capture(), any(), anyInt());\n" +
             "      String payload = throwableCaptor.getValue();\n" +
             "      "+adhocDeleteEventhubClassName + " " + adhocDeleteEventhubClassName.replace("AdhocDelete", "").toLowerCase()
             + " = mapper.readValue(deleteAdhocException, "+adhocDeleteEventhubClassName+ ".class);\n" +
-            "      "+adhocDeleteEventhubClassName+" exception"+adhocDeleteEventhubClassName.replace("AdhocDelete", "").toLowerCase()+
+            "      "+adhocDeleteEventhubClassName+" exception"+adhocDeleteEventhubClassName.replace("AdhocDelete", "")+
             " = mapper.readValue(payload, "+adhocDeleteEventhubClassName+".class);\n" +
             "      #TODO: Test some columns using assertions\n" +
             "      assertEquals("+eventHubClassName.toLowerCase()+".get, exceptionAgdename.get);\n" +
+            "      assertEquals(, exceptionagmmtkts.getProcessingException().getEventHubSource());\n" +
+            "      assertEquals(, exceptionagmmtkts.getProcessingException().getCurator());\n" +
         "    } catch (Exception e) {\n" +
         "      fail(e.getMessage(), e);\n" +
         "    }\n" +
