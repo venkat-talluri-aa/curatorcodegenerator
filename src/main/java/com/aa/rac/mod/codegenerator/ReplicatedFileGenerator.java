@@ -43,6 +43,7 @@ public class ReplicatedFileGenerator {
           Map.entry("DATE", "Date"),
           Map.entry("TIMESTMP", "Timestamp"),
           Map.entry("TIMESTAMP", "Timestamp"),
+          Map.entry("VC", "String"),
           Map.entry("VARCHAR", "String"),
           Map.entry("DECIMAL", "BigDecimal"),
           Map.entry("SMALLINT", "Integer"),

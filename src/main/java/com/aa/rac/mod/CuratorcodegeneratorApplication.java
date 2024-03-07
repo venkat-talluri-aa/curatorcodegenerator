@@ -23,11 +23,11 @@ public class CuratorcodegeneratorApplication {
 	public static void main(String[] args) throws IOException {
 		SpringApplication.run(CuratorcodegeneratorApplication.class, args);
 
-		String fileName = "agdescit";
+		String fileName = "emd_cpn_details";
 		String[] uuids = {"COUPON_UUID","TICKET_UUID"};
-		String tableName = "agyd0001_agyt0410_agdescit";
+		String tableName = "agyd0001_agyt1010_emd_cpn_details";
 		boolean filterDefaultTicketCreateTs = true;
-		boolean adhocDeleteEquivalent = true;
+		boolean adhocDeleteEquivalent = false;
 
 		String resourcesPath = System.getProperty("user.dir").replace('\\', '/')
 				+ "/src/main/resources/" + fileName +"/";
@@ -42,47 +42,47 @@ public class CuratorcodegeneratorApplication {
 		ddlsqlFileGenerator.generateDDLFile();
 		System.out.println("\n");
 
-		EventHubPojoGenerator eventHubPojoGenerator = new EventHubPojoGenerator(updateFilePath, ddlsqlFileGenerator);
-		eventHubPojoGenerator.eventHubPojoFileGenerator();
-		System.out.println("\n");
+//		EventHubPojoGenerator eventHubPojoGenerator = new EventHubPojoGenerator(updateFilePath, ddlsqlFileGenerator);
+//		eventHubPojoGenerator.eventHubPojoFileGenerator();
+//		System.out.println("\n");
+//
+//		ReplicatedFileGenerator replicatedFileGenerator = new ReplicatedFileGenerator(updateFilePath, ddlsqlFileGenerator);
+//		replicatedFileGenerator.generateReplicatedFile();
+//		System.out.println("\n");
+//
+//		String replImportPath = replicatedFileGenerator.getReplicatedImportPath();
+//		String replClassName = replImportPath.substring(replImportPath.lastIndexOf(".")+1);
+//
+//		RepositoryFileGenerator repositoryFileGenerator = new RepositoryFileGenerator(ddlsqlFileGenerator, replClassName);
+//		repositoryFileGenerator.generateRepositoryFile(replImportPath);
+//
+//
+//		System.out.println("\n");
+//		ConverterFileGenerator converterFileGenerator = new ConverterFileGenerator(replicatedFileGenerator, eventHubPojoGenerator, ddlsqlFileGenerator);
+//		converterFileGenerator.generateConverterFile();
+//
+//		System.out.println("\n");
+//		ServiceFileGenerator serviceFileGenerator = new ServiceFileGenerator(replicatedFileGenerator, eventHubPojoGenerator, repositoryFileGenerator, filterDefaultTicketCreateTs);
+//		serviceFileGenerator.generateConverterFile();
+//
+//
+//		System.out.println("\n");
+//		TopicProcessorFileGenerator topicProcessorFileGenerator = new TopicProcessorFileGenerator(replicatedFileGenerator, eventHubPojoGenerator);
+//		topicProcessorFileGenerator.generateConverterFile();
+//
+//		System.out.println("\n");
+//		TestFileGenerator testFileGenerator = new TestFileGenerator(serviceFileGenerator, ddlsqlFileGenerator, insertFilePath, updateFilePath, deleteFilePath);
+//		testFileGenerator.generateConverterFile();
 
-		ReplicatedFileGenerator replicatedFileGenerator = new ReplicatedFileGenerator(updateFilePath, ddlsqlFileGenerator);
-		replicatedFileGenerator.generateReplicatedFile();
-		System.out.println("\n");
-
-		String replImportPath = replicatedFileGenerator.getReplicatedImportPath();
-		String replClassName = replImportPath.substring(replImportPath.lastIndexOf(".")+1);
-
-		RepositoryFileGenerator repositoryFileGenerator = new RepositoryFileGenerator(ddlsqlFileGenerator, replClassName);
-		repositoryFileGenerator.generateRepositoryFile(replImportPath);
-
-
-		System.out.println("\n");
-		ConverterFileGenerator converterFileGenerator = new ConverterFileGenerator(replicatedFileGenerator, eventHubPojoGenerator, ddlsqlFileGenerator);
-		converterFileGenerator.generateConverterFile();
-
-		System.out.println("\n");
-		ServiceFileGenerator serviceFileGenerator = new ServiceFileGenerator(replicatedFileGenerator, eventHubPojoGenerator, repositoryFileGenerator, filterDefaultTicketCreateTs);
-		serviceFileGenerator.generateConverterFile();
-
-
-		System.out.println("\n");
-		TopicProcessorFileGenerator topicProcessorFileGenerator = new TopicProcessorFileGenerator(replicatedFileGenerator, eventHubPojoGenerator);
-		topicProcessorFileGenerator.generateConverterFile();
-
-		System.out.println("\n");
-		TestFileGenerator testFileGenerator = new TestFileGenerator(serviceFileGenerator, ddlsqlFileGenerator, insertFilePath, updateFilePath, deleteFilePath);
-		testFileGenerator.generateConverterFile();
-
-		if (adhocDeleteEquivalent) {
-			System.out.println("\n");
-			AdhocDeleteServiceFileGenerator adhocDeleteServiceFileGenerator = new AdhocDeleteServiceFileGenerator(replicatedFileGenerator, eventHubPojoGenerator, repositoryFileGenerator);
-			adhocDeleteServiceFileGenerator.generateConverterFile();
-
-			System.out.println("\n");
-			AdhoDeleteServiceTestFileGenerator adhoDeleteServiceTestFileGenerator = new AdhoDeleteServiceTestFileGenerator(adhocDeleteServiceFileGenerator, ddlsqlFileGenerator, insertFilePath, updateFilePath, deleteFilePath);
-			adhoDeleteServiceTestFileGenerator.generateConverterFile();
-		}
+//		if (adhocDeleteEquivalent) {
+//			System.out.println("\n");
+//			AdhocDeleteServiceFileGenerator adhocDeleteServiceFileGenerator = new AdhocDeleteServiceFileGenerator(replicatedFileGenerator, eventHubPojoGenerator, repositoryFileGenerator);
+//			adhocDeleteServiceFileGenerator.generateConverterFile();
+//
+//			System.out.println("\n");
+//			AdhoDeleteServiceTestFileGenerator adhoDeleteServiceTestFileGenerator = new AdhoDeleteServiceTestFileGenerator(adhocDeleteServiceFileGenerator, ddlsqlFileGenerator, insertFilePath, updateFilePath, deleteFilePath);
+//			adhoDeleteServiceTestFileGenerator.generateConverterFile();
+//		}
 	}
 
 }
