@@ -40,6 +40,7 @@ public class DDLSQLFileGenerator {
       Map.entry("TIMESTMP", "TIMESTAMP WITHOUT TIME ZONE"),
       Map.entry("TIMESTAMP", "TIMESTAMP WITHOUT TIME ZONE"),
       Map.entry("VARCHAR", "VARCHAR"),
+      Map.entry("VC", "VARCHAR"),
       Map.entry("DECIMAL", "DECIMAL"),
       Map.entry("SMALLINT", "SMALLINT"),
       Map.entry("BIGINT", "BIGINT"),
