@@ -23,9 +23,9 @@ public class CuratorcodegeneratorApplication {
 	public static void main(String[] args) throws IOException {
 		SpringApplication.run(CuratorcodegeneratorApplication.class, args);
 
-		String fileName = "emd_cpn_details";
-		String[] uuids = {"COUPON_UUID","TICKET_UUID"};
-		String tableName = "agyd0001_agyt1010_emd_cpn_details";
+		String fileName = "agdeitin";
+		String[] uuids = {"ITIN_UUID","COUPON_UUID","TICKET_UUID"};
+		String tableName = "agyd0001_agyt0110_agdeitin";
 		boolean filterDefaultTicketCreateTs = true;
 		boolean adhocDeleteEquivalent = false;
 
