@@ -144,7 +144,7 @@ public class EventHubPojoGenerator {
         continue;
       }
       lines.add("  " + getJsonPropertyAnnotation(field));
-      String fieldUp = field.startsWith("B_")?field.replace("B_", ""):field;
+      String fieldUp = field.startsWith("B_")?field.substring(2):field;
       if (ddlsqlFileGenerator.getTrimMap().get(fieldUp)) {
 
         if (value.contains("{")) {
