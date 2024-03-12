@@ -42,7 +42,7 @@ public class CuratorcodegeneratorApplication {
 		ddlsqlFileGenerator.generateDDLFile();
 		System.out.println("\n");
 
-		EventHubPojoGenerator eventHubPojoGenerator = new EventHubPojoGenerator(updateFilePath, ddlsqlFileGenerator);
+		EventHubPojoGenerator eventHubPojoGenerator = new EventHubPojoGenerator(updateFilePath, ddlsqlFileGenerator, filterDefaultTicketCreateTs);
 		eventHubPojoGenerator.eventHubPojoFileGenerator();
 		System.out.println("\n");
 

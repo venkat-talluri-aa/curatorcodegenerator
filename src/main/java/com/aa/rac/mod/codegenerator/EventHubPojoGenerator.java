@@ -43,11 +43,14 @@ public class EventHubPojoGenerator {
   private String filePath;
   private String generatedOutput;
 
+  private boolean filterDefaultTicketCreateTs;
 
-  public EventHubPojoGenerator(String filePath, DDLSQLFileGenerator ddlsqlFileGenerator) {
+
+  public EventHubPojoGenerator(String filePath, DDLSQLFileGenerator ddlsqlFileGenerator, boolean filterDefaultTicketCreateTs) {
     this.filePath = filePath;
     eventHubClassName = FileUtil.getClassName(filePath);
     this.ddlsqlFileGenerator = ddlsqlFileGenerator;
+    this.filterDefaultTicketCreateTs = filterDefaultTicketCreateTs;
   }
 
   public String getGeneratedOutput() {
@@ -159,6 +162,20 @@ public class EventHubPojoGenerator {
     }
   }
 
+  public void addFilterDefaultTicketCreateTsMethod() {
+    lines.add("\n  /** Check if any tickets have default ticket_create_ts \"0001-01-01T00:00:00.00000\". */\n" +
+            "  public boolean filterDefaultTicketCreateTs() {\n" +
+            "    if (entityType.equals(\"DL\")) {\n" +
+            "      return (this.ticketCreateTsBefore != null\n" +
+            "              && this.ticketCreateTsBefore.startsWith(\"0001-01-01\"));\n" +
+            "    }\n" +
+            "    return (this.ticketCreateTs != null\n" +
+            "            && this.ticketCreateTs.startsWith(\"0001-01-01\"));\n" +
+            "  }\n\n");
+  }
+
+
+
   public void addEndingLine() {
     lines.add("}");
   }
@@ -175,6 +192,9 @@ public class EventHubPojoGenerator {
     addClassAnnotations();
     addInitialClassTemplate(eventHubClassName);
     addFields();
+    if (this.filterDefaultTicketCreateTs) {
+      addFilterDefaultTicketCreateTsMethod();
+    }
     addEndingLine();
     this.generatedOutput = String.join("", lines);
     try {
