@@ -172,13 +172,17 @@ public class DDLSQLFileGenerator {
     lines.add(");\n");
   }
 
-  public void addComments() {
+  public void addCommentsAndPermissions() {
+    lines.add("\nALTER TABLE "+ CuratorcodegeneratorApplication.SCHEMA_NAME + "." +tableName +" OWNER TO itfs_admin;");
     lines.add("\nCOMMENT ON TABLE " + CuratorcodegeneratorApplication.SCHEMA_NAME + "." +tableName +
         " IS 'UUID values are derived using SHA256 Hash';");
     for (String uuidColumnName: uuidColumnNames) {
       lines.add("\nCOMMENT ON COLUMN " + CuratorcodegeneratorApplication.SCHEMA_NAME + "." +tableName +
           "." + uuidColumnName + " IS '" + uuidColumnName + " is derived using SHA256 Hash';");
     }
+
+    lines.add("\n\n\nGRANT SELECT ON TABLE "+ CuratorcodegeneratorApplication.SCHEMA_NAME + "." +tableName +" TO itfs_ro;");
+    lines.add("\nGRANT SELECT,INSERT,DELETE,UPDATE ON TABLE "+ CuratorcodegeneratorApplication.SCHEMA_NAME + "." +tableName +" TO itfs_rw;");
   }
 
   public void generateDDLFile() throws IOException {
@@ -191,7 +195,7 @@ public class DDLSQLFileGenerator {
     addFields();
     addPKConstraint();
     addEndingLine();
-    addComments();
+    addCommentsAndPermissions();
     this.generatedOutput = String.join("", lines);
     try {
       writer.write(this.generatedOutput);
