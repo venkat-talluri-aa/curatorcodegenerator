@@ -352,7 +352,7 @@ public class TestFileGenerator {
         "      "+serviceVariable+".processAsync("+updateVariable+");\n" +
         "      "+serviceVariable+".processAsync("+updateVariable+");\n" +
         "      "+serviceVariable+".processAsync("+deleteVariable+");\n" +
-        "      lock.await(12, TimeUnit.SECONDS);\n" + "\n" +
+        "      lock.await(2, TimeUnit.SECONDS);\n" + "\n" +
         "      "+eventHubClassName+" "+eventHubClassName.toLowerCase()+" = mapper.readValue("+insertVariable+", "+eventHubClassName+".class);\n" +
         "\n" +
         "      String uuid = #TODO \n"+
